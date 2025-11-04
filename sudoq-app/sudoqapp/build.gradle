@@ -25,7 +25,7 @@ android {
     defaultConfig {
         applicationId "de.sudoq"
         minSdkVersion 14
-        targetSdkVersion 30
+        targetSdkVersion 33
         resourceConfigurations += ['en', 'de', 'fr']
         testApplicationId "de.sudoq.test"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
