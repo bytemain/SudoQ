@@ -86,6 +86,8 @@ class Game {
     private val autoFillFillDelayMs = 260L
     private val autoFillBetweenDelayMs = 160L
     private var autoFillOrigin: Position? = null
+    @Volatile
+    private var autoFillBatchCompleteListener: ((origin: Cell?, scope: Set<Position>) -> Unit)? = null
 
     /* used by persistence (mapper) */
     constructor(
@@ -221,7 +223,7 @@ class Game {
 
         // Take a snapshot of current unique-candidate cells, limited to scope if in Easy
         val allCandidates = sudoku!!.findCellsWithUniqueCandidate()
-        val batch: List<Cell> = when (sudoku!!.complexity) {
+        val (batch: List<Cell>, scopePositions: Set<Position>) = when (sudoku!!.complexity) {
             Complexity.easy -> {
                 val originPos = autoFillOrigin
                 if (originPos != null) {
@@ -229,10 +231,10 @@ class Game {
                     for (c in sudoku!!.sudokuType!!) {
                         if (c.includes(originPos)) for (p in c) allowedPositions.add(p)
                     }
-                    allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 && allowedPositions.contains(sudoku!!.getPosition(it.id)) }
-                } else allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }
+                    Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 && allowedPositions.contains(sudoku!!.getPosition(it.id)) }, allowedPositions)
+                } else Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }, emptySet())
             }
-            else -> allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }
+            else -> Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }, emptySet())
         }
 
         if (batch.isEmpty()) {
@@ -245,6 +247,7 @@ class Game {
             fun scheduleIndex(i: Int) {
                 if (i >= batch.size) {
                     isAutoFilling = false
+                    autoFillBatchCompleteListener?.invoke(origin, scopePositions)
                     return
                 }
                 val cell = batch[i]
@@ -273,6 +276,7 @@ class Game {
                 }
             }
             isAutoFilling = false
+            autoFillBatchCompleteListener?.invoke(origin, scopePositions)
         }
     }
 
@@ -359,6 +363,11 @@ class Game {
     /** Sets a listener called after a cell has been auto-filled. */
     fun setAutoFillAfterListener(listener: (Cell) -> Unit) {
         this.autoFillAfterListener = listener
+    }
+
+    /** Sets a listener called once after a non-recursive auto-fill batch completes. */
+    fun setAutoFillBatchCompleteListener(listener: (origin: Cell?, scope: Set<Position>) -> Unit) {
+        this.autoFillBatchCompleteListener = listener
     }
 
     /**

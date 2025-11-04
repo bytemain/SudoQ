@@ -249,7 +249,9 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
             game!!.setAutoFillListener { cell ->
                 runOnUiThread {
                     val pos = game!!.sudoku!!.getPosition(cell.id)!!
-                    sudokuLayout!!.getSudokuCellView(pos).programmaticallySelectShort()
+                    val cellView = sudokuLayout!!.getSudokuCellView(pos)
+                    // Show a small red indicator box without changing selection
+                    instance!!.showPreFillIndicator(cellView)
                 }
             }
             game!!.setAutoFillAfterListener { cell ->
@@ -257,6 +259,8 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                 val pos = game!!.sudoku!!.getPosition(cell.id)!!
                 val cellView = sudokuLayout!!.getSudokuCellView(pos)
                 val painter = instance!!
+                // Remove pre-fill indicator
+                painter.hidePreFillIndicator(cellView)
                 // start from transparent
                 painter.setTextAlpha(cellView, 0)
                 val totalSteps = 10
@@ -275,6 +279,53 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                     }
                 }
                 cellView.post(fadeRunnable)
+            }
+
+            // After a non-recursive batch completes, bounce any fully-solved constraints in scope
+            game!!.setAutoFillBatchCompleteListener { origin, scope ->
+                runOnUiThread {
+                    try {
+                        val sudoku = game!!.sudoku!!
+                        // Collect constraints to check: if scope provided (easy), only constraints overlapping scope; else constraints overlapping changed cells
+                        val constraintsToCheck = mutableSetOf<de.sudoq.model.sudoku.Constraint>()
+                        val type = sudoku.sudokuType!!
+                        if (scope.isNotEmpty()) {
+                            for (c in type) {
+                                // If constraint intersects scope, consider it
+                                var intersects = false
+                                for (p in c) {
+                                    if (scope.contains(p)) { intersects = true; break }
+                                }
+                                if (intersects) constraintsToCheck.add(c)
+                            }
+                        } else {
+                            // Fallback: check all constraints (rare path for non-easy)
+                            for (c in type) constraintsToCheck.add(c)
+                        }
+
+                        fun allSolved(c: de.sudoq.model.sudoku.Constraint): Boolean {
+                            for (p in c) {
+                                val cell = sudoku.getCell(p) ?: return false
+                                if (cell.isNotSolved) return false
+                            }
+                            return true
+                        }
+
+                        for (c in constraintsToCheck) {
+                            if (allSolved(c)) {
+                                // Bounce all views in this constraint
+                                for (p in c) {
+                                    val v = sudokuLayout!!.getSudokuCellView(p)
+                                    v.animate().translationY(-10f).setDuration(80).withEndAction {
+                                        v.animate().translationY(0f).setDuration(80).start()
+                                    }.start()
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.w("AUTO_FILL_ANIM", "Constraint bounce animation failed: $e")
+                    }
+                }
             }
             if (game!!.isFinished()) {
                 setFinished(showWinDialog = false, surrendered = false)

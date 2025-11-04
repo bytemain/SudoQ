@@ -27,6 +27,9 @@ class CellViewPainter private constructor() {
      * Optional per-cell text alpha (0-255). When not present, text renders fully opaque (255).
      */
     private val textAlphas: Hashtable<View, Int>
+    /** Small red indicator box overlay for pre-fill highlighting. */
+    private val preFillIndicators: Hashtable<View, Boolean>
+    private val preFillIndicatorColors: Hashtable<View, Int>
     private var sl: SudokuLayout? = null
     fun setSudokuLayout(sl: SudokuLayout?) {
         this.sl = sl
@@ -157,7 +160,10 @@ class CellViewPainter private constructor() {
             }
         }
         //Log.d("FieldPainter", "Field drawn");
-        try {
+    // Draw small pre-fill indicator overlay if requested
+    drawPreFillIndicatorIfAny(canvas, cell)
+
+    try {
             sl!!.hintPainter.invalidateAll() //invalidate();
         } catch (e: NullPointerException) {
             /*
@@ -179,6 +185,23 @@ class CellViewPainter private constructor() {
             ...
             */
         }
+    }
+
+    private fun drawPreFillIndicatorIfAny(canvas: Canvas, cell: View) {
+        val show = preFillIndicators[cell] ?: false
+        if (!show) return
+        val color = preFillIndicatorColors[cell] ?: Color.RED
+        val sizeW = cell.width * 0.3f
+        val sizeH = cell.height * 0.3f
+        val cx = cell.width / 2f
+        val cy = cell.height / 2f
+        val rect = RectF(cx - sizeW / 2, cy - sizeH / 2, cx + sizeW / 2, cy + sizeH / 2)
+        val paint = Paint()
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = (cell.width.coerceAtMost(cell.height) * 0.05f).coerceAtLeast(2f)
+        paint.color = color
+        paint.isAntiAlias = true
+        canvas.drawRoundRect(rect, cell.width / 12f, cell.height / 12f, paint)
     }
 
     /**
@@ -328,6 +351,20 @@ class CellViewPainter private constructor() {
         cell.invalidate()
     }
 
+    /** Shows a small indicator box on the given cell. */
+    fun showPreFillIndicator(cell: View, color: Int = Color.RED) {
+        preFillIndicators[cell] = true
+        preFillIndicatorColors[cell] = color
+        cell.invalidate()
+    }
+
+    /** Hides the small indicator box on the given cell. */
+    fun hidePreFillIndicator(cell: View) {
+        preFillIndicators.remove(cell)
+        preFillIndicatorColors.remove(cell)
+        cell.invalidate()
+    }
+
     companion object {
         /**
          * Gibt die Singleton-Instanz des Handlers zurück.
@@ -353,5 +390,7 @@ class CellViewPainter private constructor() {
     init {
         markings = Hashtable()
         textAlphas = Hashtable()
+        preFillIndicators = Hashtable()
+        preFillIndicatorColors = Hashtable()
     }
 }
