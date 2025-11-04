@@ -253,6 +253,14 @@ class SudokuCellView(
     }
 
     /**
+     * Clears the same-number highlighting for this cell.
+     */
+    fun clearSameNumber() {
+        hasSameNumber = false
+        updateMarking()
+    }
+
+    /**
      * Updates the highlighting of this CellView
      */
     private fun updateMarking() {
