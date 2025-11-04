@@ -360,6 +360,41 @@ class Game {
     }
 
     /**
+     * Automatically fills cells with unique candidates (cells that have exactly one note set).
+     * Recursively continues filling until no more cells with unique candidates remain.
+     * This is an active assistance, so the assistance cost is increased.
+     *
+     * @return the number of cells that were filled
+     */
+    fun autoFillUniqueCandidates(): Int {
+        if (sudoku!!.hasErrors()) return 0
+        
+        var totalFilled = 0
+        var cellsFilled: Int
+        
+        // Keep filling cells with unique candidates until no more are found
+        do {
+            cellsFilled = 0
+            val cellsWithUniqueCandidate = sudoku!!.findCellsWithUniqueCandidate()
+            
+            for (cell in cellsWithUniqueCandidate) {
+                val uniqueCandidate = cell.getSingleNote()
+                if (uniqueCandidate >= 0 && cell.isNotSolved) {
+                    // Fill the cell with the unique candidate
+                    addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
+                    cellsFilled++
+                    totalFilled++
+                }
+            }
+        } while (cellsFilled > 0 && !sudoku!!.hasErrors())
+        
+        // Add assistance cost based on the number of cells filled
+        assistancesCost += totalFilled
+        
+        return totalFilled
+    }
+
+    /**
      * Sets the available assistances.
      *
      * @param assistances Die Assistances die für dieses Game gesetzt werden soll
