@@ -246,6 +246,28 @@ open class Sudoku : ObservableModelImpl<Cell>, Iterable<Cell>, ModelChangeListen
         //return this.fields.values().stream().anyMatch(f -> !f.isNotWrong()); //looks weird but be very careful with simplifications!
     }
 
+    /**
+     * Checks if all instances of a symbol have been filled in the sudoku.
+     * A symbol is considered fully filled when it appears exactly numberOfSymbols times.
+     *
+     * @param symbol the symbol value to check (0-based index, e.g., 0 for "1" in a standard sudoku)
+     * @return true if the symbol appears numberOfSymbols times in the grid, false otherwise
+     */
+    fun isSymbolFullyFilled(symbol: Int): Boolean {
+        if (symbol < 0 || symbol >= sudokuType!!.numberOfSymbols) {
+            return false
+        }
+        
+        var count = 0
+        for (cell in cells!!.values) {
+            if (cell.currentValue == symbol) {
+                count++
+            }
+        }
+        
+        return count == sudokuType!!.numberOfSymbols
+    }
+
     //debug
     override fun toString(): String {
         val sb = StringBuilder()
