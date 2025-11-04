@@ -13,6 +13,7 @@ import de.sudoq.model.sudoku.Position
 import de.sudoq.model.sudoku.Sudoku
 import de.sudoq.model.sudoku.complexity.Complexity
 import java.util.*
+import kotlin.collections.emptySet
 import kotlin.math.pow
 
 /**
@@ -232,7 +233,7 @@ class Game {
                         if (c.includes(originPos)) for (p in c) allowedPositions.add(p)
                     }
                     Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 && allowedPositions.contains(sudoku!!.getPosition(it.id)) }, allowedPositions)
-                } else Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }, emptySet())
+                } else Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }, emptySet<Position>())
             }
             else -> Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }, emptySet())
         }
