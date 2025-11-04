@@ -77,6 +77,11 @@ class SudokuCellView(
     private var connected: Boolean
 
     /**
+     * Indicates if this cell has the same number as the currently selected cell
+     */
+    private var hasSameNumber: Boolean
+
+    /**
      * Indicates if this cell is part of an extraConstraint
      */
     private var isInExtraConstraint: Boolean
@@ -222,6 +227,7 @@ class SudokuCellView(
     fun deselect(updateConnected: Boolean) {
         cellSelected = false
         connected = false
+        hasSameNumber = false
         if (updateConnected) {
             for (fv in connectedCells) {
                 fv.deselect(false)
@@ -235,6 +241,22 @@ class SudokuCellView(
      */
     fun markConnected() {
         connected = true
+        updateMarking()
+    }
+
+    /**
+     * Highlights this cell as having the same number as the currently selected cell.
+     */
+    fun markSameNumber() {
+        hasSameNumber = true
+        updateMarking()
+    }
+
+    /**
+     * Clears the same-number highlighting for this cell.
+     */
+    fun clearSameNumber() {
+        hasSameNumber = false
         updateMarking()
     }
 
@@ -260,6 +282,8 @@ class SudokuCellView(
                     else if (wrong) CellViewStates.SELECTED_INPUT_WRONG
                     else CellViewStates.SELECTED_INPUT
                 else CellViewStates.SELECTED_FIXED
+            else if (hasSameNumber && !cell.isNotSolved)
+                CellViewStates.SAME_NUMBER
             else if (editable)
                 if (wrong) CellViewStates.DEFAULT_WRONG
                 else CellViewStates.DEFAULT
@@ -336,6 +360,7 @@ class SudokuCellView(
         connectedCells = ArrayList()
         cellSelected = false
         connected = false
+        hasSameNumber = false
         isNoteMode = false
         isInExtraConstraint = false
         val constraints: Iterable<Constraint>? = game.sudoku!!.sudokuType
