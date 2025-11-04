@@ -265,7 +265,7 @@ open class Sudoku : ObservableModelImpl<Cell>, Iterable<Cell>, ModelChangeListen
             }
         }
         
-        return count >= sudokuType!!.numberOfSymbols
+        return count == sudokuType!!.numberOfSymbols
     }
 
     //debug

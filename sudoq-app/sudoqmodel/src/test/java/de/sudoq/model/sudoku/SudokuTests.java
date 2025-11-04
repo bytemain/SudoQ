@@ -332,15 +332,9 @@ public class SudokuTests {
 		assertFalse("Symbol 0 should not be fully filled initially", sudoku.isSymbolFullyFilled(0));
 		
 		// Fill all 9 positions with symbol 0 (which displays as "1" to users)
-		sudoku.getCell(Position.get(0, 0)).setCurrentValue(0);
-		sudoku.getCell(Position.get(1, 0)).setCurrentValue(0);
-		sudoku.getCell(Position.get(2, 0)).setCurrentValue(0);
-		sudoku.getCell(Position.get(3, 0)).setCurrentValue(0);
-		sudoku.getCell(Position.get(4, 0)).setCurrentValue(0);
-		sudoku.getCell(Position.get(5, 0)).setCurrentValue(0);
-		sudoku.getCell(Position.get(6, 0)).setCurrentValue(0);
-		sudoku.getCell(Position.get(7, 0)).setCurrentValue(0);
-		sudoku.getCell(Position.get(8, 0)).setCurrentValue(0);
+		for (int i = 0; i < 9; i++) {
+			sudoku.getCell(Position.get(i, 0)).setCurrentValue(0);
+		}
 
 		// Now symbol 0 should be fully filled (9 occurrences)
 		assertTrue("Symbol 0 should be fully filled after 9 placements", sudoku.isSymbolFullyFilled(0));
@@ -353,6 +347,13 @@ public class SudokuTests {
 		sudoku.getCell(Position.get(0, 1)).setCurrentValue(1);
 		sudoku.getCell(Position.get(1, 1)).setCurrentValue(1);
 		assertFalse("Symbol 1 should not be fully filled with only 2 occurrences", sudoku.isSymbolFullyFilled(1));
+
+		// Test overfilled symbol (more than numberOfSymbols occurrences - invalid sudoku state)
+		for (int i = 0; i < 9; i++) {
+			sudoku.getCell(Position.get(i, 1)).setCurrentValue(2);
+		}
+		sudoku.getCell(Position.get(0, 2)).setCurrentValue(2);  // 10th occurrence
+		assertFalse("Symbol 2 should not be considered fully filled with 10 occurrences (invalid state)", sudoku.isSymbolFullyFilled(2));
 
 		// Test invalid symbol values
 		assertFalse("Invalid symbol -1 should return false", sudoku.isSymbolFullyFilled(-1));
