@@ -10,6 +10,7 @@ package de.sudoq.model.game
 import de.sudoq.model.actionTree.*
 import de.sudoq.model.sudoku.Cell
 import de.sudoq.model.sudoku.Position
+import de.sudoq.model.sudoku.ConstraintType
 import de.sudoq.model.sudoku.Sudoku
 import de.sudoq.model.sudoku.complexity.Complexity
 import java.util.*
@@ -225,22 +226,26 @@ class Game {
         isAutoFilling = true
         autoFillOrigin = sudoku!!.getPosition(origin.id)
 
-    // Take a snapshot of current unique-candidate cells, limited to scope if in Easy
+        // Take a snapshot of current unique-candidate cells, limited to scope (current block only in all modes)
     autoFillBatchPositions.clear()
         val allCandidates = sudoku!!.findCellsWithUniqueCandidate()
-        val (batch: List<Cell>, scopePositions: Set<Position>) = when (sudoku!!.complexity) {
-            Complexity.easy -> {
-                val originPos = autoFillOrigin
-                if (originPos != null) {
-                    val allowedPositions = HashSet<Position>()
-                    for (c in sudoku!!.sudokuType!!) {
-                        if (c.includes(originPos)) for (p in c) allowedPositions.add(p)
-                    }
-                    Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 && allowedPositions.contains(sudoku!!.getPosition(it.id)) }, allowedPositions)
-                } else Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }, emptySet<Position>())
+        val originPos = autoFillOrigin
+        val allowedPositions: Set<Position> = if (originPos != null) {
+            val set = HashSet<Position>()
+            for (c in sudoku!!.sudokuType!!) {
+                if (c.type == ConstraintType.BLOCK && c.includes(originPos)) {
+                    for (p in c) set.add(p)
+                }
             }
-            else -> Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }, emptySet())
+            set
+        } else {
+            emptySet()
         }
+        val batch: List<Cell> = allCandidates.filter { cell ->
+            cell.isNotSolved && cell.getNotesCount() == 1 &&
+            (allowedPositions.isEmpty() || allowedPositions.contains(sudoku!!.getPosition(cell.id)))
+        }
+        val scopePositions: Set<Position> = allowedPositions
 
         if (batch.isEmpty()) {
             isAutoFilling = false
@@ -302,25 +307,21 @@ class Game {
             isAutoFilling = false
             return
         }
-        // Find next cell with exactly one candidate
+        // Find next cell with exactly one candidate, restricted to current block of origin
         val candidates = sudoku!!.findCellsWithUniqueCandidate()
-        val nextCell = when (sudoku!!.complexity) {
-            Complexity.easy -> {
-                val origin = autoFillOrigin
-                if (origin != null) {
-                    // limit to row/column/block (all constraints containing origin)
-                    val allowedPositions = HashSet<Position>()
-                    for (c in sudoku!!.sudokuType!!) {
-                        if (c.includes(origin)) {
-                            for (p in c) allowedPositions.add(p)
-                        }
-                    }
-                    candidates.firstOrNull { it.isNotSolved && it.getNotesCount() == 1 && allowedPositions.contains(sudoku!!.getPosition(it.id)) }
-                } else {
-                    candidates.firstOrNull { it.isNotSolved && it.getNotesCount() == 1 }
+        val origin = autoFillOrigin
+        val allowed: Set<Position> = if (origin != null) {
+            val set = HashSet<Position>()
+            for (c in sudoku!!.sudokuType!!) {
+                if (c.type == ConstraintType.BLOCK && c.includes(origin)) {
+                    for (p in c) set.add(p)
                 }
             }
-            else -> candidates.firstOrNull { it.isNotSolved && it.getNotesCount() == 1 }
+            set
+        } else emptySet()
+
+        val nextCell = candidates.firstOrNull {
+            it.isNotSolved && it.getNotesCount() == 1 && (allowed.isNotEmpty() && allowed.contains(sudoku!!.getPosition(it.id)))
         }
 
         if (nextCell == null) {
