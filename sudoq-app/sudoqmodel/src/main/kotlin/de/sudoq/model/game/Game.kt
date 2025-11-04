@@ -9,6 +9,7 @@ package de.sudoq.model.game
 
 import de.sudoq.model.actionTree.*
 import de.sudoq.model.sudoku.Cell
+import de.sudoq.model.sudoku.Position
 import de.sudoq.model.sudoku.Sudoku
 import de.sudoq.model.sudoku.complexity.Complexity
 import java.util.*
@@ -77,8 +78,9 @@ class Game {
     @Volatile
     private var autoFillListener: ((Cell) -> Unit)? = null
 
-    private val autoFillStepDelayMs = 180L
-    private val autoFillFillDelayMs = 120L
+    private val autoFillStepDelayMs = 320L
+    private val autoFillFillDelayMs = 260L
+    private var autoFillOrigin: Position? = null
 
     /* used by persistence (mapper) */
     constructor(
@@ -194,7 +196,7 @@ class Game {
             updateNotes(cell)
             // Auto-fill cells with unique candidates if assistance is enabled and action is a SolveAction
             if (!isAutoFilling && action is SolveAction && cell.isSolved) {
-                triggerAutoFillIfEnabled()
+                triggerAutoFillIfEnabled(cell)
             }
         }
         if (isFinished()) finished = true
@@ -204,12 +206,23 @@ class Game {
      * Triggers auto-fill for cells with unique candidates if the assistance is enabled.
      * This is called automatically after a user fills a cell.
      */
-    private fun triggerAutoFillIfEnabled() {
+    private fun triggerAutoFillIfEnabled(origin: Cell) {
         if (!isAssistanceAvailable(Assistances.autoFillUniqueCandidates)) return
         if (sudoku!!.hasErrors()) return
         if (isAutoFilling) return
 
         isAutoFilling = true
+        autoFillOrigin = sudoku!!.getPosition(origin.id)
+        scheduleNextAutoFillStep()
+    }
+
+    // Backward-compat for callers without origin
+    private fun triggerAutoFillIfEnabled() {
+        if (!isAssistanceAvailable(Assistances.autoFillUniqueCandidates)) return
+        if (sudoku!!.hasErrors()) return
+        if (isAutoFilling) return
+        isAutoFilling = true
+        autoFillOrigin = null
         scheduleNextAutoFillStep()
     }
 
@@ -219,8 +232,25 @@ class Game {
             return
         }
         // Find next cell with exactly one candidate
-        val nextCell = sudoku!!.findCellsWithUniqueCandidate()
-            .firstOrNull { it.isNotSolved && it.getNotesCount() == 1 }
+        val candidates = sudoku!!.findCellsWithUniqueCandidate()
+        val nextCell = when (sudoku!!.complexity) {
+            Complexity.easy -> {
+                val origin = autoFillOrigin
+                if (origin != null) {
+                    // limit to row/column/block (all constraints containing origin)
+                    val allowedPositions = HashSet<Position>()
+                    for (c in sudoku!!.sudokuType!!) {
+                        if (c.includes(origin)) {
+                            for (p in c) allowedPositions.add(p)
+                        }
+                    }
+                    candidates.firstOrNull { it.isNotSolved && it.getNotesCount() == 1 && allowedPositions.contains(sudoku!!.getPosition(it.id)) }
+                } else {
+                    candidates.firstOrNull { it.isNotSolved && it.getNotesCount() == 1 }
+                }
+            }
+            else -> candidates.firstOrNull { it.isNotSolved && it.getNotesCount() == 1 }
+        }
 
         if (nextCell == null) {
             isAutoFilling = false
