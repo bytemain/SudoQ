@@ -121,13 +121,46 @@ class UserInteractionMediator(
         updateKeyboard()
     }
 
+    /**
+     * Highlights all cells that have the same number as the specified cell view.
+     * 
+     * @param cellView The cell view whose number should be matched
+     */
+    private fun highlightCellsWithSameNumber(cellView: SudokuCellView) {
+        if (!cellView.cell.isNotSolved) {
+            val selectedValue = cellView.cell.currentValue
+            val sudokuType = game!!.sudoku!!.sudokuType
+            for (p in sudokuType!!.validPositions) {
+                val cell = sudokuView!!.getSudokuCellView(p)
+                if (cell != cellView && !cell.cell.isNotSolved && 
+                    cell.cell.currentValue == selectedValue) {
+                    cell.markSameNumber()
+                }
+            }
+        }
+    }
+
+    /**
+     * Clears same-number highlighting from all cells except the specified one.
+     * 
+     * @param excludeCell The cell to exclude from clearing (typically the selected cell)
+     */
+    private fun clearSameNumberHighlighting(excludeCell: SudokuCellView?) {
+        val sudokuType = game!!.sudoku!!.sudokuType
+        for (p in sudokuType!!.validPositions) {
+            val cell = sudokuView!!.getSudokuCellView(p)
+            if (cell != excludeCell) {
+                cell.clearSameNumber()
+            }
+        }
+    }
+
     private fun cellSelectedNumPadMode(view: SudokuCellView, e: SelectEvent) {
         var currentField = sudokuView!!.currentCellView
         val freshlySelected = currentField != view
         if (freshlySelected) {
             noteMode = e == SelectEvent.Long
             sudokuView.currentCellView = view
-
 
             //unpdate currentField
             currentField?.deselect(true)
@@ -136,17 +169,7 @@ class UserInteractionMediator(
             currentField.select(game!!.isAssistanceAvailable(Assistances.markRowColumn))
             
             // Highlight cells with the same number
-            if (!currentField.cell.isNotSolved) {
-                val selectedValue = currentField.cell.currentValue
-                val sudokuType = game.sudoku!!.sudokuType
-                for (p in sudokuType!!.validPositions) {
-                    val cellView = sudokuView.getSudokuCellView(p)
-                    if (cellView != currentField && !cellView.cell.isNotSolved && 
-                        cellView.cell.currentValue == selectedValue) {
-                        cellView.markSameNumber()
-                    }
-                }
-            }
+            highlightCellsWithSameNumber(currentField)
         } else {
             noteMode = !noteMode
             currentField!!.setNoteState(noteMode)
@@ -175,17 +198,7 @@ class UserInteractionMediator(
             currentCellView!!.select(game!!.isAssistanceAvailable(Assistances.markRowColumn))
             
             // Highlight cells with the same number
-            if (!currentCellView.cell.isNotSolved) {
-                val selectedValue = currentCellView.cell.currentValue
-                val sudokuType = game.sudoku!!.sudokuType
-                for (p in sudokuType!!.validPositions) {
-                    val cellView = sudokuView.getSudokuCellView(p)
-                    if (cellView != currentCellView && !cellView.cell.isNotSolved && 
-                        cellView.cell.currentValue == selectedValue) {
-                        cellView.markSameNumber()
-                    }
-                }
-            }
+            highlightCellsWithSameNumber(currentCellView)
             
             currentCell = currentCellView.cell
             if (currentCell.isEditable) {
@@ -265,25 +278,10 @@ class UserInteractionMediator(
         // Re-highlight cells with same number if the changed cell is currently selected
         val currentField = sudokuView!!.currentCellView
         if (currentField == view) {
-            val sudokuType = game!!.sudoku!!.sudokuType
             // Clear same-number marking from all cells
-            for (p in sudokuType!!.validPositions) {
-                val cellView = sudokuView.getSudokuCellView(p)
-                if (cellView != currentField) {
-                    cellView.clearSameNumber()
-                }
-            }
+            clearSameNumberHighlighting(currentField)
             // Re-mark cells with the same number if current cell has a value
-            if (!currentField.cell.isNotSolved) {
-                val selectedValue = currentField.cell.currentValue
-                for (p in sudokuType.validPositions) {
-                    val cellView = sudokuView.getSudokuCellView(p)
-                    if (cellView != currentField && !cellView.cell.isNotSolved && 
-                        cellView.cell.currentValue == selectedValue) {
-                        cellView.markSameNumber()
-                    }
-                }
-            }
+            highlightCellsWithSameNumber(currentField)
         }
     }
 
