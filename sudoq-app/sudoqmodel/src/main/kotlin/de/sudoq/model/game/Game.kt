@@ -378,8 +378,9 @@ class Game {
             val cellsWithUniqueCandidate = sudoku!!.findCellsWithUniqueCandidate()
             
             for (cell in cellsWithUniqueCandidate) {
-                val uniqueCandidate = cell.getSingleNote()
-                if (uniqueCandidate >= 0 && cell.isNotSolved) {
+                // Double-check cell state in case it was modified during iteration
+                if (cell.isNotSolved && cell.getNotesCount() == 1) {
+                    val uniqueCandidate = cell.getSingleNote()
                     // Fill the cell with the unique candidate
                     addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
                     cellsFilled++

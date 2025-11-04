@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import de.sudoq.model.Utility;
 import de.sudoq.model.actionTree.NoteActionFactory;
+import de.sudoq.model.game.Assistances;
+import de.sudoq.model.game.GameSettings;
 import de.sudoq.model.persistence.IRepo;
 import de.sudoq.model.sudoku.Cell;
 import de.sudoq.model.sudoku.Position;
