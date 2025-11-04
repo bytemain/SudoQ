@@ -60,6 +60,11 @@ class Game {
      */
     private var finished = false
 
+    /**
+     * Flag to prevent recursive auto-fill calls
+     */
+    private var isAutoFilling = false
+
     /* used by persistence (mapper) */
     constructor(
         id: Int,
@@ -170,8 +175,40 @@ class Game {
     fun addAndExecute(action: Action) {
         if (finished) return
         stateHandler!!.addAndExecute(action)
-        sudoku!!.getCell(action.cellId)?.let { updateNotes(it) }
+        sudoku!!.getCell(action.cellId)?.let { cell ->
+            updateNotes(cell)
+            // Auto-fill cells with unique candidates if assistance is enabled and action is a SolveAction
+            if (!isAutoFilling && action is SolveAction && cell.isSolved) {
+                triggerAutoFillIfEnabled()
+            }
+        }
         if (isFinished()) finished = true
+    }
+
+    /**
+     * Triggers auto-fill for cells with unique candidates if the assistance is enabled.
+     * This is called automatically after a user fills a cell.
+     */
+    private fun triggerAutoFillIfEnabled() {
+        if (!isAssistanceAvailable(Assistances.autoFillUniqueCandidates)) return
+        if (sudoku!!.hasErrors()) return
+        
+        isAutoFilling = true
+        try {
+            // Find and fill cells with unique candidates
+            val cellsWithUniqueCandidate = sudoku!!.findCellsWithUniqueCandidate()
+            
+            for (cell in cellsWithUniqueCandidate) {
+                // Double-check cell state in case it was modified during iteration
+                if (cell.isNotSolved && cell.getNotesCount() == 1) {
+                    val uniqueCandidate = cell.getSingleNote()
+                    // Fill the cell with the unique candidate
+                    addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
+                }
+            }
+        } finally {
+            isAutoFilling = false
+        }
     }
 
     /**
@@ -357,6 +394,49 @@ class Game {
         ) {
             undo()
         }
+    }
+
+    /**
+     * Automatically fills cells with unique candidates (cells that have exactly one note set).
+     * Recursively continues filling until no more cells with unique candidates remain.
+     * This is an active assistance, so the assistance cost is increased when called manually.
+     *
+     * @return the number of cells that were filled
+     */
+    fun autoFillUniqueCandidates(): Int {
+        if (sudoku!!.hasErrors()) return 0
+        if (isAutoFilling) return 0 // Prevent recursive calls
+        
+        var totalFilled = 0
+        isAutoFilling = true
+        
+        try {
+            var cellsFilled: Int
+            
+            // Keep filling cells with unique candidates until no more are found
+            do {
+                cellsFilled = 0
+                val cellsWithUniqueCandidate = sudoku!!.findCellsWithUniqueCandidate()
+                
+                for (cell in cellsWithUniqueCandidate) {
+                    // Double-check cell state in case it was modified during iteration
+                    if (cell.isNotSolved && cell.getNotesCount() == 1) {
+                        val uniqueCandidate = cell.getSingleNote()
+                        // Fill the cell with the unique candidate
+                        addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
+                        cellsFilled++
+                        totalFilled++
+                    }
+                }
+            } while (cellsFilled > 0 && !sudoku!!.hasErrors())
+            
+            // Add assistance cost based on the number of cells filled
+            assistancesCost += totalFilled
+        } finally {
+            isAutoFilling = false
+        }
+        
+        return totalFilled
     }
 
     /**

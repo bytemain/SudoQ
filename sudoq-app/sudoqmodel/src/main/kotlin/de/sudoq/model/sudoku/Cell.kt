@@ -155,6 +155,28 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
     }
 
     /**
+     * Returns the number of notes set in this cell.
+     *
+     * @return the count of set notes
+     */
+    fun getNotesCount(): Int {
+        return noticeFlags.cardinality()
+    }
+
+    /**
+     * Returns the single note value if exactly one note is set.
+     * Returns -1 if zero or multiple notes are set.
+     *
+     * @return the single note value or -1
+     */
+    fun getSingleNote(): Int {
+        if (noticeFlags.cardinality() == 1) {
+            return noticeFlags.nextSetBit(0)
+        }
+        return -1
+    }
+
+    /**
      * Checks if the cell is solved correctly, i.e. if the filled in value is correct.
      *
      * @return true, iff the cell is solved correctly

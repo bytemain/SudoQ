@@ -268,6 +268,22 @@ open class Sudoku : ObservableModelImpl<Cell>, Iterable<Cell>, ModelChangeListen
         return count == sudokuType!!.numberOfSymbols
     }
 
+    /**
+     * Finds all cells that have exactly one candidate (note) set and are not yet solved.
+     * These cells have a unique solution based on the current notes.
+     *
+     * @return a list of cells with unique candidates
+     */
+    fun findCellsWithUniqueCandidate(): List<Cell> {
+        val cellsWithUniqueCandidate = mutableListOf<Cell>()
+        for (cell in cells!!.values) {
+            if (cell.isEditable && cell.isNotSolved && cell.getNotesCount() == 1) {
+                cellsWithUniqueCandidate.add(cell)
+            }
+        }
+        return cellsWithUniqueCandidate
+    }
+
     //debug
     override fun toString(): String {
         val sb = StringBuilder()
