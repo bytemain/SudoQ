@@ -195,47 +195,55 @@ class CellViewPainter private constructor() {
         if (!show) return
         val color = preFillIndicatorColors[cell] ?: Color.RED
 
-        // Configure a paint like we use for drawing text to compute tight bounds
-        val textPaint = Paint()
-        textPaint.isAntiAlias = true
-        textPaint.textAlign = Paint.Align.CENTER
-        textPaint.textSize = Math.min(cell.height * 3 / 4, cell.width * 3 / 4).toFloat()
-        // Use the targeted symbol if provided; else use current symbol
+        val density = cell.resources.displayMetrics.density
         val targetSymbol = preFillIndicatorSymbols[cell] ?: currentSymbol
+        val abstractIdx = try { Symbol.getInstance().getAbstract(targetSymbol) } catch (_: Exception) { -1 }
 
-        val bounds = Rect()
-        val symbolToMeasure = if (targetSymbol.isNotEmpty()) targetSymbol else "0" // fallback to a digit for size
-        textPaint.getTextBounds(symbolToMeasure, 0, symbolToMeasure.length, bounds)
-
-        // Compute where we draw text (baseline y): mirror drawText positioning
-        val xCenter = cell.width / 2f
-        val yBaseline = (cell.height / 2 + Math.min(cell.height / 4, cell.width / 4)).toFloat()
-
-    // Translate bounds to canvas coordinates
-    val left = xCenter + bounds.left
-    val top = yBaseline + bounds.top
-    val right = xCenter + bounds.right
-    val bottom = yBaseline + bounds.bottom
-
-    // Add a small DP padding to leave some breathing room and enforce a square box
-    val density = cell.resources.displayMetrics.density
-    val pad = 2.5f * density
-    val glyphWidth = (right - left)
-    val glyphHeight = (bottom - top)
-    val side = kotlin.math.max(glyphWidth, glyphHeight) + 2f * pad
-    val half = side / 2f
-    val cx = (left + right) / 2f
-    val cy = (top + bottom) / 2f
-    val rect = RectF(cx - half, cy - half, cx + half, cy + half)
+        val rect: RectF = if (abstractIdx >= 0) {
+            // Align to the note grid cell (small candidate square)
+            val raster = try { Symbol.getInstance().getRasterSize() } catch (_: Exception) { 3 }
+            val noteSize = cell.height / raster.toFloat() // match SudokuCellView.drawNotes
+            val col = abstractIdx % raster
+            val row = abstractIdx / raster
+            val left = col * noteSize
+            val top = row * noteSize
+            val right = left + noteSize
+            val bottom = top + noteSize
+            // Inset slightly so the stroke sits nicely inside the mini-cell
+            val inset = 1.25f * density
+            RectF(left + inset, top + inset, right - inset, bottom - inset)
+        } else {
+            // Fallback: build a small square around the main glyph position (rare)
+            val textPaint = Paint()
+            textPaint.isAntiAlias = true
+            textPaint.textAlign = Paint.Align.CENTER
+            textPaint.textSize = Math.min(cell.height * 3 / 4, cell.width * 3 / 4).toFloat()
+            val symbolToMeasure = if (targetSymbol.isNotEmpty()) targetSymbol else "0"
+            val bounds = Rect()
+            textPaint.getTextBounds(symbolToMeasure, 0, symbolToMeasure.length, bounds)
+            val xCenter = cell.width / 2f
+            val yBaseline = (cell.height / 2 + Math.min(cell.height / 4, cell.width / 4)).toFloat()
+            val left = xCenter + bounds.left
+            val top = yBaseline + bounds.top
+            val right = xCenter + bounds.right
+            val bottom = yBaseline + bounds.bottom
+            val pad = 2.0f * density
+            val glyphWidth = (right - left)
+            val glyphHeight = (bottom - top)
+            val side = kotlin.math.max(glyphWidth, glyphHeight) + 2f * pad
+            val half = side / 2f
+            val cx = (left + right) / 2f
+            val cy = (top + bottom) / 2f
+            RectF(cx - half, cy - half, cx + half, cy + half)
+        }
 
         val paint = Paint()
         paint.style = Paint.Style.STROKE
-        // Thinner stroke: ~1.5dp
-        paint.strokeWidth = 1.5f * density
+        // Thin stroke for small note boxes
+        paint.strokeWidth = 1.0f * density
         paint.color = color
         paint.isAntiAlias = true
-        // Draw a subtle rounded box hugging the glyph bounds
-        val radius = 2f * density
+        val radius = 1.5f * density
         canvas.drawRoundRect(rect, radius, radius, paint)
     }
 
