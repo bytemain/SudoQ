@@ -10,6 +10,7 @@ package de.sudoq.controller.sudoku.board
 import android.graphics.*
 import android.view.View
 import de.sudoq.view.SudokuLayout
+import de.sudoq.controller.sudoku.Symbol
 import java.util.*
 import kotlin.collections.set
 
@@ -23,6 +24,13 @@ class CellViewPainter private constructor() {
      * Maps a cell onto an Animation value that describes how to draw the cell
      */
     private val markings: Hashtable<View, CellViewStates>
+    /**
+     * Optional per-cell text alpha (0-255). When not present, text renders fully opaque (255).
+     */
+    private val textAlphas: Hashtable<View, Int>
+    /** Small red indicator box overlay for pre-fill highlighting. */
+    private val preFillIndicators: Hashtable<View, Boolean>
+    private val preFillIndicatorColors: Hashtable<View, Int>
     private var sl: SudokuLayout? = null
     fun setSudokuLayout(sl: SudokuLayout?) {
         this.sl = sl
@@ -52,15 +60,15 @@ class CellViewPainter private constructor() {
             when (cellState) {
                 CellViewStates.SELECTED_INPUT_BORDER -> {
                     drawBackground(canvas, cell, Color.DKGRAY, true, darken)
-                    drawInner(canvas, cell, Color.rgb(255, 100, 100), true, darken)
+                    drawInner(canvas, cell, Color.rgb(255, 80, 80), true, darken)
                     drawText(canvas, cell, Color.BLACK, false, symbol)
                 }
                 CellViewStates.SELECTED_INPUT -> {
-                    drawBackground(canvas, cell, Color.rgb(255, 100, 100), true, darken)
+                    drawBackground(canvas, cell, Color.rgb(255, 80, 80), true, darken)
                     drawText(canvas, cell, Color.BLACK, false, symbol)
                 }
                 CellViewStates.SELECTED_INPUT_WRONG -> {
-                    drawBackground(canvas, cell, Color.rgb(255, 100, 100), true, darken)
+                    drawBackground(canvas, cell, Color.rgb(255, 80, 80), true, darken)
                     drawText(canvas, cell, Color.RED, false, symbol)
                 }
                 CellViewStates.SELECTED_NOTE_BORDER -> {
@@ -75,6 +83,10 @@ class CellViewPainter private constructor() {
                 CellViewStates.SELECTED_NOTE_WRONG -> {
                     drawBackground(canvas, cell, Color.YELLOW, true, darken)
                     drawText(canvas, cell, Color.RED, false, symbol)
+                }
+                CellViewStates.SELECTED -> {
+                    drawBackground(canvas, cell, Color.rgb(180, 180, 255), true, darken)
+                    drawText(canvas, cell, Color.rgb(0, 140, 0), true, symbol)
                 }
                 CellViewStates.SELECTED_FIXED -> {
                     drawBackground(canvas, cell, Color.rgb(220, 220, 255), true, darken)
@@ -143,12 +155,16 @@ class CellViewPainter private constructor() {
                 CellViewStates.DEFAULT_WRONG,
                 CellViewStates.CONNECTED_WRONG -> drawText(canvas, cell, Color.RED, false, symbol)
                 CellViewStates.SELECTED_FIXED,
+                CellViewStates.SELECTED,
                 CellViewStates.FIXED -> drawText(canvas, cell, Color.rgb(0, 100, 0), true, symbol)
                 else -> {}
             }
         }
         //Log.d("FieldPainter", "Field drawn");
-        try {
+    // Draw small pre-fill indicator overlay if requested
+    drawPreFillIndicatorIfAny(canvas, cell)
+
+    try {
             sl!!.hintPainter.invalidateAll() //invalidate();
         } catch (e: NullPointerException) {
             /*
@@ -170,6 +186,23 @@ class CellViewPainter private constructor() {
             ...
             */
         }
+    }
+
+    private fun drawPreFillIndicatorIfAny(canvas: Canvas, cell: View) {
+        val show = preFillIndicators[cell] ?: false
+        if (!show) return
+        val color = preFillIndicatorColors[cell] ?: Color.RED
+        val sizeW = cell.width * 0.3f
+        val sizeH = cell.height * 0.3f
+        val cx = cell.width / 2f
+        val cy = cell.height / 2f
+        val rect = RectF(cx - sizeW / 2, cy - sizeH / 2, cx + sizeW / 2, cy + sizeH / 2)
+        val paint = Paint()
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = (cell.width.coerceAtMost(cell.height) * 0.05f).coerceAtLeast(2f)
+        paint.color = color
+        paint.isAntiAlias = true
+        canvas.drawRoundRect(rect, cell.width / 12f, cell.height / 12f, paint)
     }
 
     /**
@@ -266,8 +299,20 @@ class CellViewPainter private constructor() {
      */
     private fun drawText(canvas: Canvas, cell: View, color: Int, bold: Boolean, symbol: String) {
         val paint = Paint()
-        paint.color = color
-        if (bold) {
+        val alpha = textAlphas[cell] ?: 255
+        val r = Color.red(color)
+        val g = Color.green(color)
+        val b = Color.blue(color)
+        paint.color = Color.argb(alpha, r, g, b)
+        // Make fixed numbers non-bold if their symbol is fully filled in the sudoku
+        var effectiveBold = bold
+        try {
+            val idx = Symbol.getInstance().getAbstract(symbol)
+            if (idx >= 0 && sl != null && sl!!.isSymbolFullyFilled(idx)) {
+                effectiveBold = false
+            }
+        } catch (_: Exception) { /* ignore, fallback to requested bold */ }
+        if (effectiveBold) {
             paint.typeface = Typeface.DEFAULT_BOLD
         }
         paint.isAntiAlias = true
@@ -302,6 +347,33 @@ class CellViewPainter private constructor() {
         markings.clear()
     }
 
+    /** Sets the text alpha (0-255) for the given cell view and requests redraw. */
+    fun setTextAlpha(cell: View, alpha: Int) {
+        val a = alpha.coerceIn(0, 255)
+        textAlphas[cell] = a
+        cell.invalidate()
+    }
+
+    /** Clears any custom text alpha for the cell view (will render fully opaque). */
+    fun clearTextAlpha(cell: View) {
+        textAlphas.remove(cell)
+        cell.invalidate()
+    }
+
+    /** Shows a small indicator box on the given cell. */
+    fun showPreFillIndicator(cell: View, color: Int = Color.RED) {
+        preFillIndicators[cell] = true
+        preFillIndicatorColors[cell] = color
+        cell.invalidate()
+    }
+
+    /** Hides the small indicator box on the given cell. */
+    fun hidePreFillIndicator(cell: View) {
+        preFillIndicators.remove(cell)
+        preFillIndicatorColors.remove(cell)
+        cell.invalidate()
+    }
+
     companion object {
         /**
          * Gibt die Singleton-Instanz des Handlers zurück.
@@ -326,5 +398,8 @@ class CellViewPainter private constructor() {
      */
     init {
         markings = Hashtable()
+        textAlphas = Hashtable()
+        preFillIndicators = Hashtable()
+        preFillIndicatorColors = Hashtable()
     }
 }

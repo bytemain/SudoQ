@@ -82,6 +82,11 @@ class ControlPanelFragment : Fragment() {
          * Der "Schließen" Button des ActionTrees
          */
         var closeButton: Button? = null
+
+        /**
+         * Der "Fill Candidates" Button
+         */
+        var fillCandidatesButton: ImageButton? = null
     }
 
     fun inflateButtons() {
@@ -93,6 +98,8 @@ class ControlPanelFragment : Fragment() {
             view!!.findViewById<View>(R.id.button_sudoku_toggle_gesture) as ImageButton
         Buttons.assistancesButton =
             view!!.findViewById<View>(R.id.button_sudoku_help) as ImageButton
+        Buttons.fillCandidatesButton =
+            view!!.findViewById<View>(R.id.button_sudoku_fill_candidates) as ImageButton
         val activity = getActivity() as SudokuActivity
         Buttons.bookmarkButton =
             activity.findViewById<View>(R.id.sudoku_action_tree_button_bookmark) as Button
@@ -113,6 +120,7 @@ class ControlPanelFragment : Fragment() {
         Buttons.actionTreeButton!!.isEnabled = !actionTreeShown
         Buttons.assistancesButton!!.isEnabled = !actionTreeShown && !finished
         Buttons.gestureButton!!.isEnabled = !actionTreeShown
+        Buttons.fillCandidatesButton!!.isEnabled = !actionTreeShown && !finished
         val sudokuView = sl
         activity.mediator!!.setKeyboardState(!finished && sudokuView.currentCellView != null)
     }
@@ -156,6 +164,8 @@ class ControlPanelFragment : Fragment() {
             }
         } else if (v === Buttons.assistancesButton) {
             activity.showAssistancesDialog()
+        } else if (v === Buttons.fillCandidatesButton) {
+            controller.fillAllCandidates()
         } else if (v === Buttons.bookmarkButton) {
             game.markCurrentState()
             activity.actionTreeController!!.refresh()

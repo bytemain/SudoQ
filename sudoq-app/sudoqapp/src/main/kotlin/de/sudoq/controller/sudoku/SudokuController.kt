@@ -183,4 +183,57 @@ class SudokuController(
                                              ProfilesListRepo(profilesDir))
         p.setStatistic(s, p.getStatistic(s) + 1)
     }
+
+    /**
+     * Fills all empty cells with valid candidates based on Sudoku rules.
+     * For each empty cell, calculates which numbers are valid by checking
+     * the row, column, and constraint group (block).
+     */
+    fun fillAllCandidates() {
+        val sudoku = game.sudoku ?: return
+        val sudokuType = sudoku.sudokuType ?: return
+        val numberOfSymbols = sudokuType.numberOfSymbols
+
+        // Iterate through all cells
+        for (cell in sudoku) {
+            // Skip cells that are not editable or already have a value
+            if (!cell.isEditable || cell.isSolved) {
+                continue
+            }
+
+            // Get the position of this cell
+            val position = sudoku.getPosition(cell.id) ?: continue
+
+            // Create a set of all possible values (0 to numberOfSymbols-1)
+            val validCandidates = mutableSetOf<Int>()
+            for (i in 0 until numberOfSymbols) {
+                validCandidates.add(i)
+            }
+
+            // Check all constraints (row, column, block) for this position
+            for (constraint in sudokuType) {
+                // Check if this constraint contains the current position
+                if (constraint.includes(position)) {
+                    // Remove values that are already present in this constraint
+                    for (constraintPos in constraint) {
+                        val constraintCell = sudoku.getCell(constraintPos)
+                        if (constraintCell != null && constraintCell.isSolved) {
+                            validCandidates.remove(constraintCell.currentValue)
+                        }
+                    }
+                }
+            }
+
+            // Set the valid candidates as notes in the cell
+            for (candidate in 0 until numberOfSymbols) {
+                val shouldBeSet = validCandidates.contains(candidate)
+                val isCurrentlySet = cell.isNoteSet(candidate)
+
+                // Only toggle if the state needs to change
+                if (shouldBeSet != isCurrentlySet) {
+                    cell.toggleNote(candidate)
+                }
+            }
+        }
+    }
 }

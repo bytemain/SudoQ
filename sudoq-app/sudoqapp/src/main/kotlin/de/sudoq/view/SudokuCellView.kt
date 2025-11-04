@@ -133,11 +133,6 @@ class SudokuCellView(
         notePaint.textAlign = Paint.Align.CENTER
         notePaint.color = Color.BLACK
         for (i in 0 until Symbol.getInstance().getNumberOfSymbols()) {
-            // Skip drawing this candidate if the symbol is fully filled in the sudoku
-            if (game.sudoku!!.isSymbolFullyFilled(i)) {
-                continue
-            }
-            
             if (cell.isNoteSet(i)) {
                 val note = Symbol.getInstance().getMapping(i)
                 canvas.drawText(
@@ -286,7 +281,7 @@ class SudokuCellView(
                         else CellViewStates.SELECTED_NOTE
                     else if (wrong) CellViewStates.SELECTED_INPUT_WRONG
                     else CellViewStates.SELECTED_INPUT
-                else CellViewStates.SELECTED_FIXED
+                else CellViewStates.SELECTED
             else if (hasSameNumber && !cell.isNotSolved)
                 CellViewStates.SAME_NUMBER
             else if (editable)
