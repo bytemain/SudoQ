@@ -28,7 +28,7 @@ open class Sudoku : ObservableModelImpl<Cell>, Iterable<Cell>, ModelChangeListen
     var transformCount = 0
         private set
 
-    /** Eine Map, welche jeder Position des Sudokus ein Feld zuweist */
+    /** A map that assigns a field to each position of the Sudoku */
     @JvmField
     var cells: HashMap<Position, Cell>? = null
 
@@ -266,6 +266,22 @@ open class Sudoku : ObservableModelImpl<Cell>, Iterable<Cell>, ModelChangeListen
         }
         
         return count == sudokuType!!.numberOfSymbols
+    }
+
+    /**
+     * Finds all cells that have exactly one candidate (note) set and are not yet solved.
+     * These cells have a unique solution based on the current notes.
+     *
+     * @return a list of cells with unique candidates
+     */
+    fun findCellsWithUniqueCandidate(): List<Cell> {
+        val cellsWithUniqueCandidate = mutableListOf<Cell>()
+        for (cell in cells!!.values) {
+            if (cell.isEditable && cell.isNotSolved && cell.getNotesCount() == 1) {
+                cellsWithUniqueCandidate.add(cell)
+            }
+        }
+        return cellsWithUniqueCandidate
     }
 
     //debug

@@ -39,5 +39,12 @@ enum class Assistances {
      * row/column/block will be removed.
      * (passive)
      */
-    autoAdjustNotes
+    autoAdjustNotes,
+
+    /**
+     * Enables the auto-fill feature for cells with unique candidates.
+     * When enabled, the game can automatically fill cells that have exactly one candidate (note) set.
+     * (active - triggered by user)
+     */
+    autoFillUniqueCandidates
 }

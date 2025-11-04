@@ -42,3 +42,4 @@ tmp
 sudoq-app/sudoqmodel/build/
 sudoq-app/investigateJARcreation/
 sudoq-app/sudoqmodel/sudoqmodel.jar
+sudoq-app/sudoqmodel/bin

@@ -51,6 +51,9 @@ class NewSudokuActivity : SudoqCompatActivity() {
 
     private var sudokuType: SudokuTypes? = null
     private var complexity: Complexity? = null
+    private val prefsName = "new_sudoku_prefs"
+    private val keyLastType = "last_sudoku_type"
+    private val keyLastComplexity = "last_complexity"
 
     /**
      * Wird beim ersten Aufruf der SudokuPreferences aufgerufen. Die Methode
@@ -117,6 +120,9 @@ class NewSudokuActivity : SudoqCompatActivity() {
         }
         initTypeSpinner(possibleTypes)
 
+        // Load and apply previously selected values
+        applyPersistedSelections()
+
 
 //		SudokuTypesList wtl = Profile.Companion.getInstance().getAssistances().getWantedTypesList();
 //		fillTypeSpinner(wtl);
@@ -157,6 +163,50 @@ class NewSudokuActivity : SudoqCompatActivity() {
 
         /* add onItemSelectListener */
         typeSpinner.onItemSelectedListener = MyListener(this)
+    }
+
+    private fun applyPersistedSelections() {
+        val prefs = getSharedPreferences(prefsName, MODE_PRIVATE)
+
+        // Apply complexity selection
+        val savedComplexityName = prefs.getString(keyLastComplexity, null)
+        val complexitySpinner = findViewById<Spinner>(R.id.spinner_sudokucomplexity)
+        if (savedComplexityName != null) {
+            try {
+                val savedComplexity = Complexity.valueOf(savedComplexityName)
+                // Set field and spinner
+                complexity = savedComplexity
+                val index = savedComplexity.ordinal
+                if (index in 0 until (complexitySpinner.adapter?.count ?: 0)) {
+                    complexitySpinner.setSelection(index)
+                }
+            } catch (_: IllegalArgumentException) {
+                // ignore invalid persisted value
+            }
+        }
+
+        // Apply sudoku type selection
+        val savedTypeName = prefs.getString(keyLastType, null)
+        val typeSpinner = findViewById<Spinner>(R.id.spinner_sudokutype)
+        if (savedTypeName != null && typeSpinner.adapter != null) {
+            try {
+                val savedType = SudokuTypes.valueOf(savedTypeName)
+                // Find position in current adapter list
+                for (i in 0 until typeSpinner.adapter.count) {
+                    val item = typeSpinner.adapter.getItem(i)
+                    if (item is StringAndEnum<*>) {
+                        val enumVal = item.enum
+                        if (enumVal is SudokuTypes && enumVal == savedType) {
+                            sudokuType = savedType
+                            typeSpinner.setSelection(i)
+                            break
+                        }
+                    }
+                }
+            } catch (_: IllegalArgumentException) {
+                // ignore invalid persisted value
+            }
+        }
     }
 
     //custom class for better debugging
@@ -251,6 +301,13 @@ class NewSudokuActivity : SudoqCompatActivity() {
     fun setSudokuType(type: SudokuTypes?) {
         sudokuType = type
         Log.d(LOG_TAG, "type changed to:" + (type?.toString() ?: "null"))
+        // persist
+        type?.let {
+            getSharedPreferences(prefsName, MODE_PRIVATE)
+                .edit()
+                .putString(keyLastType, it.name)
+                .apply()
+        }
     }
 
     /**
@@ -263,6 +320,11 @@ class NewSudokuActivity : SudoqCompatActivity() {
     fun setSudokuDifficulty(difficulty: Complexity) {
         complexity = difficulty
         Log.d(LOG_TAG, "complexity changed to:$difficulty")
+        // persist
+        getSharedPreferences(prefsName, MODE_PRIVATE)
+            .edit()
+            .putString(keyLastComplexity, difficulty.name)
+            .apply()
     }
 
     /**
