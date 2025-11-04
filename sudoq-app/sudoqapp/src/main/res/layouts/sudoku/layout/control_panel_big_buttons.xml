@@ -27,4 +27,16 @@ android:paddingTop="5dp">
     android:layout_margin="0dp"
     android:onClick="onClick"
     android:src="@drawable/action_tree" />
+
+<de.sudoq.view.SquareImageButton
+    android:id="@+id/button_sudoku_fill_candidates"
+    android:padding="7dp"
+    android:scaleType="fitXY"
+    android:layout_width="1dp"
+    android:layout_height="fill_parent"
+    android:layout_weight="1"
+    android:layout_margin="0dp"
+    android:onClick="onClick"
+    android:src="@drawable/help"
+    android:contentDescription="@string/sf_sudoku_button_fill_candidates" />
 </LinearLayout>
