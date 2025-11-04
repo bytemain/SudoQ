@@ -51,7 +51,7 @@ android:background="#282828" >
             android:layout_weight="1"
             android:layout_margin="0dp"
             android:onClick="onClick"
-            android:src="@drawable/help"
+            android:src="@drawable/fill_candidates"
             android:contentDescription="@string/sf_sudoku_button_fill_candidates" />
     </LinearLayout>
 
