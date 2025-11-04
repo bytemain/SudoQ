@@ -9,13 +9,24 @@ allprojects {
 }
 
 android {
+    namespace "de.sudoq"
+    testNamespace "de.sudoq.test"
     compileSdkVersion 30
-
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+    kotlin {
+        jvmToolchain(17)
+    }
     defaultConfig {
         applicationId "de.sudoq"
         minSdkVersion 14
         targetSdkVersion 30
-        resConfigs "en", "de", "fr"
+        resourceConfigurations += ['en', 'de', 'fr']
         testApplicationId "de.sudoq.test"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

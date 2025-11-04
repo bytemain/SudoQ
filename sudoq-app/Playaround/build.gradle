@@ -9,10 +9,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
-sourceCompatibility = "7"
-targetCompatibility = "7"
 buildscript {
-    ext.kotlin_version = '1.5.0-RC'
+    ext.kotlin_version = '1.9.0'
     repositories {
         mavenCentral()
     }
@@ -25,11 +23,11 @@ repositories {
 }
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
