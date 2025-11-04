@@ -264,17 +264,22 @@ class UserInteractionMediator(
         
         // Re-highlight cells with same number if the changed cell is currently selected
         val currentField = sudokuView!!.currentCellView
-        if (currentField == view && !currentField.cell.isNotSolved) {
-            val selectedValue = currentField.cell.currentValue
+        if (currentField == view) {
             val sudokuType = game!!.sudoku!!.sudokuType
-            // Clear and re-mark cells with the same number
+            // Clear same-number marking from all cells
             for (p in sudokuType!!.validPositions) {
                 val cellView = sudokuView.getSudokuCellView(p)
                 if (cellView != currentField) {
-                    // Clear same-number marking
                     cellView.clearSameNumber()
-                    // Re-mark if it has the new value
-                    if (!cellView.cell.isNotSolved && cellView.cell.currentValue == selectedValue) {
+                }
+            }
+            // Re-mark cells with the same number if current cell has a value
+            if (!currentField.cell.isNotSolved) {
+                val selectedValue = currentField.cell.currentValue
+                for (p in sudokuType.validPositions) {
+                    val cellView = sudokuView.getSudokuCellView(p)
+                    if (cellView != currentField && !cellView.cell.isNotSolved && 
+                        cellView.cell.currentValue == selectedValue) {
                         cellView.markSameNumber()
                     }
                 }
