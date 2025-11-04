@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import de.sudoq.model.Utility;
 import de.sudoq.model.actionTree.NoteActionFactory;
+import de.sudoq.model.actionTree.SolveActionFactory;
 import de.sudoq.model.game.Assistances;
 import de.sudoq.model.game.GameSettings;
 import de.sudoq.model.persistence.IRepo;
@@ -238,5 +239,82 @@ public class AutoFillUniqueCandidatesTests {
         // Remove a note
         game.addAndExecute(new NoteActionFactory().createAction(5, cell)); // Toggle off
         assertEquals(2, cell.getNotesCount());
+    }
+
+    @Test
+    public void testAutoFillTriggeredAutomaticallyWhenEnabled() {
+        // Test that auto-fill is triggered automatically when a cell is filled and assistance is enabled
+        Game game = new Game(1, new SudokuBuilder(SudokuTypes.standard9x9, sudokuTypeRepo).createSudoku());
+        
+        // Enable auto-fill assistance
+        game.setAssistances(new GameSettings() {
+            @Override
+            public boolean getAssistance(Assistances assistance) {
+                return assistance == Assistances.autoFillUniqueCandidates;
+            }
+        });
+        
+        Position pos1 = Position.get(0, 0);
+        Position pos2 = Position.get(1, 1);
+        
+        Cell cell1 = game.getSudoku().getCell(pos1);
+        Cell cell2 = game.getSudoku().getCell(pos2);
+        
+        // Set single notes on both cells
+        game.addAndExecute(new NoteActionFactory().createAction(3, cell1));
+        game.addAndExecute(new NoteActionFactory().createAction(7, cell2));
+        
+        assertEquals(1, cell1.getNotesCount());
+        assertEquals(1, cell2.getNotesCount());
+        assertTrue(cell1.isNotSolved());
+        assertTrue(cell2.isNotSolved());
+        
+        // Now fill cell1 manually - this should trigger auto-fill for both cells
+        game.addAndExecute(new SolveActionFactory().createAction(3, cell1));
+        
+        // Cell1 should be filled
+        assertEquals(3, cell1.getCurrentValue());
+        assertTrue(cell1.isSolved());
+        
+        // Cell2 should also be auto-filled because it had a unique candidate
+        assertEquals(7, cell2.getCurrentValue());
+        assertTrue(cell2.isSolved());
+    }
+
+    @Test
+    public void testAutoFillNotTriggeredWhenDisabled() {
+        // Test that auto-fill is NOT triggered automatically when assistance is disabled
+        Game game = new Game(1, new SudokuBuilder(SudokuTypes.standard9x9, sudokuTypeRepo).createSudoku());
+        
+        // Disable auto-fill assistance
+        game.setAssistances(new GameSettings() {
+            @Override
+            public boolean getAssistance(Assistances assistance) {
+                return false;
+            }
+        });
+        
+        Position pos1 = Position.get(0, 0);
+        Position pos2 = Position.get(1, 1);
+        
+        Cell cell1 = game.getSudoku().getCell(pos1);
+        Cell cell2 = game.getSudoku().getCell(pos2);
+        
+        // Set single notes on both cells
+        game.addAndExecute(new NoteActionFactory().createAction(3, cell1));
+        game.addAndExecute(new NoteActionFactory().createAction(7, cell2));
+        
+        assertEquals(1, cell1.getNotesCount());
+        assertEquals(1, cell2.getNotesCount());
+        
+        // Fill cell1 manually - auto-fill should NOT trigger
+        game.addAndExecute(new SolveActionFactory().createAction(3, cell1));
+        
+        // Cell1 should be filled
+        assertEquals(3, cell1.getCurrentValue());
+        
+        // Cell2 should NOT be auto-filled
+        assertTrue(cell2.isNotSolved());
+        assertEquals(1, cell2.getNotesCount());
     }
 }
