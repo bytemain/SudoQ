@@ -9,9 +9,11 @@ package de.sudoq.model.game
 
 import de.sudoq.model.actionTree.*
 import de.sudoq.model.sudoku.Cell
+import de.sudoq.model.sudoku.Position
 import de.sudoq.model.sudoku.Sudoku
 import de.sudoq.model.sudoku.complexity.Complexity
 import java.util.*
+import kotlin.collections.emptySet
 import kotlin.math.pow
 
 /**
@@ -59,6 +61,34 @@ class Game {
      * Indicates if game is finished
      */
     private var finished = false
+
+    /**
+     * Flag to prevent recursive auto-fill calls
+     */
+    private var isAutoFilling = false
+
+    /**
+     * Optional scheduler for animating auto-fill steps (provided by UI layer). If null, steps run immediately.
+     */
+    @Volatile
+    private var autoFillScheduler: ((delayMs: Long, action: () -> Unit) -> Unit)? = null
+
+    /**
+     * Optional listener invoked before a cell is auto-filled (allows UI to highlight/select the cell).
+     */
+    @Volatile
+    private var autoFillListener: ((Cell) -> Unit)? = null
+
+    /** Optional listener invoked right after a cell has been auto-filled (for UI animations). */
+    @Volatile
+    private var autoFillAfterListener: ((Cell) -> Unit)? = null
+
+    private val autoFillStepDelayMs = 320L
+    private val autoFillFillDelayMs = 260L
+    private val autoFillBetweenDelayMs = 160L
+    private var autoFillOrigin: Position? = null
+    @Volatile
+    private var autoFillBatchCompleteListener: ((origin: Cell?, scope: Set<Position>) -> Unit)? = null
 
     /* used by persistence (mapper) */
     constructor(
@@ -128,6 +158,7 @@ class Game {
                 Complexity.difficult -> scoreFactor = power(3.5)
                 Complexity.medium -> scoreFactor = power(3.0)
                 Complexity.easy -> scoreFactor = power(2.5)
+                else -> {}
             }
             return (scoreFactor * 10 / ((time + assistancesTimeCost) / 60.0f)).toInt()
         }
@@ -169,8 +200,175 @@ class Game {
     fun addAndExecute(action: Action) {
         if (finished) return
         stateHandler!!.addAndExecute(action)
-        sudoku!!.getCell(action.cellId)?.let { updateNotes(it) }
+        sudoku!!.getCell(action.cellId)?.let { cell ->
+            updateNotes(cell)
+            // Auto-fill cells with unique candidates if assistance is enabled and action is a SolveAction
+            if (!isAutoFilling && action is SolveAction && cell.isSolved) {
+                triggerAutoFillIfEnabled(cell)
+            }
+        }
         if (isFinished()) finished = true
+    }
+
+    /**
+     * Triggers auto-fill for cells with unique candidates if the assistance is enabled.
+     * This is called automatically after a user fills a cell.
+     */
+    private fun triggerAutoFillIfEnabled(origin: Cell) {
+        if (!isAssistanceAvailable(Assistances.autoFillUniqueCandidates)) return
+        if (sudoku!!.hasErrors()) return
+        if (isAutoFilling) return
+
+        isAutoFilling = true
+        autoFillOrigin = sudoku!!.getPosition(origin.id)
+
+        // Take a snapshot of current unique-candidate cells, limited to scope if in Easy
+        val allCandidates = sudoku!!.findCellsWithUniqueCandidate()
+        val (batch: List<Cell>, scopePositions: Set<Position>) = when (sudoku!!.complexity) {
+            Complexity.easy -> {
+                val originPos = autoFillOrigin
+                if (originPos != null) {
+                    val allowedPositions = HashSet<Position>()
+                    for (c in sudoku!!.sudokuType!!) {
+                        if (c.includes(originPos)) for (p in c) allowedPositions.add(p)
+                    }
+                    Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 && allowedPositions.contains(sudoku!!.getPosition(it.id)) }, allowedPositions)
+                } else Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }, emptySet<Position>())
+            }
+            else -> Pair(allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }, emptySet())
+        }
+
+        if (batch.isEmpty()) {
+            isAutoFilling = false
+            return
+        }
+
+        val scheduler = autoFillScheduler
+        if (scheduler != null) {
+            fun scheduleIndex(i: Int) {
+                if (i >= batch.size) {
+                    isAutoFilling = false
+                    autoFillBatchCompleteListener?.invoke(origin, scopePositions)
+                    return
+                }
+                val cell = batch[i]
+                scheduler.invoke(autoFillStepDelayMs) {
+                    autoFillListener?.invoke(cell)
+                    scheduler.invoke(autoFillFillDelayMs) {
+                        // Double-check still unique/not solved; if changed, skip safely
+                        if (cell.isNotSolved && cell.getNotesCount() == 1) {
+                            val uniqueCandidate = cell.getSingleNote()
+                            addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
+                            autoFillAfterListener?.invoke(cell)
+                        }
+                        // Schedule next cell (no recursion beyond the initial snapshot)
+                        scheduler.invoke(autoFillBetweenDelayMs) { scheduleIndex(i + 1) }
+                    }
+                }
+            }
+            scheduleIndex(0)
+        } else {
+            // No scheduler: perform immediately without animation
+            for (cell in batch) {
+                if (cell.isNotSolved && cell.getNotesCount() == 1) {
+                    val uniqueCandidate = cell.getSingleNote()
+                    addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
+                    autoFillAfterListener?.invoke(cell)
+                }
+            }
+            isAutoFilling = false
+            autoFillBatchCompleteListener?.invoke(origin, scopePositions)
+        }
+    }
+
+    // Backward-compat for callers without origin
+    private fun triggerAutoFillIfEnabled() {
+        if (!isAssistanceAvailable(Assistances.autoFillUniqueCandidates)) return
+        if (sudoku!!.hasErrors()) return
+        if (isAutoFilling) return
+        isAutoFilling = true
+        autoFillOrigin = null
+        scheduleNextAutoFillStep()
+    }
+
+    private fun scheduleNextAutoFillStep() {
+        if (sudoku!!.hasErrors()) {
+            isAutoFilling = false
+            return
+        }
+        // Find next cell with exactly one candidate
+        val candidates = sudoku!!.findCellsWithUniqueCandidate()
+        val nextCell = when (sudoku!!.complexity) {
+            Complexity.easy -> {
+                val origin = autoFillOrigin
+                if (origin != null) {
+                    // limit to row/column/block (all constraints containing origin)
+                    val allowedPositions = HashSet<Position>()
+                    for (c in sudoku!!.sudokuType!!) {
+                        if (c.includes(origin)) {
+                            for (p in c) allowedPositions.add(p)
+                        }
+                    }
+                    candidates.firstOrNull { it.isNotSolved && it.getNotesCount() == 1 && allowedPositions.contains(sudoku!!.getPosition(it.id)) }
+                } else {
+                    candidates.firstOrNull { it.isNotSolved && it.getNotesCount() == 1 }
+                }
+            }
+            else -> candidates.firstOrNull { it.isNotSolved && it.getNotesCount() == 1 }
+        }
+
+        if (nextCell == null) {
+            isAutoFilling = false
+            return
+        }
+
+        val scheduler = autoFillScheduler
+        if (scheduler != null) {
+            // Phase 1: brief pre-highlight
+            scheduler.invoke(autoFillStepDelayMs) {
+                autoFillListener?.invoke(nextCell)
+                // Phase 2: perform fill after a short delay
+                scheduler.invoke(autoFillFillDelayMs) {
+                    val uniqueCandidate = nextCell.getSingleNote()
+                    addAndExecute(SolveActionFactory().createAction(uniqueCandidate, nextCell))
+                    autoFillAfterListener?.invoke(nextCell)
+                    // Chain next step
+                    scheduler.invoke(0L) { scheduleNextAutoFillStep() }
+                }
+            }
+        } else {
+            // No scheduler injected: perform immediately, but still step-by-step
+            val uniqueCandidate = nextCell.getSingleNote()
+            addAndExecute(SolveActionFactory().createAction(uniqueCandidate, nextCell))
+            autoFillAfterListener?.invoke(nextCell)
+            scheduleNextAutoFillStep()
+        }
+    }
+
+    /**
+     * Sets a scheduler used to animate auto-fill steps. The scheduler is expected to execute the
+     * given action after the specified delay (in milliseconds) on the UI thread.
+     */
+    fun setAutoFillScheduler(scheduler: (delayMs: Long, action: () -> Unit) -> Unit) {
+        this.autoFillScheduler = scheduler
+    }
+
+    /**
+     * Sets a listener that will be called right before a cell is auto-filled. Useful for UI to
+     * highlight/select the cell that is about to be filled.
+     */
+    fun setAutoFillListener(listener: (Cell) -> Unit) {
+        this.autoFillListener = listener
+    }
+
+    /** Sets a listener called after a cell has been auto-filled. */
+    fun setAutoFillAfterListener(listener: (Cell) -> Unit) {
+        this.autoFillAfterListener = listener
+    }
+
+    /** Sets a listener called once after a non-recursive auto-fill batch completes. */
+    fun setAutoFillBatchCompleteListener(listener: (origin: Cell?, scope: Set<Position>) -> Unit) {
+        this.autoFillBatchCompleteListener = listener
     }
 
     /**
@@ -356,6 +554,49 @@ class Game {
         ) {
             undo()
         }
+    }
+
+    /**
+     * Automatically fills cells with unique candidates (cells that have exactly one note set).
+     * Recursively continues filling until no more cells with unique candidates remain.
+     * This is an active assistance, so the assistance cost is increased when called manually.
+     *
+     * @return the number of cells that were filled
+     */
+    fun autoFillUniqueCandidates(): Int {
+        if (sudoku!!.hasErrors()) return 0
+        if (isAutoFilling) return 0 // Prevent recursive calls
+        
+        var totalFilled = 0
+        isAutoFilling = true
+        
+        try {
+            var cellsFilled: Int
+            
+            // Keep filling cells with unique candidates until no more are found
+            do {
+                cellsFilled = 0
+                val cellsWithUniqueCandidate = sudoku!!.findCellsWithUniqueCandidate()
+                
+                for (cell in cellsWithUniqueCandidate) {
+                    // Double-check cell state in case it was modified during iteration
+                    if (cell.isNotSolved && cell.getNotesCount() == 1) {
+                        val uniqueCandidate = cell.getSingleNote()
+                        // Fill the cell with the unique candidate
+                        addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
+                        cellsFilled++
+                        totalFilled++
+                    }
+                }
+            } while (cellsFilled > 0 && !sudoku!!.hasErrors())
+            
+            // Add assistance cost based on the number of cells filled
+            assistancesCost += totalFilled
+        } finally {
+            isAutoFilling = false
+        }
+        
+        return totalFilled
     }
 
     /**

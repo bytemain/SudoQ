@@ -135,6 +135,8 @@ class UserInteractionMediator(
                 if (cell != cellView && !cell.cell.isNotSolved && 
                     cell.cell.currentValue == selectedValue) {
                     cell.markSameNumber()
+                } else {
+                    cell.clearSameNumber()
                 }
             }
         }

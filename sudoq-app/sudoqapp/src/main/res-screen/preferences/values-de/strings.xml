@@ -13,6 +13,7 @@
     <string name="profile_preference_title_assistance_allowSolveRandomCell">Zufälliges Feld lösen</string>
     <string name="profile_preference_title_assistance_allowGetHint">Tipps</string>
     <string name="profile_preference_title_assistance_autoAdjustNotes">Notizen automatisch anpassen</string>
+    <string name="profile_preference_title_assistance_autoFillUniqueCandidates">Zellen mit eindeutigen Kandidaten automatisch ausfüllen</string>
     <string name="profile_preference_title_profile">Profil</string>
     <string name="profile_preference_button_statistics">Statistik</string>
     <string name="profile_preference_button_gesture_builder">Gesten definieren</string>

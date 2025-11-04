@@ -1,8 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'kotlin'
 
-targetCompatibility = '1.7'
-sourceCompatibility = '1.7'
+targetCompatibility = '17'
+sourceCompatibility = '17'
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -22,7 +22,7 @@ test{
 
         testImplementation project(':sudoq-persistence-xml')
         testImplementation "org.junit.jupiter:junit-jupiter:5.4.0"
-        testImplementation "org.amshove.kluent:kluent:1.67"
+        testImplementation "org.amshove.kluent:kluent:1.73"
         testImplementation "io.mockk:mockk:1.9"
 
         testImplementation 'org.apache.directory.studio:org.apache.commons.io:2.4'
@@ -114,7 +114,7 @@ check.dependsOn solverTest
 
 
 buildscript {
-    ext.kotlin_version = '1.5.0-RC'
+    ext.kotlin_version = '2.2.21'
     repositories {
         mavenCentral()
     }
@@ -127,12 +127,12 @@ repositories {
 }
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 }
 

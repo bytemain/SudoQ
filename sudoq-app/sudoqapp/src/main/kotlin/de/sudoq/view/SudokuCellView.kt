@@ -281,7 +281,7 @@ class SudokuCellView(
                         else CellViewStates.SELECTED_NOTE
                     else if (wrong) CellViewStates.SELECTED_INPUT_WRONG
                     else CellViewStates.SELECTED_INPUT
-                else CellViewStates.SELECTED_FIXED
+                else CellViewStates.SELECTED
             else if (hasSameNumber && !cell.isNotSolved)
                 CellViewStates.SAME_NUMBER
             else if (editable)

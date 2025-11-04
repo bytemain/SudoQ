@@ -53,6 +53,7 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         markRowColumn = findViewById<View>(R.id.checkbox_markRowColumn) as CheckBox
         markWrongSymbol = findViewById<View>(R.id.checkbox_markWrongSymbol) as CheckBox
         restrictCandidates = findViewById<View>(R.id.checkbox_restrictCandidates) as CheckBox
+        autoFillUniqueCandidates = findViewById<View>(R.id.checkbox_autoFillUniqueCandidates) as CheckBox
         name = findViewById<View>(R.id.edittext_profilename) as EditText
         name!!.clearFocus()
         name!!.isSingleLine = true // no multiline names
@@ -76,6 +77,7 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         markRowColumn!!.isChecked = profile.getAssistance(Assistances.markRowColumn)
         markWrongSymbol!!.isChecked = profile.getAssistance(Assistances.markWrongSymbol)
         restrictCandidates!!.isChecked = profile.getAssistance(Assistances.restrictCandidates)
+        autoFillUniqueCandidates!!.isChecked = profile.getAssistance(Assistances.autoFillUniqueCandidates)
     }
 
     /**
@@ -141,6 +143,7 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         saveAssistance(Assistances.markRowColumn, markRowColumn!!)
         saveAssistance(Assistances.markWrongSymbol, markWrongSymbol!!)
         saveAssistance(Assistances.restrictCandidates, restrictCandidates!!)
+        saveAssistance(Assistances.autoFillUniqueCandidates, autoFillUniqueCandidates!!)
         p.saveChanges()
     }
 

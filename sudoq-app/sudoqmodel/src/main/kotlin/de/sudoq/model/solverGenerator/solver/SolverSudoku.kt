@@ -139,6 +139,7 @@ class SolverSudoku : Sudoku {
                             if (sudoku.getCell(p)!!.isNoteSet(i) != currentCandidates!![p]!![i])
                                 currentCandidates!![p]!!.flip(i)
                     }
+            else -> {}
         }
     }
 

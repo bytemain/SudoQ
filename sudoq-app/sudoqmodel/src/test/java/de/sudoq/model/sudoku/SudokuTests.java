@@ -321,4 +321,42 @@ public class SudokuTests {
 		            +"xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx\n"
 		            +"xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx",sudoku.toString());
 	}
+
+	@Test
+	public void testIsSymbolFullyFilled() {
+		// Create a 9x9 standard sudoku
+		SudokuType sudokuType = TypeBuilder.getType(SudokuTypes.standard9x9);
+		Sudoku sudoku = new Sudoku(sudokuType);
+
+		// Initially no symbol should be fully filled
+		assertFalse("Symbol 0 should not be fully filled initially", sudoku.isSymbolFullyFilled(0));
+		
+		// Fill all 9 positions with symbol 0 (which displays as "1" to users)
+		for (int i = 0; i < 9; i++) {
+			sudoku.getCell(Position.get(i, 0)).setCurrentValue(0);
+		}
+
+		// Now symbol 0 should be fully filled (9 occurrences)
+		assertTrue("Symbol 0 should be fully filled after 9 placements", sudoku.isSymbolFullyFilled(0));
+		
+		// Other symbols should not be fully filled
+		assertFalse("Symbol 1 should not be fully filled", sudoku.isSymbolFullyFilled(1));
+		assertFalse("Symbol 8 should not be fully filled", sudoku.isSymbolFullyFilled(8));
+
+		// Test partial fill
+		sudoku.getCell(Position.get(0, 1)).setCurrentValue(1);
+		sudoku.getCell(Position.get(1, 1)).setCurrentValue(1);
+		assertFalse("Symbol 1 should not be fully filled with only 2 occurrences", sudoku.isSymbolFullyFilled(1));
+
+		// Test overfilled symbol (more than numberOfSymbols occurrences - invalid sudoku state)
+		for (int i = 0; i < 9; i++) {
+			sudoku.getCell(Position.get(i, 1)).setCurrentValue(2);
+		}
+		sudoku.getCell(Position.get(0, 2)).setCurrentValue(2);  // 10th occurrence
+		assertFalse("Symbol 2 should not be considered fully filled with 10 occurrences (invalid state)", sudoku.isSymbolFullyFilled(2));
+
+		// Test invalid symbol values
+		assertFalse("Invalid symbol -1 should return false", sudoku.isSymbolFullyFilled(-1));
+		assertFalse("Invalid symbol 9 should return false", sudoku.isSymbolFullyFilled(9));
+	}
 }
