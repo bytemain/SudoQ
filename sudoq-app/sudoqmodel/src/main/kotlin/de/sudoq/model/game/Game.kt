@@ -94,6 +94,10 @@ class Game {
     /** Tracks positions auto-filled during the current batch (non-recursive). */
     private val autoFillBatchPositions: MutableList<Position> = mutableListOf()
 
+    /** Optional listener invoked once when the game becomes finished (all cells solved). */
+    @Volatile
+    private var gameFinishedListener: (() -> Unit)? = null
+
     /* used by persistence (mapper) */
     constructor(
         id: Int,
@@ -211,7 +215,10 @@ class Game {
                 triggerAutoFillIfEnabled(cell)
             }
         }
-        if (isFinished()) finished = true
+        if (!finished && isFinished()) {
+            finished = true
+            gameFinishedListener?.invoke()
+        }
     }
 
     /**
@@ -331,6 +338,16 @@ class Game {
     /** Sets a listener called once after a non-recursive auto-fill batch completes. */
     fun setAutoFillBatchCompleteListener(listener: (origin: Cell?, scope: Set<Position>, filled: Set<Position>) -> Unit) {
         this.autoFillBatchCompleteListener = listener
+    }
+
+    /** Sets a listener that will be called once when the game becomes finished. */
+    fun setGameFinishedListener(listener: () -> Unit) {
+        this.gameFinishedListener = listener
+        // In case game is already finished when registering, notify immediately
+        if (isFinished()) {
+            finished = true
+            listener.invoke()
+        }
     }
 
     /**

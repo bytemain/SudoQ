@@ -329,6 +329,21 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                     }
                 }
             }
+
+            // Ensure finishing is triggered also when last steps are auto-filled
+            game!!.setGameFinishedListener {
+                runOnUiThread {
+                    if (!finished) {
+                        finished = true
+                        updateButtons()
+                        // Keep current selection highlight consistent
+                        sudokuLayout!!.currentCellView?.select(game!!.isAssistanceAvailable(Assistances.markRowColumn))
+                        // Stop timer and show win dialog
+                        timeHandler.removeCallbacks(timeUpdate)
+                        showWinDialog(surrendered = false)
+                    }
+                }
+            }
             if (game!!.isFinished()) {
                 setFinished(showWinDialog = false, surrendered = false)
             } else {
