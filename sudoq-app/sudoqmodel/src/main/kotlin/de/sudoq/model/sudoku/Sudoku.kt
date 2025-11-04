@@ -28,7 +28,7 @@ open class Sudoku : ObservableModelImpl<Cell>, Iterable<Cell>, ModelChangeListen
     var transformCount = 0
         private set
 
-    /** Eine Map, welche jeder Position des Sudokus ein Feld zuweist */
+    /** A map that assigns a field to each position of the Sudoku */
     @JvmField
     var cells: HashMap<Position, Cell>? = null
 

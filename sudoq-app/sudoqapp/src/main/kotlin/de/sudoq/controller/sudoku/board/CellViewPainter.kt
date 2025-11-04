@@ -52,15 +52,15 @@ class CellViewPainter private constructor() {
             when (cellState) {
                 CellViewStates.SELECTED_INPUT_BORDER -> {
                     drawBackground(canvas, cell, Color.DKGRAY, true, darken)
-                    drawInner(canvas, cell, Color.rgb(255, 100, 100), true, darken)
+                    drawInner(canvas, cell, Color.rgb(255, 80, 80), true, darken)
                     drawText(canvas, cell, Color.BLACK, false, symbol)
                 }
                 CellViewStates.SELECTED_INPUT -> {
-                    drawBackground(canvas, cell, Color.rgb(255, 100, 100), true, darken)
+                    drawBackground(canvas, cell, Color.rgb(255, 80, 80), true, darken)
                     drawText(canvas, cell, Color.BLACK, false, symbol)
                 }
                 CellViewStates.SELECTED_INPUT_WRONG -> {
-                    drawBackground(canvas, cell, Color.rgb(255, 100, 100), true, darken)
+                    drawBackground(canvas, cell, Color.rgb(255, 80, 80), true, darken)
                     drawText(canvas, cell, Color.RED, false, symbol)
                 }
                 CellViewStates.SELECTED_NOTE_BORDER -> {
@@ -75,6 +75,10 @@ class CellViewPainter private constructor() {
                 CellViewStates.SELECTED_NOTE_WRONG -> {
                     drawBackground(canvas, cell, Color.YELLOW, true, darken)
                     drawText(canvas, cell, Color.RED, false, symbol)
+                }
+                CellViewStates.SELECTED -> {
+                    drawBackground(canvas, cell, Color.rgb(180, 180, 255), true, darken)
+                    drawText(canvas, cell, Color.rgb(0, 140, 0), true, symbol)
                 }
                 CellViewStates.SELECTED_FIXED -> {
                     drawBackground(canvas, cell, Color.rgb(220, 220, 255), true, darken)
@@ -143,6 +147,7 @@ class CellViewPainter private constructor() {
                 CellViewStates.DEFAULT_WRONG,
                 CellViewStates.CONNECTED_WRONG -> drawText(canvas, cell, Color.RED, false, symbol)
                 CellViewStates.SELECTED_FIXED,
+                CellViewStates.SELECTED,
                 CellViewStates.FIXED -> drawText(canvas, cell, Color.rgb(0, 100, 0), true, symbol)
                 else -> {}
             }
