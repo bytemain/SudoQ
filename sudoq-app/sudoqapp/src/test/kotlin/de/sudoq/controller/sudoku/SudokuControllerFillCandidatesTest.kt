@@ -26,7 +26,7 @@ class SudokuControllerFillCandidatesTest {
         val setValuesMap = PositionMap<Boolean>(sudokuType.size!!)
         
         // Set up a simple pattern with some prefilled cells
-        // Fill first row: 1,2,3,4,5,6,7,8,9
+        // Fill first row: values 0-8 (internal representation; displayed as 1-9 to users)
         for (i in 0 until 9) {
             val pos = Position[0, i]
             solutionMap[pos] = i
@@ -59,7 +59,7 @@ class SudokuControllerFillCandidatesTest {
             assertTrue(cell.getNotesCount() > 0, "Empty editable cell should have candidates filled")
             
             // Verify that the value from the same column is NOT a candidate
-            // Column 0 has value 0 in row 0
+            // Column 0, row 0 has value 0, so cell at (1,0) in the same column should not have 0 as candidate
             assertFalse(cell.isNoteSet(0), "Value from same column should not be a candidate")
         }
     }
