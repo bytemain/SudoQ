@@ -211,16 +211,22 @@ class CellViewPainter private constructor() {
         val xCenter = cell.width / 2f
         val yBaseline = (cell.height / 2 + Math.min(cell.height / 4, cell.width / 4)).toFloat()
 
-        // Translate bounds to canvas coordinates
-        val left = xCenter + bounds.left
-        val top = yBaseline + bounds.top
-        val right = xCenter + bounds.right
-        val bottom = yBaseline + bounds.bottom
+    // Translate bounds to canvas coordinates
+    val left = xCenter + bounds.left
+    val top = yBaseline + bounds.top
+    val right = xCenter + bounds.right
+    val bottom = yBaseline + bounds.bottom
 
-        // Add a small DP padding to leave some breathing room
-        val density = cell.resources.displayMetrics.density
-        val pad = 2.5f * density
-        val rect = RectF(left - pad, top - pad, right + pad, bottom + pad)
+    // Add a small DP padding to leave some breathing room and enforce a square box
+    val density = cell.resources.displayMetrics.density
+    val pad = 2.5f * density
+    val glyphWidth = (right - left)
+    val glyphHeight = (bottom - top)
+    val side = kotlin.math.max(glyphWidth, glyphHeight) + 2f * pad
+    val half = side / 2f
+    val cx = (left + right) / 2f
+    val cy = (top + bottom) / 2f
+    val rect = RectF(cx - half, cy - half, cx + half, cy + half)
 
         val paint = Paint()
         paint.style = Paint.Style.STROKE
