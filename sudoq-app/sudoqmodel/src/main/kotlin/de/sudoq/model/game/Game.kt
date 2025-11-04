@@ -84,6 +84,7 @@ class Game {
 
     private val autoFillStepDelayMs = 320L
     private val autoFillFillDelayMs = 260L
+    private val autoFillBetweenDelayMs = 160L
     private var autoFillOrigin: Position? = null
 
     /* used by persistence (mapper) */
@@ -217,7 +218,62 @@ class Game {
 
         isAutoFilling = true
         autoFillOrigin = sudoku!!.getPosition(origin.id)
-        scheduleNextAutoFillStep()
+
+        // Take a snapshot of current unique-candidate cells, limited to scope if in Easy
+        val allCandidates = sudoku!!.findCellsWithUniqueCandidate()
+        val batch: List<Cell> = when (sudoku!!.complexity) {
+            Complexity.easy -> {
+                val originPos = autoFillOrigin
+                if (originPos != null) {
+                    val allowedPositions = HashSet<Position>()
+                    for (c in sudoku!!.sudokuType!!) {
+                        if (c.includes(originPos)) for (p in c) allowedPositions.add(p)
+                    }
+                    allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 && allowedPositions.contains(sudoku!!.getPosition(it.id)) }
+                } else allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }
+            }
+            else -> allCandidates.filter { it.isNotSolved && it.getNotesCount() == 1 }
+        }
+
+        if (batch.isEmpty()) {
+            isAutoFilling = false
+            return
+        }
+
+        val scheduler = autoFillScheduler
+        if (scheduler != null) {
+            fun scheduleIndex(i: Int) {
+                if (i >= batch.size) {
+                    isAutoFilling = false
+                    return
+                }
+                val cell = batch[i]
+                scheduler.invoke(autoFillStepDelayMs) {
+                    autoFillListener?.invoke(cell)
+                    scheduler.invoke(autoFillFillDelayMs) {
+                        // Double-check still unique/not solved; if changed, skip safely
+                        if (cell.isNotSolved && cell.getNotesCount() == 1) {
+                            val uniqueCandidate = cell.getSingleNote()
+                            addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
+                            autoFillAfterListener?.invoke(cell)
+                        }
+                        // Schedule next cell (no recursion beyond the initial snapshot)
+                        scheduler.invoke(autoFillBetweenDelayMs) { scheduleIndex(i + 1) }
+                    }
+                }
+            }
+            scheduleIndex(0)
+        } else {
+            // No scheduler: perform immediately without animation
+            for (cell in batch) {
+                if (cell.isNotSolved && cell.getNotesCount() == 1) {
+                    val uniqueCandidate = cell.getSingleNote()
+                    addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
+                    autoFillAfterListener?.invoke(cell)
+                }
+            }
+            isAutoFilling = false
+        }
     }
 
     // Backward-compat for callers without origin
