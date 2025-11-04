@@ -21,7 +21,7 @@ test{
         testImplementation "org.junit.vintage:junit-vintage-engine:5.4.0"
 
         testImplementation project(':sudoq-persistence-xml')
-        testImplementation "org.junit.jupiter:junit-jupiter:5.4.0"
+        testImplementation "org.junit.jupiter:junit-jupiter:6.0.1"
         testImplementation "org.amshove.kluent:kluent:1.73"
         testImplementation "io.mockk:mockk:1.9"
 
