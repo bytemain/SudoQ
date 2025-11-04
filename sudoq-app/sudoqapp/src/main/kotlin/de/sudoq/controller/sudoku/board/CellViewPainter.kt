@@ -10,6 +10,7 @@ package de.sudoq.controller.sudoku.board
 import android.graphics.*
 import android.view.View
 import de.sudoq.view.SudokuLayout
+import de.sudoq.controller.sudoku.Symbol
 import java.util.*
 import kotlin.collections.set
 
@@ -303,7 +304,15 @@ class CellViewPainter private constructor() {
         val g = Color.green(color)
         val b = Color.blue(color)
         paint.color = Color.argb(alpha, r, g, b)
-        if (bold) {
+        // Make fixed numbers non-bold if their symbol is fully filled in the sudoku
+        var effectiveBold = bold
+        try {
+            val idx = Symbol.getInstance().getAbstract(symbol)
+            if (idx >= 0 && sl != null && sl!!.isSymbolFullyFilled(idx)) {
+                effectiveBold = false
+            }
+        } catch (_: Exception) { /* ignore, fallback to requested bold */ }
+        if (effectiveBold) {
             paint.typeface = Typeface.DEFAULT_BOLD
         }
         paint.isAntiAlias = true

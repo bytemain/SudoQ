@@ -75,6 +75,15 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     val hintPainter: HintPainter
     private val paint: Paint
 
+    /** Exposes whether a symbol (0-based) is fully filled in the current sudoku. */
+    fun isSymbolFullyFilled(symbol: Int): Boolean {
+        return try {
+            game.sudoku!!.isSymbolFullyFilled(symbol)
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     /**
      * Erstellt die Anzeige des Sudokus.
      * doesn't draw anything
