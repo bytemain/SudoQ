@@ -52,15 +52,15 @@ class CellViewPainter private constructor() {
             when (cellState) {
                 CellViewStates.SELECTED_INPUT_BORDER -> {
                     drawBackground(canvas, cell, Color.DKGRAY, true, darken)
-                    drawInner(canvas, cell, Color.rgb(255, 100, 100), true, darken)
+                    drawInner(canvas, cell, Color.rgb(255, 80, 80), true, darken)
                     drawText(canvas, cell, Color.BLACK, false, symbol)
                 }
                 CellViewStates.SELECTED_INPUT -> {
-                    drawBackground(canvas, cell, Color.rgb(255, 100, 100), true, darken)
+                    drawBackground(canvas, cell, Color.rgb(255, 80, 80), true, darken)
                     drawText(canvas, cell, Color.BLACK, false, symbol)
                 }
                 CellViewStates.SELECTED_INPUT_WRONG -> {
-                    drawBackground(canvas, cell, Color.rgb(255, 100, 100), true, darken)
+                    drawBackground(canvas, cell, Color.rgb(255, 80, 80), true, darken)
                     drawText(canvas, cell, Color.RED, false, symbol)
                 }
                 CellViewStates.SELECTED_NOTE_BORDER -> {
@@ -77,7 +77,7 @@ class CellViewPainter private constructor() {
                     drawText(canvas, cell, Color.RED, false, symbol)
                 }
                 CellViewStates.SELECTED_FIXED -> {
-                    drawBackground(canvas, cell, Color.rgb(220, 220, 255), true, darken)
+                    drawBackground(canvas, cell, Color.rgb(180, 180, 255), true, darken)
                     drawText(canvas, cell, Color.rgb(0, 100, 0), true, symbol)
                 }
                 CellViewStates.CONNECTED -> {
