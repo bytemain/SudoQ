@@ -88,14 +88,27 @@ class GameSettingsBE(val assistances: BitSet = BitSet(),
      */
     @Throws(IllegalArgumentException::class)
     private fun assistancesfromString(representation: String) {
-
-        for ((i, assist) in Assistances.values().withIndex()) {
-            try {
+        val expectedLength = Assistances.values().size
+        
+        // Handle legacy profiles that may have fewer assistances saved
+        if (representation.length < expectedLength) {
+            // For old profiles, only read what's available
+            for (i in representation.indices) {
                 if (representation[i] == '1') {
-                    setAssistance(assist)
+                    setAssistance(Assistances.values()[i])
                 }
-            } catch (exc: Exception) {
-                throw IllegalArgumentException()
+            }
+            // New assistances default to false (not set), which is already the default
+        } else {
+            // Normal case: read all assistances
+            for ((i, assist) in Assistances.values().withIndex()) {
+                try {
+                    if (representation[i] == '1') {
+                        setAssistance(assist)
+                    }
+                } catch (exc: Exception) {
+                    throw IllegalArgumentException("Invalid assistances string representation: expected $expectedLength characters, but got ${representation.length}. String: '$representation'", exc)
+                }
             }
         }
     }
