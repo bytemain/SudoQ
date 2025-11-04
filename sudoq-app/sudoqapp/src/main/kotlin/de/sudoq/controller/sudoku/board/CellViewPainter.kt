@@ -23,6 +23,10 @@ class CellViewPainter private constructor() {
      * Maps a cell onto an Animation value that describes how to draw the cell
      */
     private val markings: Hashtable<View, CellViewStates>
+    /**
+     * Optional per-cell text alpha (0-255). When not present, text renders fully opaque (255).
+     */
+    private val textAlphas: Hashtable<View, Int>
     private var sl: SudokuLayout? = null
     fun setSudokuLayout(sl: SudokuLayout?) {
         this.sl = sl
@@ -271,7 +275,11 @@ class CellViewPainter private constructor() {
      */
     private fun drawText(canvas: Canvas, cell: View, color: Int, bold: Boolean, symbol: String) {
         val paint = Paint()
-        paint.color = color
+        val alpha = textAlphas[cell] ?: 255
+        val r = Color.red(color)
+        val g = Color.green(color)
+        val b = Color.blue(color)
+        paint.color = Color.argb(alpha, r, g, b)
         if (bold) {
             paint.typeface = Typeface.DEFAULT_BOLD
         }
@@ -307,6 +315,19 @@ class CellViewPainter private constructor() {
         markings.clear()
     }
 
+    /** Sets the text alpha (0-255) for the given cell view and requests redraw. */
+    fun setTextAlpha(cell: View, alpha: Int) {
+        val a = alpha.coerceIn(0, 255)
+        textAlphas[cell] = a
+        cell.invalidate()
+    }
+
+    /** Clears any custom text alpha for the cell view (will render fully opaque). */
+    fun clearTextAlpha(cell: View) {
+        textAlphas.remove(cell)
+        cell.invalidate()
+    }
+
     companion object {
         /**
          * Gibt die Singleton-Instanz des Handlers zurück.
@@ -331,5 +352,6 @@ class CellViewPainter private constructor() {
      */
     init {
         markings = Hashtable()
+        textAlphas = Hashtable()
     }
 }

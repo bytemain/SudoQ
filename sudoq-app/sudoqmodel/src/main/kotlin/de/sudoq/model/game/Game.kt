@@ -78,6 +78,10 @@ class Game {
     @Volatile
     private var autoFillListener: ((Cell) -> Unit)? = null
 
+    /** Optional listener invoked right after a cell has been auto-filled (for UI animations). */
+    @Volatile
+    private var autoFillAfterListener: ((Cell) -> Unit)? = null
+
     private val autoFillStepDelayMs = 320L
     private val autoFillFillDelayMs = 260L
     private var autoFillOrigin: Position? = null
@@ -266,6 +270,7 @@ class Game {
                 scheduler.invoke(autoFillFillDelayMs) {
                     val uniqueCandidate = nextCell.getSingleNote()
                     addAndExecute(SolveActionFactory().createAction(uniqueCandidate, nextCell))
+                    autoFillAfterListener?.invoke(nextCell)
                     // Chain next step
                     scheduler.invoke(0L) { scheduleNextAutoFillStep() }
                 }
@@ -274,6 +279,7 @@ class Game {
             // No scheduler injected: perform immediately, but still step-by-step
             val uniqueCandidate = nextCell.getSingleNote()
             addAndExecute(SolveActionFactory().createAction(uniqueCandidate, nextCell))
+            autoFillAfterListener?.invoke(nextCell)
             scheduleNextAutoFillStep()
         }
     }
@@ -292,6 +298,11 @@ class Game {
      */
     fun setAutoFillListener(listener: (Cell) -> Unit) {
         this.autoFillListener = listener
+    }
+
+    /** Sets a listener called after a cell has been auto-filled. */
+    fun setAutoFillAfterListener(listener: (Cell) -> Unit) {
+        this.autoFillAfterListener = listener
     }
 
     /**

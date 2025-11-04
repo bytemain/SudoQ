@@ -252,6 +252,30 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                     sudokuLayout!!.getSudokuCellView(pos).programmaticallySelectShort()
                 }
             }
+            game!!.setAutoFillAfterListener { cell ->
+                // Fade-in the filled number by animating text alpha from 0 to 255
+                val pos = game!!.sudoku!!.getPosition(cell.id)!!
+                val cellView = sudokuLayout!!.getSudokuCellView(pos)
+                val painter = instance!!
+                // start from transparent
+                painter.setTextAlpha(cellView, 0)
+                val totalSteps = 10
+                val stepDelay = 24L
+                var step = 0
+                val fadeRunnable = object : Runnable {
+                    override fun run() {
+                        step++
+                        val alpha = ((255L * step) / totalSteps).toInt()
+                        painter.setTextAlpha(cellView, alpha)
+                        if (step < totalSteps) {
+                            cellView.postDelayed(this, stepDelay)
+                        } else {
+                            painter.clearTextAlpha(cellView)
+                        }
+                    }
+                }
+                cellView.post(fadeRunnable)
+            }
             if (game!!.isFinished()) {
                 setFinished(showWinDialog = false, surrendered = false)
             } else {
