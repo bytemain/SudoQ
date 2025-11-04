@@ -225,71 +225,9 @@ class Game {
 
         isAutoFilling = true
         autoFillOrigin = sudoku!!.getPosition(origin.id)
-
-        // Take a snapshot of current unique-candidate cells, limited to scope (current block only in all modes)
-    autoFillBatchPositions.clear()
-        val allCandidates = sudoku!!.findCellsWithUniqueCandidate()
-        val originPos = autoFillOrigin
-        val allowedPositions: Set<Position> = if (originPos != null) {
-            val set = HashSet<Position>()
-            for (c in sudoku!!.sudokuType!!) {
-                if (c.type == ConstraintType.BLOCK && c.includes(originPos)) {
-                    for (p in c) set.add(p)
-                }
-            }
-            set
-        } else {
-            emptySet()
-        }
-        val batch: List<Cell> = allCandidates.filter { cell ->
-            cell.isNotSolved && cell.getNotesCount() == 1 &&
-            (allowedPositions.isEmpty() || allowedPositions.contains(sudoku!!.getPosition(cell.id)))
-        }
-        val scopePositions: Set<Position> = allowedPositions
-
-        if (batch.isEmpty()) {
-            isAutoFilling = false
-            return
-        }
-
-        val scheduler = autoFillScheduler
-        if (scheduler != null) {
-            fun scheduleIndex(i: Int) {
-                if (i >= batch.size) {
-                    isAutoFilling = false
-                    autoFillBatchCompleteListener?.invoke(origin, scopePositions, autoFillBatchPositions.toSet())
-                    return
-                }
-                val cell = batch[i]
-                scheduler.invoke(autoFillStepDelayMs) {
-                    autoFillListener?.invoke(cell)
-                    scheduler.invoke(autoFillFillDelayMs) {
-                        // Double-check still unique/not solved; if changed, skip safely
-                        if (cell.isNotSolved && cell.getNotesCount() == 1) {
-                            val uniqueCandidate = cell.getSingleNote()
-                            addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
-                            autoFillAfterListener?.invoke(cell)
-                            sudoku!!.getPosition(cell.id)?.let { autoFillBatchPositions.add(it) }
-                        }
-                        // Schedule next cell (no recursion beyond the initial snapshot)
-                        scheduler.invoke(autoFillBetweenDelayMs) { scheduleIndex(i + 1) }
-                    }
-                }
-            }
-            scheduleIndex(0)
-        } else {
-            // No scheduler: perform immediately without animation
-            for (cell in batch) {
-                if (cell.isNotSolved && cell.getNotesCount() == 1) {
-                    val uniqueCandidate = cell.getSingleNote()
-                    addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
-                    autoFillAfterListener?.invoke(cell)
-                    sudoku!!.getPosition(cell.id)?.let { autoFillBatchPositions.add(it) }
-                }
-            }
-            isAutoFilling = false
-            autoFillBatchCompleteListener?.invoke(origin, scopePositions, autoFillBatchPositions.toSet())
-        }
+        autoFillBatchPositions.clear()
+        // Use the step-by-step recursive scheduler within the current block
+        scheduleNextAutoFillStep()
     }
 
     // Backward-compat for callers without origin
@@ -325,6 +263,22 @@ class Game {
         }
 
         if (nextCell == null) {
+            // Batch complete: report only the current block scope and positions we actually filled
+            val origin = autoFillOrigin
+            val scopePositions: Set<Position> = if (origin != null) {
+                val set = HashSet<Position>()
+                for (c in sudoku!!.sudokuType!!) {
+                    if (c.type == ConstraintType.BLOCK && c.includes(origin)) {
+                        for (p in c) set.add(p)
+                    }
+                }
+                set
+            } else emptySet()
+            autoFillBatchCompleteListener?.invoke(
+                origin?.let { sudoku!!.getCell(it) },
+                scopePositions,
+                autoFillBatchPositions.toSet()
+            )
             isAutoFilling = false
             return
         }
@@ -339,6 +293,7 @@ class Game {
                     val uniqueCandidate = nextCell.getSingleNote()
                     addAndExecute(SolveActionFactory().createAction(uniqueCandidate, nextCell))
                     autoFillAfterListener?.invoke(nextCell)
+                    sudoku!!.getPosition(nextCell.id)?.let { autoFillBatchPositions.add(it) }
                     // Chain next step
                     scheduler.invoke(0L) { scheduleNextAutoFillStep() }
                 }
