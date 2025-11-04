@@ -65,6 +65,21 @@ class Game {
      */
     private var isAutoFilling = false
 
+    /**
+     * Optional scheduler for animating auto-fill steps (provided by UI layer). If null, steps run immediately.
+     */
+    @Volatile
+    private var autoFillScheduler: ((delayMs: Long, action: () -> Unit) -> Unit)? = null
+
+    /**
+     * Optional listener invoked before a cell is auto-filled (allows UI to highlight/select the cell).
+     */
+    @Volatile
+    private var autoFillListener: ((Cell) -> Unit)? = null
+
+    private val autoFillStepDelayMs = 180L
+    private val autoFillFillDelayMs = 120L
+
     /* used by persistence (mapper) */
     constructor(
         id: Int,
@@ -192,23 +207,61 @@ class Game {
     private fun triggerAutoFillIfEnabled() {
         if (!isAssistanceAvailable(Assistances.autoFillUniqueCandidates)) return
         if (sudoku!!.hasErrors()) return
-        
+        if (isAutoFilling) return
+
         isAutoFilling = true
-        try {
-            // Find and fill cells with unique candidates
-            val cellsWithUniqueCandidate = sudoku!!.findCellsWithUniqueCandidate()
-            
-            for (cell in cellsWithUniqueCandidate) {
-                // Double-check cell state in case it was modified during iteration
-                if (cell.isNotSolved && cell.getNotesCount() == 1) {
-                    val uniqueCandidate = cell.getSingleNote()
-                    // Fill the cell with the unique candidate
-                    addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
+        scheduleNextAutoFillStep()
+    }
+
+    private fun scheduleNextAutoFillStep() {
+        if (sudoku!!.hasErrors()) {
+            isAutoFilling = false
+            return
+        }
+        // Find next cell with exactly one candidate
+        val nextCell = sudoku!!.findCellsWithUniqueCandidate()
+            .firstOrNull { it.isNotSolved && it.getNotesCount() == 1 }
+
+        if (nextCell == null) {
+            isAutoFilling = false
+            return
+        }
+
+        val scheduler = autoFillScheduler
+        if (scheduler != null) {
+            // Phase 1: brief pre-highlight
+            scheduler.invoke(autoFillStepDelayMs) {
+                autoFillListener?.invoke(nextCell)
+                // Phase 2: perform fill after a short delay
+                scheduler.invoke(autoFillFillDelayMs) {
+                    val uniqueCandidate = nextCell.getSingleNote()
+                    addAndExecute(SolveActionFactory().createAction(uniqueCandidate, nextCell))
+                    // Chain next step
+                    scheduler.invoke(0L) { scheduleNextAutoFillStep() }
                 }
             }
-        } finally {
-            isAutoFilling = false
+        } else {
+            // No scheduler injected: perform immediately, but still step-by-step
+            val uniqueCandidate = nextCell.getSingleNote()
+            addAndExecute(SolveActionFactory().createAction(uniqueCandidate, nextCell))
+            scheduleNextAutoFillStep()
         }
+    }
+
+    /**
+     * Sets a scheduler used to animate auto-fill steps. The scheduler is expected to execute the
+     * given action after the specified delay (in milliseconds) on the UI thread.
+     */
+    fun setAutoFillScheduler(scheduler: (delayMs: Long, action: () -> Unit) -> Unit) {
+        this.autoFillScheduler = scheduler
+    }
+
+    /**
+     * Sets a listener that will be called right before a cell is auto-filled. Useful for UI to
+     * highlight/select the cell that is about to be filled.
+     */
+    fun setAutoFillListener(listener: (Cell) -> Unit) {
+        this.autoFillListener = listener
     }
 
     /**

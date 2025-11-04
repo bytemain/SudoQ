@@ -241,6 +241,17 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
             )
             mediator!!.registerListener(sudokuController!!)
             mediator!!.registerListener(this)
+            // Configure animated auto-fill of unique candidates: schedule steps and highlight cells
+            game!!.setAutoFillScheduler { delayMs, action ->
+                // Use the view to post on UI thread with delay
+                sudokuLayout!!.postDelayed(action, delayMs)
+            }
+            game!!.setAutoFillListener { cell ->
+                runOnUiThread {
+                    val pos = game!!.sudoku!!.getPosition(cell.id)!!
+                    sudokuLayout!!.getSudokuCellView(pos).programmaticallySelectShort()
+                }
+            }
             if (game!!.isFinished()) {
                 setFinished(showWinDialog = false, surrendered = false)
             } else {
