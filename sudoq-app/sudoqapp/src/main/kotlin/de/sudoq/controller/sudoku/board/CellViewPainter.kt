@@ -76,8 +76,12 @@ class CellViewPainter private constructor() {
                     drawBackground(canvas, cell, Color.YELLOW, true, darken)
                     drawText(canvas, cell, Color.RED, false, symbol)
                 }
-                CellViewStates.SELECTED_FIXED -> {
+                CellViewStates.SELECTED -> {
                     drawBackground(canvas, cell, Color.rgb(180, 180, 255), true, darken)
+                    drawText(canvas, cell, Color.rgb(0, 140, 0), true, symbol)
+                }
+                CellViewStates.SELECTED_FIXED -> {
+                    drawBackground(canvas, cell, Color.rgb(220, 220, 255), true, darken)
                     drawText(canvas, cell, Color.rgb(0, 100, 0), true, symbol)
                 }
                 CellViewStates.CONNECTED -> {
@@ -143,6 +147,7 @@ class CellViewPainter private constructor() {
                 CellViewStates.DEFAULT_WRONG,
                 CellViewStates.CONNECTED_WRONG -> drawText(canvas, cell, Color.RED, false, symbol)
                 CellViewStates.SELECTED_FIXED,
+                CellViewStates.SELECTED,
                 CellViewStates.FIXED -> drawText(canvas, cell, Color.rgb(0, 100, 0), true, symbol)
                 else -> {}
             }

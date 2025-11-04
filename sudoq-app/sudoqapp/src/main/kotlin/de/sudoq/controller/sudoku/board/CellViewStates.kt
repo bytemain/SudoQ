@@ -44,12 +44,17 @@ enum class CellViewStates {
     SELECTED_NOTE_WRONG,
 
     /**
-     * Animation für ein ausgewähltes, nicht editierbares Feld
+     * Animation for a selected, non-editable field
      */
     SELECTED_FIXED,
 
     /**
-     * Animation für ein mit dem selektierten verbundenes Feld
+     * Animation for the currently selected cell
+     */
+    SELECTED,
+
+    /**
+     * Animation for a field associated with the selected one
      */
     CONNECTED,
 
