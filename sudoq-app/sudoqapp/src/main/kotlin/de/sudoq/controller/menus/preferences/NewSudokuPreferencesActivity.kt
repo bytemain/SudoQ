@@ -49,6 +49,7 @@ class NewSudokuPreferencesActivity : PreferencesActivity() {
         markRowColumn = findViewById<View>(R.id.checkbox_markRowColumn) as CheckBox
         markWrongSymbol = findViewById<View>(R.id.checkbox_markWrongSymbol) as CheckBox
         restrictCandidates = findViewById<View>(R.id.checkbox_restrictCandidates) as CheckBox
+        autoFillUniqueCandidates = findViewById<View>(R.id.checkbox_autoFillUniqueCandidates) as CheckBox
         Log.i(
             "gameSettings",
             "NewSudokuPreferencesActivity onCreate end is gameSettings null?" + (NewSudokuActivity.gameSettings == null)
@@ -64,6 +65,8 @@ class NewSudokuPreferencesActivity : PreferencesActivity() {
         markWrongSymbol!!.isChecked = confSettings!!.getAssistance(Assistances.markWrongSymbol)
         restrictCandidates!!.isChecked =
             confSettings!!.getAssistance(Assistances.restrictCandidates)
+        autoFillUniqueCandidates!!.isChecked =
+            confSettings!!.getAssistance(Assistances.autoFillUniqueCandidates)
 
         val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
         val pm = ProfileManager(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
@@ -92,6 +95,7 @@ class NewSudokuPreferencesActivity : PreferencesActivity() {
         saveCheckbox(markRowColumn!!, Assistances.markRowColumn, confSettings!!)
         saveCheckbox(markWrongSymbol!!, Assistances.markWrongSymbol, confSettings!!)
         saveCheckbox(restrictCandidates!!, Assistances.restrictCandidates, confSettings!!)
+        saveCheckbox(autoFillUniqueCandidates!!, Assistances.autoFillUniqueCandidates, confSettings!!)
         //confSettings.setHelper();
         //confSettings.setCrash();
         //todo singleton not necessary

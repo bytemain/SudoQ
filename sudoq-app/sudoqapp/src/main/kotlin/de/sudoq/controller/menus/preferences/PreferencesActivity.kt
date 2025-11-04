@@ -21,6 +21,7 @@ abstract class PreferencesActivity : SudoqCompatActivity(), ModelChangeListener<
     var markRowColumn: CheckBox? = null
     var markWrongSymbol: CheckBox? = null
     var restrictCandidates: CheckBox? = null
+    var autoFillUniqueCandidates: CheckBox? = null
 
     //CheckBox helper;
     //CheckBox lefthand;
