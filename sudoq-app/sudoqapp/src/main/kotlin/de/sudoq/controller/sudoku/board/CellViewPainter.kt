@@ -31,6 +31,8 @@ class CellViewPainter private constructor() {
     /** Small red indicator box overlay for pre-fill highlighting. */
     private val preFillIndicators: Hashtable<View, Boolean>
     private val preFillIndicatorColors: Hashtable<View, Int>
+    /** Optional symbol to align indicator to; if absent, falls back to current cell symbol. */
+    private val preFillIndicatorSymbols: Hashtable<View, String>
     private var sl: SudokuLayout? = null
     fun setSudokuLayout(sl: SudokuLayout?) {
         this.sl = sl
@@ -161,8 +163,8 @@ class CellViewPainter private constructor() {
             }
         }
         //Log.d("FieldPainter", "Field drawn");
-    // Draw small pre-fill indicator overlay if requested
-    drawPreFillIndicatorIfAny(canvas, cell)
+        // Draw small pre-fill indicator overlay if requested
+        drawPreFillIndicatorIfAny(canvas, cell, symbol)
 
     try {
             sl!!.hintPainter.invalidateAll() //invalidate();
@@ -188,21 +190,47 @@ class CellViewPainter private constructor() {
         }
     }
 
-    private fun drawPreFillIndicatorIfAny(canvas: Canvas, cell: View) {
+    private fun drawPreFillIndicatorIfAny(canvas: Canvas, cell: View, currentSymbol: String) {
         val show = preFillIndicators[cell] ?: false
         if (!show) return
         val color = preFillIndicatorColors[cell] ?: Color.RED
-        val sizeW = cell.width * 0.3f
-        val sizeH = cell.height * 0.3f
-        val cx = cell.width / 2f
-        val cy = cell.height / 2f
-        val rect = RectF(cx - sizeW / 2, cy - sizeH / 2, cx + sizeW / 2, cy + sizeH / 2)
+
+        // Configure a paint like we use for drawing text to compute tight bounds
+        val textPaint = Paint()
+        textPaint.isAntiAlias = true
+        textPaint.textAlign = Paint.Align.CENTER
+        textPaint.textSize = Math.min(cell.height * 3 / 4, cell.width * 3 / 4).toFloat()
+        // Use the targeted symbol if provided; else use current symbol
+        val targetSymbol = preFillIndicatorSymbols[cell] ?: currentSymbol
+
+        val bounds = Rect()
+        val symbolToMeasure = if (targetSymbol.isNotEmpty()) targetSymbol else "0" // fallback to a digit for size
+        textPaint.getTextBounds(symbolToMeasure, 0, symbolToMeasure.length, bounds)
+
+        // Compute where we draw text (baseline y): mirror drawText positioning
+        val xCenter = cell.width / 2f
+        val yBaseline = (cell.height / 2 + Math.min(cell.height / 4, cell.width / 4)).toFloat()
+
+        // Translate bounds to canvas coordinates
+        val left = xCenter + bounds.left
+        val top = yBaseline + bounds.top
+        val right = xCenter + bounds.right
+        val bottom = yBaseline + bounds.bottom
+
+        // Add a small DP padding to leave some breathing room
+        val density = cell.resources.displayMetrics.density
+        val pad = 2.5f * density
+        val rect = RectF(left - pad, top - pad, right + pad, bottom + pad)
+
         val paint = Paint()
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = (cell.width.coerceAtMost(cell.height) * 0.05f).coerceAtLeast(2f)
+        // Thinner stroke: ~1.5dp
+        paint.strokeWidth = 1.5f * density
         paint.color = color
         paint.isAntiAlias = true
-        canvas.drawRoundRect(rect, cell.width / 12f, cell.height / 12f, paint)
+        // Draw a subtle rounded box hugging the glyph bounds
+        val radius = 2f * density
+        canvas.drawRoundRect(rect, radius, radius, paint)
     }
 
     /**
@@ -361,9 +389,10 @@ class CellViewPainter private constructor() {
     }
 
     /** Shows a small indicator box on the given cell. */
-    fun showPreFillIndicator(cell: View, color: Int = Color.RED) {
+    fun showPreFillIndicator(cell: View, color: Int = Color.RED, symbol: String? = null) {
         preFillIndicators[cell] = true
         preFillIndicatorColors[cell] = color
+        if (symbol != null) preFillIndicatorSymbols[cell] = symbol
         cell.invalidate()
     }
 
@@ -371,6 +400,7 @@ class CellViewPainter private constructor() {
     fun hidePreFillIndicator(cell: View) {
         preFillIndicators.remove(cell)
         preFillIndicatorColors.remove(cell)
+        preFillIndicatorSymbols.remove(cell)
         cell.invalidate()
     }
 
@@ -401,5 +431,6 @@ class CellViewPainter private constructor() {
         textAlphas = Hashtable()
         preFillIndicators = Hashtable()
         preFillIndicatorColors = Hashtable()
+        preFillIndicatorSymbols = Hashtable()
     }
 }

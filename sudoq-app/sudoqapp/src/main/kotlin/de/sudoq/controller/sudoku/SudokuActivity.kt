@@ -250,8 +250,11 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                 runOnUiThread {
                     val pos = game!!.sudoku!!.getPosition(cell.id)!!
                     val cellView = sudokuLayout!!.getSudokuCellView(pos)
-                    // Show a small red indicator box without changing selection
-                    instance!!.showPreFillIndicator(cellView)
+                    // Determine the symbol that will be filled to align the red box precisely
+                    val abstractIdx = cell.getSingleNote()
+                    val symbolStr = if (abstractIdx >= 0) Symbol.getInstance().getMapping(abstractIdx) else ""
+                    // Show a small red indicator box without changing selection, aligned to glyph
+                    instance!!.showPreFillIndicator(cellView, symbol = symbolStr)
                 }
             }
             game!!.setAutoFillAfterListener { cell ->
@@ -282,25 +285,20 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
             }
 
             // After a non-recursive batch completes, bounce any fully-solved constraints in scope
-            game!!.setAutoFillBatchCompleteListener { origin, scope ->
+            game!!.setAutoFillBatchCompleteListener { origin, scope, filledPositions ->
                 runOnUiThread {
                     try {
                         val sudoku = game!!.sudoku!!
-                        // Collect constraints to check: if scope provided (easy), only constraints overlapping scope; else constraints overlapping changed cells
+                        // Collect constraints to check: only those that include one of the newly filled positions
                         val constraintsToCheck = mutableSetOf<de.sudoq.model.sudoku.Constraint>()
                         val type = sudoku.sudokuType!!
-                        if (scope.isNotEmpty()) {
-                            for (c in type) {
-                                // If constraint intersects scope, consider it
-                                var intersects = false
-                                for (p in c) {
-                                    if (scope.contains(p)) { intersects = true; break }
-                                }
-                                if (intersects) constraintsToCheck.add(c)
+                        val filledSet = filledPositions.toSet()
+                        for (c in type) {
+                            var intersects = false
+                            for (p in c) {
+                                if (filledSet.contains(p)) { intersects = true; break }
                             }
-                        } else {
-                            // Fallback: check all constraints (rare path for non-easy)
-                            for (c in type) constraintsToCheck.add(c)
+                            if (intersects) constraintsToCheck.add(c)
                         }
 
                         fun allSolved(c: de.sudoq.model.sudoku.Constraint): Boolean {
@@ -313,11 +311,15 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
 
                         for (c in constraintsToCheck) {
                             if (allSolved(c)) {
-                                // Bounce all views in this constraint
+                                // Bounce all views in this constraint (stronger amplitude)
+                                // Use dp-based amplitude for consistency across sizes
+                                val density = resources.displayMetrics.density
+                                val dy = -12f * density
+                                val duration = 100L
                                 for (p in c) {
                                     val v = sudokuLayout!!.getSudokuCellView(p)
-                                    v.animate().translationY(-10f).setDuration(80).withEndAction {
-                                        v.animate().translationY(0f).setDuration(80).start()
+                                    v.animate().translationY(dy).setDuration(duration).withEndAction {
+                                        v.animate().translationY(0f).setDuration(duration).start()
                                     }.start()
                                 }
                             }

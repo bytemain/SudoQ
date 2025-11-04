@@ -88,7 +88,10 @@ class Game {
     private val autoFillBetweenDelayMs = 160L
     private var autoFillOrigin: Position? = null
     @Volatile
-    private var autoFillBatchCompleteListener: ((origin: Cell?, scope: Set<Position>) -> Unit)? = null
+    private var autoFillBatchCompleteListener: ((origin: Cell?, scope: Set<Position>, filled: Set<Position>) -> Unit)? = null
+
+    /** Tracks positions auto-filled during the current batch (non-recursive). */
+    private val autoFillBatchPositions: MutableList<Position> = mutableListOf()
 
     /* used by persistence (mapper) */
     constructor(
@@ -222,7 +225,8 @@ class Game {
         isAutoFilling = true
         autoFillOrigin = sudoku!!.getPosition(origin.id)
 
-        // Take a snapshot of current unique-candidate cells, limited to scope if in Easy
+    // Take a snapshot of current unique-candidate cells, limited to scope if in Easy
+    autoFillBatchPositions.clear()
         val allCandidates = sudoku!!.findCellsWithUniqueCandidate()
         val (batch: List<Cell>, scopePositions: Set<Position>) = when (sudoku!!.complexity) {
             Complexity.easy -> {
@@ -248,7 +252,7 @@ class Game {
             fun scheduleIndex(i: Int) {
                 if (i >= batch.size) {
                     isAutoFilling = false
-                    autoFillBatchCompleteListener?.invoke(origin, scopePositions)
+                    autoFillBatchCompleteListener?.invoke(origin, scopePositions, autoFillBatchPositions.toSet())
                     return
                 }
                 val cell = batch[i]
@@ -260,6 +264,7 @@ class Game {
                             val uniqueCandidate = cell.getSingleNote()
                             addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
                             autoFillAfterListener?.invoke(cell)
+                            sudoku!!.getPosition(cell.id)?.let { autoFillBatchPositions.add(it) }
                         }
                         // Schedule next cell (no recursion beyond the initial snapshot)
                         scheduler.invoke(autoFillBetweenDelayMs) { scheduleIndex(i + 1) }
@@ -274,10 +279,11 @@ class Game {
                     val uniqueCandidate = cell.getSingleNote()
                     addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
                     autoFillAfterListener?.invoke(cell)
+                    sudoku!!.getPosition(cell.id)?.let { autoFillBatchPositions.add(it) }
                 }
             }
             isAutoFilling = false
-            autoFillBatchCompleteListener?.invoke(origin, scopePositions)
+            autoFillBatchCompleteListener?.invoke(origin, scopePositions, autoFillBatchPositions.toSet())
         }
     }
 
@@ -367,7 +373,7 @@ class Game {
     }
 
     /** Sets a listener called once after a non-recursive auto-fill batch completes. */
-    fun setAutoFillBatchCompleteListener(listener: (origin: Cell?, scope: Set<Position>) -> Unit) {
+    fun setAutoFillBatchCompleteListener(listener: (origin: Cell?, scope: Set<Position>, filled: Set<Position>) -> Unit) {
         this.autoFillBatchCompleteListener = listener
     }
 
