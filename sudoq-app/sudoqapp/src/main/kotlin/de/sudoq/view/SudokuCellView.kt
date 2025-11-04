@@ -128,21 +128,25 @@ class SudokuCellView(
     private fun drawNotes(canvas: Canvas) {
         val notePaint = Paint()
         notePaint.isAntiAlias = true
-        val noteTextSize = height / Symbol.getInstance().getRasterSize()
-        notePaint.textSize = noteTextSize.toFloat()
+        val raster = Symbol.getInstance().getRasterSize()
+        val noteCellSize = height / raster.toFloat()
+        notePaint.textSize = noteCellSize
         notePaint.textAlign = Paint.Align.CENTER
         notePaint.color = Color.BLACK
+        val fm = notePaint.fontMetrics
         for (i in 0 until Symbol.getInstance().getNumberOfSymbols()) {
             if (cell.isNoteSet(i)) {
                 val note = Symbol.getInstance().getMapping(i)
-                canvas.drawText(
-                    note + "", (
-                            i % Symbol.getInstance()
-                                .getRasterSize() * noteTextSize + noteTextSize / 2).toFloat(), (
-                            i / Symbol.getInstance()
-                                .getRasterSize() * noteTextSize + noteTextSize).toFloat(),
-                    notePaint
-                )
+                val col = i % raster
+                val row = i / raster
+                val left = col * noteCellSize
+                val top = row * noteCellSize
+                val right = left + noteCellSize
+                val bottom = top + noteCellSize
+                val cx = (left + right) / 2f
+                // Vertically center text within the mini-cell using font metrics (baseline)
+                val baseline = (top + bottom - fm.bottom - fm.top) / 2f
+                canvas.drawText(note + "", cx, baseline, notePaint)
             }
         }
     }
