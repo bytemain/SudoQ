@@ -59,6 +59,11 @@ enum class CellViewStates {
     CONNECTED_WRONG,
 
     /**
+     * Field with the same number as the currently selected field
+     */
+    SAME_NUMBER,
+
+    /**
      * Ein Feld, welches vorgegeben ist
      */
     FIXED,

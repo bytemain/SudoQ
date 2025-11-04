@@ -88,6 +88,10 @@ class CellViewPainter private constructor() {
                     drawBackground(canvas, cell, Color.rgb(220, 220, 255), true, darken)
                     drawText(canvas, cell, Color.RED, false, symbol)
                 }
+                CellViewStates.SAME_NUMBER -> {
+                    drawBackground(canvas, cell, Color.rgb(180, 230, 180), true, darken)
+                    drawText(canvas, cell, Color.BLACK, false, symbol)
+                }
                 CellViewStates.FIXED -> {
                     drawBackground(canvas, cell, Color.rgb(250, 250, 250), true, darken)
                     drawText(canvas, cell, Color.rgb(0, 100, 0), true, symbol)
@@ -131,6 +135,7 @@ class CellViewPainter private constructor() {
                 CellViewStates.SELECTED_NOTE_BORDER,
                 CellViewStates.SELECTED_NOTE,
                 CellViewStates.CONNECTED,
+                CellViewStates.SAME_NUMBER,
                 CellViewStates.DEFAULT_BORDER,
                 CellViewStates.DEFAULT -> drawText(canvas, cell, Color.BLACK, false, symbol)
                 CellViewStates.SELECTED_INPUT_WRONG,

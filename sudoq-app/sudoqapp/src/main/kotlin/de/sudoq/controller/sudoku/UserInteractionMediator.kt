@@ -128,11 +128,25 @@ class UserInteractionMediator(
             noteMode = e == SelectEvent.Long
             sudokuView.currentCellView = view
 
+
             //unpdate currentField
             currentField?.deselect(true)
             currentField = view
             currentField.setNoteState(noteMode)
             currentField.select(game!!.isAssistanceAvailable(Assistances.markRowColumn))
+            
+            // Highlight cells with the same number
+            if (!currentField.cell.isNotSolved) {
+                val selectedValue = currentField.cell.currentValue
+                val sudokuType = game.sudoku!!.sudokuType
+                for (p in sudokuType!!.validPositions) {
+                    val cellView = sudokuView.getSudokuCellView(p)
+                    if (cellView != currentField && !cellView.cell.isNotSolved && 
+                        cellView.cell.currentValue == selectedValue) {
+                        cellView.markSameNumber()
+                    }
+                }
+            }
         } else {
             noteMode = !noteMode
             currentField!!.setNoteState(noteMode)
@@ -159,6 +173,20 @@ class UserInteractionMediator(
             currentCellView = view
             currentCellView?.setNoteState(noteMode)
             currentCellView!!.select(game!!.isAssistanceAvailable(Assistances.markRowColumn))
+            
+            // Highlight cells with the same number
+            if (!currentCellView.cell.isNotSolved) {
+                val selectedValue = currentCellView.cell.currentValue
+                val sudokuType = game.sudoku!!.sudokuType
+                for (p in sudokuType!!.validPositions) {
+                    val cellView = sudokuView.getSudokuCellView(p)
+                    if (cellView != currentCellView && !cellView.cell.isNotSolved && 
+                        cellView.cell.currentValue == selectedValue) {
+                        cellView.markSameNumber()
+                    }
+                }
+            }
+            
             currentCell = currentCellView.cell
             if (currentCell.isEditable) {
                 restrictCandidates()
