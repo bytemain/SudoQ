@@ -144,6 +144,7 @@ class CellViewPainter private constructor() {
                 CellViewStates.CONNECTED_WRONG -> drawText(canvas, cell, Color.RED, false, symbol)
                 CellViewStates.SELECTED_FIXED,
                 CellViewStates.FIXED -> drawText(canvas, cell, Color.rgb(0, 100, 0), true, symbol)
+                else -> {}
             }
         }
         //Log.d("FieldPainter", "Field drawn");

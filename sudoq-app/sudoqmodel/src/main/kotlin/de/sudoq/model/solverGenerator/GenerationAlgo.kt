@@ -210,6 +210,7 @@ class GenerationAlgo(
                     }
 
                 }
+                else -> {}
             }
             plusminuscounter++
         }

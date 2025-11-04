@@ -157,6 +157,7 @@ class SudokuController(
             Complexity.difficult -> incrementStatistic(Statistics.playedDifficultSudokus)
             Complexity.medium -> incrementStatistic(Statistics.playedMediumSudokus)
             Complexity.easy -> incrementStatistic(Statistics.playedEasySudokus)
+            else -> {}
         }
         incrementStatistic(Statistics.playedSudokus)
         val profilesDir = context.getDir(

@@ -128,6 +128,7 @@ class Game {
                 Complexity.difficult -> scoreFactor = power(3.5)
                 Complexity.medium -> scoreFactor = power(3.0)
                 Complexity.easy -> scoreFactor = power(2.5)
+                else -> {}
             }
             return (scoreFactor * 10 / ((time + assistancesTimeCost) / 60.0f)).toInt()
         }
