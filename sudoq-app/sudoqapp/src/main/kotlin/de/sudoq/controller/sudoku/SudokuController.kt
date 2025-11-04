@@ -213,15 +213,7 @@ class SudokuController(
             // Check all constraints (row, column, block) for this position
             for (constraint in sudokuType) {
                 // Check if this constraint contains the current position
-                var containsPosition = false
-                for (constraintPos in constraint) {
-                    if (constraintPos == position) {
-                        containsPosition = true
-                        break
-                    }
-                }
-
-                if (containsPosition) {
+                if (constraint.includes(position)) {
                     // Remove values that are already present in this constraint
                     for (constraintPos in constraint) {
                         val constraintCell = sudoku.getCell(constraintPos)
@@ -237,9 +229,8 @@ class SudokuController(
                 val shouldBeSet = validCandidates.contains(candidate)
                 val isCurrentlySet = cell.isNoteSet(candidate)
 
-                if (shouldBeSet && !isCurrentlySet) {
-                    cell.toggleNote(candidate)
-                } else if (!shouldBeSet && isCurrentlySet) {
+                // Only toggle if the state needs to change
+                if (shouldBeSet != isCurrentlySet) {
                     cell.toggleNote(candidate)
                 }
             }
