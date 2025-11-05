@@ -12,7 +12,7 @@ import de.sudoq.model.sudoku.Cell
 /**
  * This class represents an action that adds or removes entries from a [cell].
  */
-class SolveAction(diff: Int, cell: Cell) : Action(diff, cell) {
+open class SolveAction(diff: Int, cell: Cell) : Action(diff, cell) {
 
     init {
         XML_ATTRIBUTE_NAME = "SolveAction"
