@@ -194,6 +194,9 @@ class SudokuController(
         val sudokuType = sudoku.sudokuType ?: return
         val numberOfSymbols = sudokuType.numberOfSymbols
 
+        // Collect all changes to be made
+        val changes = mutableListOf<de.sudoq.model.actionTree.FillCandidatesAction.CellChange>()
+
         // Iterate through all cells
         for (cell in sudoku) {
             // Skip cells that are not editable or already have a value
@@ -224,16 +227,28 @@ class SudokuController(
                 }
             }
 
-            // Set the valid candidates as notes in the cell
+            // Record changes for the valid candidates as notes in the cell
             for (candidate in 0 until numberOfSymbols) {
                 val shouldBeSet = validCandidates.contains(candidate)
                 val isCurrentlySet = cell.isNoteSet(candidate)
 
-                // Only toggle if the state needs to change
+                // Only add to changes if the state needs to change
                 if (shouldBeSet != isCurrentlySet) {
-                    cell.toggleNote(candidate)
+                    changes.add(
+                        de.sudoq.model.actionTree.FillCandidatesAction.CellChange(
+                            cell,
+                            candidate,
+                            shouldBeSet
+                        )
+                    )
                 }
             }
+        }
+
+        // Execute all changes as a single undoable action
+        if (changes.isNotEmpty()) {
+            val fillAction = de.sudoq.model.actionTree.FillCandidatesAction(changes)
+            game.addAndExecute(fillAction)
         }
     }
 }
