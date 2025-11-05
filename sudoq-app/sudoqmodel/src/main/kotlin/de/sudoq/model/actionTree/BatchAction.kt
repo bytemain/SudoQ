@@ -50,7 +50,7 @@ class BatchAction(
     /**
      * Batch actions don't inverse with other actions
      */
-    fun inverse(a: Action): Boolean = false
+    override fun inverse(a: Action): Boolean = false
     
     /**
      * Returns the number of actions in this batch

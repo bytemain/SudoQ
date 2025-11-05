@@ -72,6 +72,12 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
      */
     private val touchedCellsDuringDrag: MutableSet<SudokuCellView> = mutableSetOf()
     
+    /**
+     * Track if we should start intercepting touch events for drag selection
+     * Set to true when entering multi-selection mode
+     */
+    private var shouldInterceptForDrag: Boolean = false
+    
     private var zoomFactor: Float
         private set
 
@@ -275,8 +281,23 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
      */
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
         // In multi-selection mode, intercept MOVE events to handle drag selection
-        if (isMultiSelectionMode && event.action == MotionEvent.ACTION_MOVE) {
-            return true  // Intercept and handle in onTouchEvent
+        if (isMultiSelectionMode) {
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // User touched down in multi-select mode, prepare to intercept drags
+                    shouldInterceptForDrag = true
+                    return false  // Let children handle the initial touch
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (shouldInterceptForDrag) {
+                        // Start intercepting to handle drag selection
+                        return true
+                    }
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    shouldInterceptForDrag = false
+                }
+            }
         }
         return super.onInterceptTouchEvent(event)
     }
@@ -446,6 +467,7 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
         selectedCellViews.clear()
         touchedCellsDuringDrag.clear()
         isMultiSelectionMode = false
+        shouldInterceptForDrag = false
     }
     
     /**
@@ -469,6 +491,8 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
             selectedCellViews.clear()
             selectedCellViews.add(currentCellView!!)
             isMultiSelectionMode = true
+            shouldInterceptForDrag = true  // Enable drag interception immediately
+            touchedCellsDuringDrag.clear()
         }
     }
 
