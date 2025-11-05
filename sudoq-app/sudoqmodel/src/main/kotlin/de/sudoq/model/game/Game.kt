@@ -237,16 +237,6 @@ class Game {
         scheduleNextAutoFillStep()
     }
 
-    // Backward-compat for callers without origin
-    private fun triggerAutoFillIfEnabled() {
-        if (!isAssistanceAvailable(Assistances.autoFillUniqueCandidates)) return
-        if (sudoku!!.hasErrors()) return
-        if (isAutoFilling) return
-        isAutoFilling = true
-        autoFillOrigin = null
-        scheduleNextAutoFillStep()
-    }
-
     private fun scheduleNextAutoFillStep() {
         if (sudoku!!.hasErrors()) {
             isAutoFilling = false
