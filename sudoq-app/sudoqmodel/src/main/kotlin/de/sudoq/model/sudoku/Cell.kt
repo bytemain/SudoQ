@@ -177,6 +177,21 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
     }
 
     /**
+     * Returns all note indices that are currently set.
+     *
+     * @return list of note indices (0-based)
+     */
+    fun getAllNotes(): List<Int> {
+        val notes = mutableListOf<Int>()
+        var i = noticeFlags.nextSetBit(0)
+        while (i >= 0) {
+            notes.add(i)
+            i = noticeFlags.nextSetBit(i + 1)
+        }
+        return notes
+    }
+
+    /**
      * Checks if the cell is solved correctly, i.e. if the filled in value is correct.
      *
      * @return true, iff the cell is solved correctly

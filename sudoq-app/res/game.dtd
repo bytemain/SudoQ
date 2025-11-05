@@ -15,7 +15,8 @@
 <!ATTLIST fieldmap
 	id CDATA #REQUIRED
 	editable (true | false) "no"
-	solution CDATA #REQUIRED>
+	solution CDATA #REQUIRED
+	notes CDATA #IMPLIED>
 	
 <!ELEMENT action (position)>
 <!ATTLIST action 

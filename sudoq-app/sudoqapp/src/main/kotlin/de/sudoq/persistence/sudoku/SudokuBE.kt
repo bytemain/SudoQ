@@ -57,6 +57,16 @@ class SudokuBE() : XmlableWithRepo<SudokuType> {
             fieldmap.addAttribute(XmlAttribute("id", "" + value.id))
             fieldmap.addAttribute(XmlAttribute("editable", "" + value.isEditable))
             fieldmap.addAttribute(XmlAttribute("solution", "" + value.solution))
+            // Persist notes (noticeFlags) as a comma-separated list of indices if any are set
+            val notes = value.getAllNotes()
+            if (notes.isNotEmpty()) {
+                fieldmap.addAttribute(
+                    XmlAttribute(
+                        "notes",
+                        notes.joinToString(separator = ",")
+                    )
+                )
+            }
             val position = XmlTree("position")
             position.addAttribute(XmlAttribute("x", "" + key.x))
             position.addAttribute(XmlAttribute("y", "" + key.y))
@@ -104,6 +114,19 @@ class SudokuBE() : XmlableWithRepo<SudokuType> {
                 }
                 val pos = Position[x, y]
                 val cell = Cell(editable, solution, fieldId, sudokuType!!.numberOfSymbols)
+                
+                // Restore notes (noticeFlags) if present
+                val notesAttr = sub.getAttributeValue("notes")
+                if (!notesAttr.isNullOrBlank()) {
+                    val noteIndices = notesAttr.split(',')
+                        .mapNotNull { it.trim().toIntOrNull() }
+                    for (noteIdx in noteIndices) {
+                        if (noteIdx >= 0 && noteIdx < sudokuType!!.numberOfSymbols) {
+                            cell.toggleNote(noteIdx)
+                        }
+                    }
+                }
+                
                 cells!![pos] = cell
                 cellIdCounter++
             }
