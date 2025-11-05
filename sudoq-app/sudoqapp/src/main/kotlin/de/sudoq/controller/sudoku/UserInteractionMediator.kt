@@ -103,9 +103,17 @@ class UserInteractionMediator(
             // Create the appropriate action for this cell
             if (noteMode) {
                 if (cell.isNoteSet(symbol)) {
-                    actions.add(de.sudoq.model.actionTree.NoteAction(symbol, cell, false))
+                    actions.add(de.sudoq.model.actionTree.NoteAction(
+                        symbol, 
+                        de.sudoq.model.actionTree.NoteAction.Action.REMOVE, 
+                        cell
+                    ))
                 } else {
-                    actions.add(de.sudoq.model.actionTree.NoteAction(symbol, cell, true))
+                    actions.add(de.sudoq.model.actionTree.NoteAction(
+                        symbol, 
+                        de.sudoq.model.actionTree.NoteAction.Action.SET, 
+                        cell
+                    ))
                 }
             } else {
                 if (symbol == cell.currentValue) {
