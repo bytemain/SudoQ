@@ -44,12 +44,15 @@ class FillCandidatesAction(
 
     /**
      * Reverses the action by toggling all notes back to their original state.
+     * This undoes what execute() did by reversing each toggle.
      */
     override fun undo() {
         for (change in cellChanges) {
             val isCurrentlySet = change.cell.isNoteSet(change.candidate)
-            // Toggle back to original state
-            if (change.shouldSet != isCurrentlySet) {
+            // Reverse the change: if we set it in execute, remove it now; if we removed it, add it back
+            // After execute: isCurrentlySet == shouldSet (they match)
+            // So to undo, we toggle when they match (to make them not match again)
+            if (change.shouldSet == isCurrentlySet) {
                 change.cell.toggleNote(change.candidate)
             }
         }
@@ -57,26 +60,13 @@ class FillCandidatesAction(
 
     /**
      * Checks if another action is the inverse of this one.
-     * For FillCandidatesAction, two actions are inverse if they affect the same cells
-     * with opposite operations.
+     * For FillCandidatesAction, it is not self-inverse, so this always returns false.
+     * The undo mechanism handles reverting the changes.
      */
     override fun inverse(a: Action): Boolean {
-        if (a !is FillCandidatesAction) return false
-        if (cellChanges.size != a.cellChanges.size) return false
-        
-        // Check if all changes are inverted
-        for (i in cellChanges.indices) {
-            val thisChange = cellChanges[i]
-            val otherChange = a.cellChanges[i]
-            
-            if (thisChange.cell != otherChange.cell ||
-                thisChange.candidate != otherChange.candidate ||
-                thisChange.shouldSet == otherChange.shouldSet) {
-                return false
-            }
-        }
-        
-        return true
+        // FillCandidatesAction is not self-inverse
+        // Undo is handled by the undo() method which toggles notes back
+        return false
     }
 
     override fun equals(other: Any?): Boolean {
