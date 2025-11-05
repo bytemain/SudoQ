@@ -51,9 +51,27 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     // private int currentCellViewSize;
 
     /**
-     * Die aktuell ausgewählte CellView
+     * The currently selected CellView (primary selection)
      */
     var currentCellView: SudokuCellView? = null
+    
+    /**
+     * Set of all currently selected cells for multi-selection
+     */
+    private val selectedCellViews: MutableSet<SudokuCellView> = mutableSetOf()
+    
+    /**
+     * Whether multi-selection mode is currently active
+     */
+    var isMultiSelectionMode: Boolean = false
+        private set
+    
+    /**
+     * Track which cells have been touched during current drag operation
+     * to avoid repeatedly processing the same cell
+     */
+    private val touchedCellsDuringDrag: MutableSet<SudokuCellView> = mutableSetOf()
+    
     private var zoomFactor: Float
         private set
 
@@ -253,10 +271,81 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     }
 
     /**
-     * Touch-Events werden nicht verarbeitet.
+     * Intercept touch events in multi-selection mode to handle drag selection
+     */
+    override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
+        // In multi-selection mode, intercept MOVE events to handle drag selection
+        if (isMultiSelectionMode && event.action == MotionEvent.ACTION_MOVE) {
+            return true  // Intercept and handle in onTouchEvent
+        }
+        return super.onInterceptTouchEvent(event)
+    }
+
+    /**
+     * Handle touch events for multi-selection drag support
      */
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        return false
+        // Only handle touch events in multi-selection mode
+        if (!isMultiSelectionMode) {
+            return false
+        }
+        
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                // Start of touch, clear the drag tracking set
+                touchedCellsDuringDrag.clear()
+                return true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                // Find which cell the user is touching during drag
+                val x = event.x
+                val y = event.y
+                
+                // Find the cell at this position
+                val cellView = findCellViewAt(x, y)
+                if (cellView != null && cellView.cell.isEditable) {
+                    // Only process each cell once per drag
+                    if (!touchedCellsDuringDrag.contains(cellView)) {
+                        touchedCellsDuringDrag.add(cellView)
+                        
+                        // Add to selection if not already selected
+                        if (!selectedCellViews.contains(cellView)) {
+                            addToMultiSelection(cellView)
+                            cellView.setMultiSelected(true)
+                            cellView.select(false)
+                            Log.d("multi-select", "Cell added during drag")
+                        }
+                    }
+                }
+                return true
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                // Touch ended, clear tracking
+                touchedCellsDuringDrag.clear()
+                return true
+            }
+        }
+        
+        return super.onTouchEvent(event)
+    }
+    
+    /**
+     * Find the cell view at the given screen coordinates
+     */
+    private fun findCellViewAt(x: Float, y: Float): SudokuCellView? {
+        val sudokuType = game.sudoku!!.sudokuType
+        for (p in sudokuType!!.validPositions) {
+            val cellView = getSudokuCellView(p)
+            val left = cellView.left
+            val top = cellView.top
+            val right = cellView.right
+            val bottom = cellView.bottom
+            
+            if (x >= left && x <= right && y >= top && y <= bottom) {
+                return cellView
+            }
+        }
+        return null
     }
 
     /**
@@ -326,6 +415,61 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
      */
     override fun getMaxZoomFactor(): Float {
         return 10f //this.game.getSudoku().getSudokuType().getSize().getX() / 2.0f;
+    }
+    
+    /**
+     * Adds a cell to the multi-selection
+     */
+    fun addToMultiSelection(cellView: SudokuCellView) {
+        selectedCellViews.add(cellView)
+        isMultiSelectionMode = selectedCellViews.size > 1
+    }
+    
+    /**
+     * Removes a cell from the multi-selection
+     */
+    fun removeFromMultiSelection(cellView: SudokuCellView) {
+        selectedCellViews.remove(cellView)
+        isMultiSelectionMode = selectedCellViews.size > 1
+    }
+    
+    /**
+     * Clears all multi-selected cells
+     */
+    fun clearMultiSelection() {
+        for (cellView in selectedCellViews) {
+            cellView.setMultiSelected(false)
+            if (cellView != currentCellView) {
+                cellView.deselect(false)
+            }
+        }
+        selectedCellViews.clear()
+        touchedCellsDuringDrag.clear()
+        isMultiSelectionMode = false
+    }
+    
+    /**
+     * Gets all currently selected cell views
+     */
+    fun getSelectedCellViews(): Set<SudokuCellView> {
+        return if (isMultiSelectionMode) {
+            selectedCellViews.toSet()
+        } else if (currentCellView != null) {
+            setOf(currentCellView!!)
+        } else {
+            emptySet()
+        }
+    }
+    
+    /**
+     * Starts multi-selection mode with the current cell
+     */
+    fun startMultiSelectionMode() {
+        if (currentCellView != null && !isMultiSelectionMode) {
+            selectedCellViews.clear()
+            selectedCellViews.add(currentCellView!!)
+            isMultiSelectionMode = true
+        }
     }
 
     companion object {

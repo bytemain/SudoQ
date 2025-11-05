@@ -80,31 +80,138 @@ class UserInteractionMediator(
      */
     private val gestureStore: GestureStore
     override fun onInput(symbol: Int) {
-        val currentField = sudokuView!!.currentCellView
-
-        for (listener in actionListener) {
+        // Get all selected cells (multi-select or single select)
+        val selectedCells = sudokuView!!.getSelectedCellViews()
+        
+        if (selectedCells.isEmpty()) {
+            Log.w("UserInteractionMediator", "No cells selected for input")
+            return
+        }
+        
+        Log.d("multi-select", "Input to ${selectedCells.size} cell(s): value=$symbol, noteMode=$noteMode")
+        
+        // Collect all actions to be performed
+        val actions = mutableListOf<de.sudoq.model.actionTree.Action>()
+        
+        for (cellView in selectedCells) {
+            val cell = cellView.cell
+            if (!cell.isEditable) {
+                Log.d("multi-select", "Skipping non-editable cell")
+                continue
+            }
+            
+            // Create the appropriate action for this cell
             if (noteMode) {
-                if (currentField!!.cell.isNoteSet(symbol)) {
-                    listener!!.onNoteDelete(currentField.cell, symbol)
-                    restrictCandidates() //because github issue #116 see below
-                    //in case we deleted a now impossible,
-                    // we immediately restrict so it cant be selected again
+                if (cell.isNoteSet(symbol)) {
+                    actions.add(de.sudoq.model.actionTree.NoteAction(symbol, cell, false))
                 } else {
-                    listener!!.onNoteAdd(currentField.cell, symbol)
+                    actions.add(de.sudoq.model.actionTree.NoteAction(symbol, cell, true))
                 }
             } else {
-                if (symbol == currentField!!.cell.currentValue) {
-                    listener!!.onDeleteEntry(currentField.cell)
+                if (symbol == cell.currentValue) {
+                    // Delete entry
+                    actions.add(de.sudoq.model.actionTree.SolveActionWithNoteUpdate(
+                        Cell.EMPTYVAL - cell.currentValue,
+                        cell,
+                        game!!.sudoku!!,
+                        game.isAssistanceAvailable(de.sudoq.model.game.Assistances.autoAdjustNotes)
+                    ))
                 } else {
-                    listener!!.onAddEntry(currentField.cell, symbol)
+                    // Add entry
+                    actions.add(de.sudoq.model.actionTree.SolveActionWithNoteUpdate(
+                        symbol - cell.currentValue,
+                        cell,
+                        game!!.sudoku!!,
+                        game.isAssistanceAvailable(de.sudoq.model.game.Assistances.autoAdjustNotes)
+                    ))
                 }
             }
         }
+        
+        // If we have actions, execute them as a batch or individually
+        if (actions.isNotEmpty()) {
+            if (actions.size > 1) {
+                // Multiple cells: use BatchAction for better undo support
+                val batchAction = de.sudoq.model.actionTree.BatchAction(actions)
+                game!!.addAndExecute(batchAction)
+                Log.d("multi-select", "Executed batch action with ${actions.size} operations")
+            } else {
+                // Single cell: execute directly
+                game!!.addAndExecute(actions[0])
+            }
+            
+            // Check if game is finished
+            if (game!!.isFinished()) {
+                for (listener in actionListener) {
+                    listener!!.onAddEntry(selectedCells.first().cell, symbol) // Trigger finish handler
+                    break
+                }
+            }
+        }
+        
+        restrictCandidates()
         updateKeyboard()
     }
 
     override fun onCellSelected(view: SudokuCellView, e: SelectEvent) {
         if (!game!!.isFinished()) {
+            // Handle multi-selection mode
+            if (sudokuView!!.isMultiSelectionMode) {
+                if (e == SelectEvent.Short) {
+                    // Short click in multi-select mode: exit multi-select
+                    sudokuView.clearMultiSelection()
+                    Toast.makeText(
+                        view.context, 
+                        view.context.getString(R.string.toast_multi_select_deactivated), 
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Log.d("multi-select", "Multi-selection mode deactivated by short click")
+                    updateKeyboard()
+                    return
+                } else if (e == SelectEvent.Long) {
+                    // Long press in multi-select mode: toggle cell selection
+                    if (sudokuView.getSelectedCellViews().contains(view)) {
+                        // Deselect this cell
+                        sudokuView.removeFromMultiSelection(view)
+                        view.setMultiSelected(false)
+                        view.deselect(false)
+                        Log.d("multi-select", "Cell removed from selection")
+                    } else {
+                        // Add to selection
+                        if (view.cell.isEditable) {
+                            sudokuView.addToMultiSelection(view)
+                            view.setMultiSelected(true)
+                            view.select(false)
+                            Log.d("multi-select", "Cell added to selection")
+                        } else {
+                            Toast.makeText(
+                                view.context, 
+                                view.context.getString(R.string.toast_cell_not_editable), 
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                    updateKeyboard()
+                    return
+                }
+            }
+            
+            // Not in multi-select mode: long press enters multi-select
+            if (e == SelectEvent.Long) {
+                // Enter multi-selection mode
+                sudokuView.startMultiSelectionMode()
+                view.setMultiSelected(true)
+                Toast.makeText(
+                    view.context, 
+                    view.context.getString(R.string.toast_multi_select_activated), 
+                    Toast.LENGTH_SHORT
+                ).show()
+                Log.d("multi-select", "Multi-selection mode activated")
+                updateKeyboard()
+                return
+            }
+            
+            // Normal single-selection logic (short click when not in multi-select mode)
             val c = view.context
             val profilesDir = c.getDir(
                 c.getString(R.string.path_rel_profiles),
@@ -184,9 +291,12 @@ class UserInteractionMediator(
     }
 
     private fun cellSelectedGestureMode(view: SudokuCellView?, e: SelectEvent) {
+        if (view == null) return
+        
         var currentCellView = sudokuView!!.currentCellView
         val currentCell: Cell
-        /* select for the first time -> set a solution */
+        
+        /* Normal selection logic */
         val freshlySelected = currentCellView != view
         if (freshlySelected) {
             Log.d("gesture-verify", "cellSelectedGestureMode: freshly selected")

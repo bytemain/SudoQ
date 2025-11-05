@@ -11,6 +11,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -72,6 +73,11 @@ class SudokuCellView(
     //parent class already defines property 'selected' so we need to call our custom one 'cellSelected'
 
     /**
+     * Indicates if this cell is part of a multi-selection
+     */
+    private var isMultiSelected: Boolean = false
+
+    /**
      * Indicates if this cell is connected to the one currently selected
      */
     private var connected: Boolean
@@ -113,10 +119,29 @@ class SudokuCellView(
             isInExtraConstraint && !cellSelected
         )
 
+        // Draw multi-selection indicator
+        if (isMultiSelected) {
+            drawMultiSelectBorder(canvas)
+        }
+
         // Draw notes if cell has no value
         if (cell.isNotSolved) {
             drawNotes(canvas)
         }
+    }
+    
+    /**
+     * Draws a border to indicate this cell is part of a multi-selection
+     */
+    private fun drawMultiSelectBorder(canvas: Canvas) {
+        val paint = Paint()
+        paint.color = Color.rgb(100, 150, 255)  // Light blue color
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 8f  // Thick border
+        paint.isAntiAlias = true
+        
+        val rect = RectF(4f, 4f, width.toFloat() - 4f, height.toFloat() - 4f)
+        canvas.drawRect(rect, paint)
     }
 
     /**
@@ -394,5 +419,20 @@ class SudokuCellView(
                 listener.onCellSelected(scv, CellInteractionListener.SelectEvent.Long)
             return true
         }
+    }
+    
+    /**
+     * Marks this cell as part of a multi-selection
+     */
+    fun setMultiSelected(selected: Boolean) {
+        isMultiSelected = selected
+        invalidate()
+    }
+    
+    /**
+     * Returns whether this cell is part of a multi-selection
+     */
+    fun isMultiSelected(): Boolean {
+        return isMultiSelected
     }
 }
