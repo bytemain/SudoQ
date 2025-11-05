@@ -310,7 +310,7 @@ class Game {
                 scheduler.invoke(autoFillFillDelayMs) {
                     val uniqueCandidate = nextCell.getSingleNote()
                     val action = SolveActionWithNoteUpdate(
-                        uniqueCandidate,
+                        uniqueCandidate - nextCell.currentValue, // diff, not absolute value
                         nextCell,
                         sudoku!!,
                         isAssistanceAvailable(Assistances.autoAdjustNotes)
@@ -326,7 +326,7 @@ class Game {
             // No scheduler injected: perform immediately, but still step-by-step
             val uniqueCandidate = nextCell.getSingleNote()
             val action = SolveActionWithNoteUpdate(
-                uniqueCandidate,
+                uniqueCandidate - nextCell.currentValue, // diff, not absolute value
                 nextCell,
                 sudoku!!,
                 isAssistanceAvailable(Assistances.autoAdjustNotes)
@@ -476,7 +476,7 @@ class Game {
         val solution = cell.solution
         return if (solution != Cell.EMPTYVAL) {
             val action = SolveActionWithNoteUpdate(
-                solution,
+                solution - cell.currentValue, // diff, not absolute value
                 cell,
                 sudoku!!,
                 isAssistanceAvailable(Assistances.autoAdjustNotes)
@@ -499,7 +499,7 @@ class Game {
         for (f in sudoku!!) {
             if (f.isNotSolved) {
                 val action = SolveActionWithNoteUpdate(
-                    f.solution,
+                    f.solution - f.currentValue, // diff, not absolute value
                     f,
                     sudoku!!,
                     isAssistanceAvailable(Assistances.autoAdjustNotes)
@@ -532,9 +532,10 @@ class Game {
         val rnd = Random()
         while (unsolvedCells.isNotEmpty()) {
             val nr = rnd.nextInt(unsolvedCells.size)
+            val cell = unsolvedCells[nr]
             val action = SolveActionWithNoteUpdate(
-                unsolvedCells[nr].solution,
-                unsolvedCells[nr],
+                cell.solution - cell.currentValue, // diff, not absolute value
+                cell,
                 sudoku!!,
                 isAssistanceAvailable(Assistances.autoAdjustNotes)
             )
@@ -603,7 +604,7 @@ class Game {
                         val uniqueCandidate = cell.getSingleNote()
                         // Fill the cell with the unique candidate using SolveActionWithNoteUpdate
                         val action = SolveActionWithNoteUpdate(
-                            uniqueCandidate,
+                            uniqueCandidate - cell.currentValue, // diff, not absolute value
                             cell,
                             sudoku!!,
                             isAssistanceAvailable(Assistances.autoAdjustNotes)

@@ -80,7 +80,7 @@ class SudokuController(
     override fun onAddEntry(cell: Cell, value: Int) {
         // Use SolveActionWithNoteUpdate to handle automatic note adjustments
         val action = de.sudoq.model.actionTree.SolveActionWithNoteUpdate(
-            value,
+            value - cell.currentValue, // diff, not absolute value
             cell,
             game.sudoku!!,
             game.isAssistanceAvailable(de.sudoq.model.game.Assistances.autoAdjustNotes)
@@ -106,7 +106,7 @@ class SudokuController(
     override fun onDeleteEntry(cell: Cell) {
         // Use SolveActionWithNoteUpdate to handle automatic note adjustments
         val action = de.sudoq.model.actionTree.SolveActionWithNoteUpdate(
-            Cell.EMPTYVAL,
+            Cell.EMPTYVAL - cell.currentValue, // diff, not absolute value
             cell,
             game.sudoku!!,
             game.isAssistanceAvailable(de.sudoq.model.game.Assistances.autoAdjustNotes)
