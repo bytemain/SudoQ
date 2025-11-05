@@ -127,6 +127,7 @@ class UserInteractionMediator(
      * @param cellView The cell view whose number should be matched
      */
     private fun highlightCellsWithSameNumber(cellView: SudokuCellView) {
+        clearSameNumberHighlighting(null)
         if (!cellView.cell.isNotSolved) {
             val selectedValue = cellView.cell.currentValue
             val sudokuType = game!!.sudoku!!.sudokuType
@@ -135,8 +136,6 @@ class UserInteractionMediator(
                 if (cell != cellView && !cell.cell.isNotSolved && 
                     cell.cell.currentValue == selectedValue) {
                     cell.markSameNumber()
-                } else {
-                    cell.clearSameNumber()
                 }
             }
         }
