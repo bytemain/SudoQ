@@ -78,7 +78,14 @@ class SudokuController(
      * {@inheritDoc}
      */
     override fun onAddEntry(cell: Cell, value: Int) {
-        game.addAndExecute(SolveActionFactory().createAction(value, cell))
+        // Use SolveActionWithNoteUpdate to handle automatic note adjustments
+        val action = de.sudoq.model.actionTree.SolveActionWithNoteUpdate(
+            value,
+            cell,
+            game.sudoku!!,
+            game.isAssistanceAvailable(de.sudoq.model.game.Assistances.autoAdjustNotes)
+        )
+        game.addAndExecute(action)
         if (game.isFinished()) {
             updateStatistics()
             handleFinish(false)
@@ -97,7 +104,14 @@ class SudokuController(
      * {@inheritDoc}
      */
     override fun onDeleteEntry(cell: Cell) {
-        game.addAndExecute(SolveActionFactory().createAction(Cell.EMPTYVAL, cell))
+        // Use SolveActionWithNoteUpdate to handle automatic note adjustments
+        val action = de.sudoq.model.actionTree.SolveActionWithNoteUpdate(
+            Cell.EMPTYVAL,
+            cell,
+            game.sudoku!!,
+            game.isAssistanceAvailable(de.sudoq.model.game.Assistances.autoAdjustNotes)
+        )
+        game.addAndExecute(action)
     }
 
     /**

@@ -69,6 +69,11 @@ class Game {
     private var isAutoFilling = false
 
     /**
+     * Flag to prevent adding note adjustment actions during the execution of a main action
+     */
+    private var isExecutingMainAction = false
+
+    /**
      * Optional scheduler for animating auto-fill steps (provided by UI layer). If null, steps run immediately.
      */
     @Volatile
@@ -207,14 +212,30 @@ class Game {
      */
     fun addAndExecute(action: Action) {
         if (finished) return
-        stateHandler!!.addAndExecute(action)
-        sudoku!!.getCell(action.cellId)?.let { cell ->
-            updateNotes(cell)
-            // Auto-fill cells with unique candidates if assistance is enabled and action is a SolveAction
-            if (!isAutoFilling && action is SolveAction && cell.isSolved) {
-                triggerAutoFillIfEnabled(cell)
-            }
+        
+        // Check if we're being called recursively from updateNotes
+        val isTopLevel = !isExecutingMainAction
+        
+        if (isTopLevel) {
+            isExecutingMainAction = true
         }
+        
+        stateHandler!!.addAndExecute(action)
+        
+        if (isTopLevel) {
+            sudoku!!.getCell(action.cellId)?.let { cell ->
+                // Only call updateNotes for old-style SolveActions that don't handle notes themselves
+                if (action is SolveAction && action !is SolveActionWithNoteUpdate) {
+                    updateNotes(cell)
+                }
+                // Auto-fill cells with unique candidates if assistance is enabled and action is a SolveAction
+                if (!isAutoFilling && action is SolveAction && cell.isSolved) {
+                    triggerAutoFillIfEnabled(cell)
+                }
+            }
+            isExecutingMainAction = false
+        }
+        
         if (!finished && isFinished()) {
             finished = true
             gameFinishedListener?.invoke()
@@ -288,7 +309,13 @@ class Game {
                 // Phase 2: perform fill after a short delay
                 scheduler.invoke(autoFillFillDelayMs) {
                     val uniqueCandidate = nextCell.getSingleNote()
-                    addAndExecute(SolveActionFactory().createAction(uniqueCandidate, nextCell))
+                    val action = SolveActionWithNoteUpdate(
+                        uniqueCandidate,
+                        nextCell,
+                        sudoku!!,
+                        isAssistanceAvailable(Assistances.autoAdjustNotes)
+                    )
+                    addAndExecute(action)
                     autoFillAfterListener?.invoke(nextCell)
                     sudoku!!.getPosition(nextCell.id)?.let { autoFillBatchPositions.add(it) }
                     // Chain next step
@@ -298,7 +325,13 @@ class Game {
         } else {
             // No scheduler injected: perform immediately, but still step-by-step
             val uniqueCandidate = nextCell.getSingleNote()
-            addAndExecute(SolveActionFactory().createAction(uniqueCandidate, nextCell))
+            val action = SolveActionWithNoteUpdate(
+                uniqueCandidate,
+                nextCell,
+                sudoku!!,
+                isAssistanceAvailable(Assistances.autoAdjustNotes)
+            )
+            addAndExecute(action)
             autoFillAfterListener?.invoke(nextCell)
             scheduleNextAutoFillStep()
         }
@@ -442,7 +475,13 @@ class Game {
         assistancesCost += 3
         val solution = cell.solution
         return if (solution != Cell.EMPTYVAL) {
-            addAndExecute(SolveActionFactory().createAction(solution, cell))
+            val action = SolveActionWithNoteUpdate(
+                solution,
+                cell,
+                sudoku!!,
+                isAssistanceAvailable(Assistances.autoAdjustNotes)
+            )
+            addAndExecute(action)
             true
         } else {
             false
@@ -459,7 +498,13 @@ class Game {
         assistancesCost += 3
         for (f in sudoku!!) {
             if (f.isNotSolved) {
-                addAndExecute(SolveActionFactory().createAction(f.solution, f))
+                val action = SolveActionWithNoteUpdate(
+                    f.solution,
+                    f,
+                    sudoku!!,
+                    isAssistanceAvailable(Assistances.autoAdjustNotes)
+                )
+                addAndExecute(action)
                 break
             }
         }
@@ -487,8 +532,13 @@ class Game {
         val rnd = Random()
         while (unsolvedCells.isNotEmpty()) {
             val nr = rnd.nextInt(unsolvedCells.size)
-            val a = SolveActionFactory().createAction(unsolvedCells[nr].solution, unsolvedCells[nr])
-            addAndExecute(a)
+            val action = SolveActionWithNoteUpdate(
+                unsolvedCells[nr].solution,
+                unsolvedCells[nr],
+                sudoku!!,
+                isAssistanceAvailable(Assistances.autoAdjustNotes)
+            )
+            addAndExecute(action)
             unsolvedCells.removeAt(nr)
         }
         assistancesCost += Int.MAX_VALUE / 80
@@ -551,8 +601,14 @@ class Game {
                     // Double-check cell state in case it was modified during iteration
                     if (cell.isNotSolved && cell.getNotesCount() == 1) {
                         val uniqueCandidate = cell.getSingleNote()
-                        // Fill the cell with the unique candidate
-                        addAndExecute(SolveActionFactory().createAction(uniqueCandidate, cell))
+                        // Fill the cell with the unique candidate using SolveActionWithNoteUpdate
+                        val action = SolveActionWithNoteUpdate(
+                            uniqueCandidate,
+                            cell,
+                            sudoku!!,
+                            isAssistanceAvailable(Assistances.autoAdjustNotes)
+                        )
+                        addAndExecute(action)
                         cellsFilled++
                         totalFilled++
                     }
