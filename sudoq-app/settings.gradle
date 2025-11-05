@@ -1,3 +1,2 @@
 include ':sudoqmodel', ':Playaround'
 include ':sudoqapp'
-include ':sudoq-persistence-xml'
