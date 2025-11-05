@@ -104,7 +104,7 @@ class CellViewPainter private constructor() {
                 }
                 CellViewStates.SAME_NUMBER -> {
                     drawBackground(canvas, cell, Color.rgb(180, 230, 180), true, darken)
-                    drawText(canvas, cell, Color.BLACK, false, symbol)
+                    drawText(canvas, cell, Color.BLACK, true, symbol)
                 }
                 CellViewStates.FIXED -> {
                     drawBackground(canvas, cell, Color.rgb(250, 250, 250), true, darken)
