@@ -369,7 +369,7 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                         currentCellView.programmaticallySelectShort()}
                     is NoteAction -> {
                         val currentCellView = getCellView(lastAction.cell.id)
-                        currentCellView.programmaticallySelectLong()}
+                        currentCellView.programmaticallySelectShort()}
                     else -> Log.e("GAME_RESTORE", "last action of unknown type")
                 }
 
