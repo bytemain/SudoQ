@@ -115,12 +115,30 @@ class ControlPanelFragment : Fragment() {
         val activity = getActivity() as SudokuActivity
         val actionTreeShown = activity.isActionTreeShown
         val finished = activity.finished
-        Buttons.redoButton!!.isEnabled = game.stateHandler!!.canRedo() && !actionTreeShown
-        Buttons.undoButton!!.isEnabled = game.stateHandler!!.canUndo() && !actionTreeShown
+        
+        val canRedo = game.stateHandler!!.canRedo() && !actionTreeShown
+        val canUndo = game.stateHandler!!.canUndo() && !actionTreeShown
+        
+        android.util.Log.d("ControlPanel", "updateButtons: canUndo=$canUndo, canRedo=$canRedo, actionTreeShown=$actionTreeShown, finished=$finished")
+        
+        Buttons.redoButton!!.isEnabled = canRedo
+        Buttons.redoButton!!.alpha = if (canRedo) 1.0f else 0.3f
+        
+        Buttons.undoButton!!.isEnabled = canUndo
+        Buttons.undoButton!!.alpha = if (canUndo) 1.0f else 0.3f
+        
         Buttons.actionTreeButton!!.isEnabled = !actionTreeShown
+        Buttons.actionTreeButton!!.alpha = if (!actionTreeShown) 1.0f else 0.3f
+        
         Buttons.assistancesButton!!.isEnabled = !actionTreeShown && !finished
+        Buttons.assistancesButton!!.alpha = if (!actionTreeShown && !finished) 1.0f else 0.3f
+        
         Buttons.gestureButton!!.isEnabled = !actionTreeShown
+        Buttons.gestureButton!!.alpha = if (!actionTreeShown) 1.0f else 0.3f
+        
         Buttons.fillCandidatesButton!!.isEnabled = !actionTreeShown && !finished
+        Buttons.fillCandidatesButton!!.alpha = if (!actionTreeShown && !finished) 1.0f else 0.3f
+        
         val sudokuView = sl
         activity.mediator!!.setKeyboardState(!finished && sudokuView.currentCellView != null)
     }
