@@ -278,6 +278,7 @@ class UserInteractionMediator(
 
     /**
      * Highlights all cells that have the same number as the specified cell view.
+     * Also highlights the same number in candidates (notes) across all cells.
      * 
      * @param cellView The cell view whose number should be matched
      */
@@ -288,16 +289,20 @@ class UserInteractionMediator(
             val sudokuType = game!!.sudoku!!.sudokuType
             for (p in sudokuType!!.validPositions) {
                 val cell = sudokuView!!.getSudokuCellView(p)
+                // Highlight cells with the same filled value
                 if (cell != cellView && !cell.cell.isNotSolved && 
                     cell.cell.currentValue == selectedValue) {
                     cell.markSameNumber()
                 }
+                // Highlight the same candidate number in all cells' notes
+                cell.setHighlightedCandidate(selectedValue)
             }
         }
     }
 
     /**
      * Clears same-number highlighting from all cells except the specified one.
+     * Also clears candidate highlighting.
      * 
      * @param excludeCell The cell to exclude from clearing (typically the selected cell)
      */
@@ -308,6 +313,8 @@ class UserInteractionMediator(
             if (cell != excludeCell) {
                 cell.clearSameNumber()
             }
+            // Clear candidate highlighting for all cells
+            cell.clearHighlightedCandidate()
         }
     }
 
