@@ -19,6 +19,7 @@
     <string name="toast_multi_select_activated">Mode multi-sélection activé</string>
     <string name="toast_multi_select_deactivated">Mode multi-sélection désactivé</string>
     <string name="toast_cell_not_editable">Cette case n’est pas modifiable</string>
+    <string name="button_exit_multi_select">Annuler la sélection</string>
     <string name="toast_solved_wrong">Une case n’a pas été résolue correctement</string>
     <string name="toast_solved_correct">Toutes les cases ont été résolues correctement</string>
     <string name="toast_invalid_symbol">Symbole invalide</string>

@@ -11,9 +11,11 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.os.Build
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.RelativeLayout
+import androidx.annotation.RequiresApi
 import de.sudoq.controller.sudoku.CellInteractionListener
 import de.sudoq.controller.sudoku.ObservableCellInteraction
 import de.sudoq.controller.sudoku.SudokuActivity
@@ -28,9 +30,9 @@ import de.sudoq.model.sudoku.Position
 import java.util.*
 
 /**
- * Eine View als RealativeLayout, die eine Sudoku-Anzeige verwaltet.
+ * A View as a RelativeLayout that manages a Sudoku display.
  *
- * @param context Der Kontext, in dem diese View angezeigt wird
+ * @param context The context in which this view is displayed
 
  */
 class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellInteraction,
@@ -54,30 +56,35 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
      * The currently selected CellView (primary selection)
      */
     var currentCellView: SudokuCellView? = null
-    
+
     /**
      * Set of all currently selected cells for multi-selection
      */
     private val selectedCellViews: MutableSet<SudokuCellView> = mutableSetOf()
-    
+
     /**
      * Whether multi-selection mode is currently active
      */
     var isMultiSelectionMode: Boolean = false
         private set
-    
+
     /**
      * Track which cells have been touched during current drag operation
      * to avoid repeatedly processing the same cell
      */
     private val touchedCellsDuringDrag: MutableSet<SudokuCellView> = mutableSetOf()
-    
+
     /**
      * Track if we should start intercepting touch events for drag selection
      * Set to true when entering multi-selection mode
      */
     private var shouldInterceptForDrag: Boolean = false
-    
+
+    /**
+     * Button to exit multi-selection mode
+     */
+    private var exitMultiSelectButton: android.widget.Button? = null
+
     private var zoomFactor: Float
         private set
 
@@ -279,23 +286,41 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     /**
      * Intercept touch events in multi-selection mode to handle drag selection
      */
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
+        Log.d(LOG_TAG, "onInterceptTouchEvent ${MotionEvent.actionToString(event.actionMasked)} isMultiSelectionMode=${isMultiSelectionMode}")
+        
+        // Request parent not to intercept touch events so cells can handle long press
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                parent?.requestDisallowInterceptTouchEvent(true)
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                parent?.requestDisallowInterceptTouchEvent(false)
+            }
+        }
+        
         // In multi-selection mode, intercept MOVE events to handle drag selection
         if (isMultiSelectionMode) {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     // User touched down in multi-select mode, prepare to intercept drags
                     shouldInterceptForDrag = true
-                    return false  // Let children handle the initial touch
+                    Log.d(LOG_TAG, "Multi-select mode ACTION_DOWN: shouldInterceptForDrag=true, returning false")
+                    return false  // Don't intercept DOWN, let children handle it first
                 }
                 MotionEvent.ACTION_MOVE -> {
                     if (shouldInterceptForDrag) {
                         // Start intercepting to handle drag selection
+                        Log.d(LOG_TAG, "Multi-select mode ACTION_MOVE: Intercepting! Returning true")
                         return true
+                    } else {
+                        Log.d(LOG_TAG, "Multi-select mode ACTION_MOVE: shouldInterceptForDrag=false, not intercepting")
                     }
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     shouldInterceptForDrag = false
+                    Log.d(LOG_TAG, "Multi-select mode ${MotionEvent.actionToString(event.actionMasked)}: shouldInterceptForDrag=false")
                 }
             }
         }
@@ -305,51 +330,72 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     /**
      * Handle touch events for multi-selection drag support
      */
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        Log.d(LOG_TAG, "onTouchEvent ${MotionEvent.actionToString(event.actionMasked)} isMultiSelectionMode=${isMultiSelectionMode}")
         // Only handle touch events in multi-selection mode
         if (!isMultiSelectionMode) {
             return false
         }
-        
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 // Start of touch, clear the drag tracking set
                 touchedCellsDuringDrag.clear()
+                // Request parent not to intercept touch events during multi-selection
+                parent?.requestDisallowInterceptTouchEvent(true)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
                 // Find which cell the user is touching during drag
                 val x = event.x
                 val y = event.y
+                Log.d(LOG_TAG, "ACTION_MOVE: x=$x, y=$y, isMultiSelectionMode=$isMultiSelectionMode")
                 
                 // Find the cell at this position
                 val cellView = findCellViewAt(x, y)
+                Log.d(LOG_TAG, "findCellViewAt returned: ${cellView?.let { "Cell at (${it.cell.id})" } ?: "null"}")
+                
                 if (cellView != null && cellView.cell.isEditable) {
+                    Log.d(LOG_TAG, "Cell is editable, isInTouchedSet=${touchedCellsDuringDrag.contains(cellView)}, isInSelectedSet=${selectedCellViews.contains(cellView)}")
+                    
                     // Only process each cell once per drag
                     if (!touchedCellsDuringDrag.contains(cellView)) {
                         touchedCellsDuringDrag.add(cellView)
+                        Log.d(LOG_TAG, "Added to touchedCellsDuringDrag, size=${touchedCellsDuringDrag.size}")
                         
                         // Add to selection if not already selected
                         if (!selectedCellViews.contains(cellView)) {
-                            addToMultiSelection(cellView)
-                            cellView.setMultiSelected(true)
-                            cellView.select(false)
-                            Log.d("multi-select", "Cell added during drag")
+                            // Delegate to cell to handle multi-selection and notify listeners
+                            cellView.addToMultiSelectionDrag()
+                            Log.d(LOG_TAG, "Cell added to multi-selection during drag! Total selected: ${selectedCellViews.size}")
+                        } else {
+                            Log.d(LOG_TAG, "Cell already in selectedCellViews, skipping")
                         }
+                    } else {
+                        Log.d(LOG_TAG, "Cell already in touchedCellsDuringDrag, skipping")
+                    }
+                } else {
+                    if (cellView == null) {
+                        Log.d(LOG_TAG, "No cell found at coordinates")
+                    } else if (!cellView.cell.isEditable) {
+                        Log.d(LOG_TAG, "Cell is not editable")
                     }
                 }
                 return true
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                // Touch ended, clear tracking
+            MotionEvent.ACTION_UP,MotionEvent.ACTION_CANCEL -> {
+                // Finger lifted: finish drag selection but KEEP multi-selection state & all selected cells
                 touchedCellsDuringDrag.clear()
+                shouldInterceptForDrag = false
+                Log.d(LOG_TAG, "Drag ended. Keeping multi-selection (selected=${selectedCellViews.size})")
+                parent?.requestDisallowInterceptTouchEvent(false)
                 return true
             }
         }
         
         return super.onTouchEvent(event)
     }
-    
+
     /**
      * Find the cell view at the given screen coordinates
      */
@@ -361,7 +407,7 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
             val top = cellView.top
             val right = cellView.right
             val bottom = cellView.bottom
-            
+
             if (x >= left && x <= right && y >= top && y <= bottom) {
                 return cellView
             }
@@ -437,27 +483,33 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     override fun getMaxZoomFactor(): Float {
         return 10f //this.game.getSudoku().getSudokuType().getSize().getX() / 2.0f;
     }
-    
+
     /**
      * Adds a cell to the multi-selection
      */
     fun addToMultiSelection(cellView: SudokuCellView) {
         selectedCellViews.add(cellView)
-        isMultiSelectionMode = selectedCellViews.size > 1
+        Log.d(LOG_TAG, "addToMultiSelection: Added cell, total=${selectedCellViews.size}, isMultiSelectionMode=$isMultiSelectionMode")
     }
-    
+
     /**
      * Removes a cell from the multi-selection
      */
     fun removeFromMultiSelection(cellView: SudokuCellView) {
         selectedCellViews.remove(cellView)
-        isMultiSelectionMode = selectedCellViews.size > 1
+        // If we have less than 1 cells left, exit multi-selection mode
+        if (selectedCellViews.size < 1) {
+            isMultiSelectionMode = false
+            shouldInterceptForDrag = false
+        }
+        Log.d(LOG_TAG, "removeFromMultiSelection: Removed cell, total=${selectedCellViews.size}, isMultiSelectionMode=$isMultiSelectionMode")
     }
-    
+
     /**
      * Clears all multi-selected cells
      */
     fun clearMultiSelection() {
+        Log.d(LOG_TAG, "clearMultiSelection called")
         for (cellView in selectedCellViews) {
             cellView.setMultiSelected(false)
             if (cellView != currentCellView) {
@@ -468,8 +520,13 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
         touchedCellsDuringDrag.clear()
         isMultiSelectionMode = false
         shouldInterceptForDrag = false
+        
+        // Hide exit button
+        Log.d(LOG_TAG, "Setting exit button GONE")
+        exitMultiSelectButton?.visibility = android.view.View.GONE
+        Log.d(LOG_TAG, "Exit button visibility after clear=${exitMultiSelectButton?.visibility}")
     }
-    
+
     /**
      * Gets all currently selected cell views
      */
@@ -482,17 +539,28 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
             emptySet()
         }
     }
-    
+
     /**
      * Starts multi-selection mode with the current cell
      */
     fun startMultiSelectionMode() {
+        Log.d(LOG_TAG, "startMultiSelectionMode called: currentCellView=$currentCellView, isMultiSelectionMode=$isMultiSelectionMode")
+        Log.d(LOG_TAG, "Stack trace:\n${android.util.Log.getStackTraceString(Exception())}")
+        
         if (currentCellView != null && !isMultiSelectionMode) {
             selectedCellViews.clear()
             selectedCellViews.add(currentCellView!!)
             isMultiSelectionMode = true
             shouldInterceptForDrag = true  // Enable drag interception immediately
             touchedCellsDuringDrag.clear()
+            
+            // Show exit button
+            Log.d(LOG_TAG, "Setting exit button VISIBLE")
+            exitMultiSelectButton?.visibility = android.view.View.VISIBLE
+            
+            Log.d(LOG_TAG, "Multi-selection mode STARTED! selectedCellViews.size=${selectedCellViews.size}, isMultiSelectionMode=$isMultiSelectionMode, button visibility=${exitMultiSelectButton?.visibility}")
+        } else {
+            Log.d(LOG_TAG, "Multi-selection mode NOT started: currentCellView=${currentCellView != null}, already in mode=$isMultiSelectionMode")
         }
     }
 
@@ -513,6 +581,7 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
      *
      */
     init {
+        Log.d(LOG_TAG, "SudokuLayout init start, isMultiSelectionMode=$isMultiSelectionMode")
         defaultCellViewSize = 40
         zoomFactor = 1.0f
         // this.currentCellViewSize = this.defaultCellViewSize;
@@ -522,6 +591,64 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
         CellViewPainter.instance!!.setSudokuLayout(this)
         hintPainter = HintPainter(this)
         inflateSudoku()
-        Log.d(LOG_TAG, "End of Constructor.")
+        
+        // Create exit multi-select button
+        createExitMultiSelectButton()
+        
+        Log.d(LOG_TAG, "End of Constructor. isMultiSelectionMode=$isMultiSelectionMode, exitButton.visibility=${exitMultiSelectButton?.visibility}")
+    }
+    
+    /**
+     * Creates and configures the exit multi-selection button
+     */
+    private fun createExitMultiSelectButton() {
+        Log.d(LOG_TAG, "createExitMultiSelectButton called")
+        
+        // Remove old button if exists
+        exitMultiSelectButton?.let {
+            removeView(it)
+        }
+        
+        exitMultiSelectButton = android.widget.Button(context).apply {
+            text = context.getString(de.sudoq.R.string.button_exit_multi_select)
+            visibility = android.view.View.GONE // Hidden by default
+            
+            // Style as a modern button
+            setBackgroundColor(android.graphics.Color.parseColor("#2196F3")) // Material Blue
+            setTextColor(android.graphics.Color.WHITE)
+            textSize = 14f
+            isAllCaps = false
+            
+            // Set padding
+            val padding = (12 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding / 2, padding, padding / 2)
+            
+            // Add elevation/shadow effect
+            stateListAnimator = null
+            elevation = 4 * resources.displayMetrics.density
+            
+            layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_TOP)
+                addRule(RelativeLayout.ALIGN_PARENT_END)
+                topMargin = (8 * resources.displayMetrics.density).toInt()
+                marginEnd = (8 * resources.displayMetrics.density).toInt()
+            }
+            
+            // Click handler
+            setOnClickListener {
+                clearMultiSelection()
+                android.widget.Toast.makeText(
+                    context,
+                    context.getString(de.sudoq.R.string.toast_multi_select_deactivated),
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        
+        Log.d(LOG_TAG, "Exit button created with visibility=${exitMultiSelectButton?.visibility}")
+        addView(exitMultiSelectButton)
     }
 }

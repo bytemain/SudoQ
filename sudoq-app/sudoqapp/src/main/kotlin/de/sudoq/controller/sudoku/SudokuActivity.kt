@@ -362,8 +362,10 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                         val currentCellView = getCellView(lastAction.cell.id)
                         currentCellView.programmaticallySelectShort()}
                     is NoteAction -> {
+                        // For note actions, just select the cell normally (short press)
+                        // We don't want to trigger multi-selection mode on app start
                         val currentCellView = getCellView(lastAction.cell.id)
-                        currentCellView.programmaticallySelectLong()}
+                        currentCellView.programmaticallySelectShort()}
                     else -> Log.e("GAME_RESTORE", "last action of unknown type")
                 }
 
@@ -861,6 +863,7 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
      * {@inheritDoc}
      */
     override fun onAddEntry(cell: Cell, value: Int) {
+        android.util.Log.d("SudokuActivity", "onAddEntry called: cell=${cell.id}, value=$value")
         onInputAction()
     }
 
@@ -872,6 +875,7 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
     }
 
     fun onInputAction() {
+        android.util.Log.d("SudokuActivity", "onInputAction called, about to updateButtons")
         updateButtons()
         saveActionTree()
     }

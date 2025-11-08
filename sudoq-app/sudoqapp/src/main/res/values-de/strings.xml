@@ -24,6 +24,7 @@
     <string name="toast_multi_select_activated">Mehrfachauswahl-Modus aktiviert</string>
     <string name="toast_multi_select_deactivated">Mehrfachauswahl-Modus deaktiviert</string>
     <string name="toast_cell_not_editable">Dieses Feld ist nicht bearbeitbar</string>
+    <string name="button_exit_multi_select">Auswahl abbrechen</string>
     
         <!-- Splash -->
     <string name="splash_text">SudoQ wird für die erste Benutzung vorbereitet</string>

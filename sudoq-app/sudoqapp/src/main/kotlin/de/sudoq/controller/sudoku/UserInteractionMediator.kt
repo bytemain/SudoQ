@@ -44,6 +44,8 @@ class UserInteractionMediator(
     gestureOverlay: GestureInputOverlay?,
     gestureStore: GestureStore
 ) : OnGesturePerformedListener, InputListener, CellInteractionListener, ObservableActionCaster {
+    private var LOG_TAG = "UserInteractionMediator"
+
     /**
      * Flag für den Notizmodus.
      */
@@ -96,7 +98,7 @@ class UserInteractionMediator(
         for (cellView in selectedCells) {
             val cell = cellView.cell
             if (!cell.isEditable) {
-                Log.d("multi-select", "Skipping non-editable cell")
+                Log.d(LOG_TAG, "Skipping non-editable cell")
                 continue
             }
             
@@ -138,27 +140,51 @@ class UserInteractionMediator(
         
         // If we have actions, execute them as a batch or individually
         if (actions.isNotEmpty()) {
+            Log.d("multi-select", "About to execute ${actions.size} action(s)")
+            Log.d("multi-select", "Before execute: game.isFinished=${game!!.isFinished()}")
+            
             if (actions.size > 1) {
                 // Multiple cells: use BatchAction for better undo support
                 val batchAction = de.sudoq.model.actionTree.BatchAction(actions)
+                Log.d("multi-select", "Created BatchAction, calling addAndExecute")
                 game!!.addAndExecute(batchAction)
-                Log.d("multi-select", "Executed batch action with ${actions.size} operations")
+                Log.d("multi-select", "After addAndExecute, canUndo=${game.stateHandler!!.canUndo()}")
             } else {
                 // Single cell: execute directly
+                Log.d("multi-select", "Single action, calling addAndExecute")
                 game!!.addAndExecute(actions[0])
+                Log.d("multi-select", "After addAndExecute, canUndo=${game.stateHandler!!.canUndo()}")
+            }
+            
+            // Notify SudokuActivity to update UI (buttons, etc.)
+            // Don't call listener.onAddEntry() as it would create duplicate actions
+            // Instead, find SudokuActivity and call its updateButtons method directly
+            Log.d("multi-select", "Looking for SudokuActivity in ${actionListener.size} listener(s)")
+            for (listener in actionListener) {
+                if (listener is de.sudoq.controller.sudoku.SudokuActivity) {
+                    Log.d("multi-select", "Found SudokuActivity, calling onInputAction")
+                    listener.onInputAction()
+                    break
+                }
             }
             
             // Check if game is finished
             if (game!!.isFinished()) {
+                Log.d("multi-select", "Game is finished after input")
+                // Notify all listeners about game completion
                 for (listener in actionListener) {
-                    listener!!.onAddEntry(selectedCells.first().cell, symbol) // Trigger finish handler
+                    listener?.onAddEntry(selectedCells.first().cell, symbol)
                     break
                 }
             }
+        } else {
+            Log.d("multi-select", "No actions to execute!")
         }
         
+        Log.d(LOG_TAG, "onInput: About to call restrictCandidates() and updateKeyboard()")
         restrictCandidates()
         updateKeyboard()
+        Log.d(LOG_TAG, "onInput: After restrictCandidates() and updateKeyboard()")
     }
 
     override fun onCellSelected(view: SudokuCellView, e: SelectEvent) {
@@ -168,6 +194,7 @@ class UserInteractionMediator(
                 if (e == SelectEvent.Short) {
                     // Short click in multi-select mode: exit multi-select
                     sudokuView.clearMultiSelection()
+                    view.setMultiSelected(false)
                     Toast.makeText(
                         view.context, 
                         view.context.getString(R.string.toast_multi_select_deactivated), 
@@ -190,7 +217,8 @@ class UserInteractionMediator(
                             sudokuView.addToMultiSelection(view)
                             view.setMultiSelected(true)
                             view.select(false)
-                            Log.d("multi-select", "Cell added to selection")
+                            virtualKeyboard.isActivated = true
+                            Log.d("multi-select", "Cell added to selection, keyboard activated")
                         } else {
                             Toast.makeText(
                                 view.context, 
@@ -206,6 +234,14 @@ class UserInteractionMediator(
             
             // Not in multi-select mode: long press enters multi-select
             if (e == SelectEvent.Long) {
+                // First, set the current cell and select it
+                val previousCell = sudokuView.currentCellView
+                if (previousCell != view) {
+                    previousCell?.deselect(true)
+                }
+                sudokuView.currentCellView = view
+                view.select(game!!.isAssistanceAvailable(Assistances.markRowColumn))
+                
                 // Enter multi-selection mode
                 sudokuView.startMultiSelectionMode()
                 view.setMultiSelected(true)
@@ -214,11 +250,15 @@ class UserInteractionMediator(
                     view.context.getString(R.string.toast_multi_select_activated), 
                     Toast.LENGTH_SHORT
                 ).show()
-                Log.d("multi-select", "Multi-selection mode activated")
+                Log.d(LOG_TAG, "Multi-selection mode activated")
                 updateKeyboard()
                 return
             }
-            
+
+
+            sudokuView.clearMultiSelection()
+            view.setMultiSelected(false)
+
             // Normal single-selection logic (short click when not in multi-select mode)
             val c = view.context
             val profilesDir = c.getDir(
@@ -392,6 +432,7 @@ class UserInteractionMediator(
     }
 
     override fun onCellChanged(view: SudokuCellView) {
+        Log.d(LOG_TAG, "onCellChanged called for cell ${view.cell.id}, value=${view.cell.currentValue}")
         updateKeyboard()
         
         // Re-highlight cells with same number if the changed cell is currently selected
@@ -402,6 +443,11 @@ class UserInteractionMediator(
             // Re-mark cells with the same number if current cell has a value
             highlightCellsWithSameNumber(currentField)
         }
+        
+        // Restrict candidates after cell value changes
+        Log.d(LOG_TAG, "onCellChanged: About to call restrictCandidates()")
+        restrictCandidates()
+        Log.d(LOG_TAG, "onCellChanged: After restrictCandidates()")
     }
 
     /**
@@ -503,11 +549,17 @@ class UserInteractionMediator(
     }
 
     /**
-     * Schränkt die Kandidaten auf der Tastatur ein.
+     * 限制键盘上的候选项。
      */
     fun restrictCandidates() {
+        Log.d(LOG_TAG, "restrictCandidates: Starting, enabling all buttons first")
         virtualKeyboard.enableAllButtons()
-        val currectFieldView = sudokuView!!.currentCellView ?: return
+        val currectFieldView = sudokuView!!.currentCellView
+        Log.d(LOG_TAG, "restrictCandidates: currentCellView=$currectFieldView")
+        if (currectFieldView == null) {
+            Log.d(LOG_TAG, "restrictCandidates: No current cell view, returning")
+            return
+        }
         //maybe there is no focus, then pass
         val currentCell = currectFieldView.cell
         val type = game!!.sudoku!!.sudokuType
@@ -515,10 +567,19 @@ class UserInteractionMediator(
                 Assistances.restrictCandidates
             )
         ) {
+            Log.d(LOG_TAG, "restrictCandidates: Input assistance is enabled, restricting symbols")
             val allPossible = getRestrictedSymbolSet(game.sudoku, currentCell, noteMode)
-            for (i in type!!.symbolIterator) if (!allPossible.contains(i)) virtualKeyboard.disableButton(
-                i
-            )
+            Log.d(LOG_TAG, "restrictCandidates: allPossible=$allPossible")
+            var disabledCount = 0
+            for (i in type!!.symbolIterator) {
+                if (!allPossible.contains(i)) {
+                    virtualKeyboard.disableButton(i)
+                    disabledCount++
+                }
+            }
+            Log.d(LOG_TAG, "restrictCandidates: Disabled $disabledCount button(s)")
+        } else {
+            Log.d(LOG_TAG, "restrictCandidates: Input assistance is disabled, all buttons enabled")
         }
     }
 

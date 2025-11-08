@@ -53,6 +53,13 @@ class SudokuController(
      */
     override fun onUndo() {
         game.undo()
+        
+        // Clear multi-selection state after undo
+        context.sudokuLayout?.let { layout ->
+            if (layout.isMultiSelectionMode) {
+                layout.clearMultiSelection()
+            }
+        }
     }
 
     /**

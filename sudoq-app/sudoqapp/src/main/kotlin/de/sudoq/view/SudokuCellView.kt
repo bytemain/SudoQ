@@ -43,7 +43,7 @@ class SudokuCellView(
     val cell: Cell,
     private val markWrongSymbol: Boolean
 ) : View(context), ModelChangeListener<Cell>, ObservableCellInteraction {
-
+    private  val LOG_TAG = "SudokuCellView"
     /**
      * List of the  selektion listeners
      */
@@ -109,7 +109,6 @@ class SudokuCellView(
      */
     public override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        //Log.d(LOG_TAG, "SudokuFieldView.onDraw()");
         symbol = Symbol.getInstance().getMapping(cell.currentValue)
         CellViewPainter.instance!!.markCell(
             canvas,
@@ -195,6 +194,20 @@ class SudokuCellView(
 
     fun programmaticallySelectLong() {
         programmaticallySelect(CellInteractionListener.SelectEvent.Long)
+    }
+    
+    /**
+     * Adds this cell to multi-selection during drag operation.
+     * This notifies listeners but with a special context to avoid triggering exit logic.
+     */
+    fun addToMultiSelectionDrag() {
+        Log.d(LOG_TAG, "addToMultiSelectionDrag called for cell ${cell.id}")
+        // Notify all listeners that this cell was selected during drag
+        // Using Long event since it won't trigger "exit multi-select" in UserInteractionMediator
+        for (listener in cellSelectListener) {
+            Log.d(LOG_TAG, "Notifying listener: ${listener.javaClass.simpleName}")
+            listener.onCellSelected(this, CellInteractionListener.SelectEvent.Long)
+        }
     }
 
     private fun programmaticallySelect(event: CellInteractionListener.SelectEvent) {
