@@ -27,8 +27,11 @@ class ProfileRepo(private val profilesDir: File) : IRepo<Profile> {
         newProfile.currentGame = -1
         newProfile.assistances = GameSettings()
         newProfile.assistances.setAssistance(Assistances.markRowColumn)
-        //		this.gameSettings.setGestures(false);
-        //this.appSettings.setDebug(false);
+        newProfile.assistances.setAssistance(Assistances.autoAdjustNotes)
+        newProfile.assistances.setAssistance(Assistances.restrictCandidates)
+        newProfile.assistances.setAssistance(Assistances.autoFillUniqueCandidates)
+        newProfile.assistances.setAssistance(Assistances.markWrongSymbol)
+
         newProfile.statistics = IntArray(Statistics.values().size)
         newProfile.statistics!![Statistics.fastestSolvingTime.ordinal] = ProfileManager.INITIAL_TIME_RECORD
 

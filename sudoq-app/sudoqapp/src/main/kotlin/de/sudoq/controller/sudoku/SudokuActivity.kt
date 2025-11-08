@@ -214,6 +214,12 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
         }
 
         if (game != null) {
+            // Update game assistances with current profile settings
+            // This ensures that when user changes settings and continues a game,
+            // the new settings take effect
+            pm.loadCurrentProfile()
+            game!!.setAssistances(pm.assistances)
+            Log.d(LOG_TAG, "Updated game assistances from current profile")
 
             /* Determine how many numbers are needed. 1-9 or 1-16 ? */
             initializeSymbolSet()
@@ -362,10 +368,8 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                         val currentCellView = getCellView(lastAction.cell.id)
                         currentCellView.programmaticallySelectShort()}
                     is NoteAction -> {
-                        // For note actions, just select the cell normally (short press)
-                        // We don't want to trigger multi-selection mode on app start
                         val currentCellView = getCellView(lastAction.cell.id)
-                        currentCellView.programmaticallySelectShort()}
+                        currentCellView.programmaticallySelectLong()}
                     else -> Log.e("GAME_RESTORE", "last action of unknown type")
                 }
 
@@ -863,7 +867,6 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
      * {@inheritDoc}
      */
     override fun onAddEntry(cell: Cell, value: Int) {
-        android.util.Log.d("SudokuActivity", "onAddEntry called: cell=${cell.id}, value=$value")
         onInputAction()
     }
 
@@ -875,7 +878,6 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
     }
 
     fun onInputAction() {
-        android.util.Log.d("SudokuActivity", "onInputAction called, about to updateButtons")
         updateButtons()
         saveActionTree()
     }
