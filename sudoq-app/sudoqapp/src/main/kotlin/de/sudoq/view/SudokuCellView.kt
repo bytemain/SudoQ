@@ -93,6 +93,11 @@ class SudokuCellView(
     private var isInExtraConstraint: Boolean
 
     /**
+     * The candidate number that should be highlighted in notes (-1 if none)
+     */
+    private var highlightedCandidateNumber: Int = -1
+
+    /**
      * The game associated with this view
      */
     private val game: Game
@@ -170,6 +175,17 @@ class SudokuCellView(
                 val cx = (left + right) / 2f
                 // Vertically center text within the mini-cell using font metrics (baseline)
                 val baseline = (top + bottom - fm.bottom - fm.top) / 2f
+                
+                // Highlight the candidate if it matches the highlighted number
+                if (i == highlightedCandidateNumber) {
+                    // Draw a light green background for the highlighted candidate
+                    val bgPaint = Paint()
+                    bgPaint.color = Color.rgb(180, 230, 180)  // Same color as SAME_NUMBER state
+                    bgPaint.isAntiAlias = true
+                    val bgRect = RectF(left + 1f, top + 1f, right - 1f, bottom - 1f)
+                    canvas.drawRoundRect(bgRect, 2f, 2f, bgPaint)
+                }
+                
                 canvas.drawText(note + "", cx, baseline, notePaint)
             }
         }
@@ -300,6 +316,23 @@ class SudokuCellView(
     fun clearSameNumber() {
         hasSameNumber = false
         updateMarking()
+    }
+
+    /**
+     * Highlights a specific candidate number in this cell's notes.
+     * @param candidateNumber The candidate number to highlight (-1 to clear)
+     */
+    fun setHighlightedCandidate(candidateNumber: Int) {
+        highlightedCandidateNumber = candidateNumber
+        invalidate()  // Redraw to show the highlight
+    }
+
+    /**
+     * Clears any highlighted candidate in this cell's notes.
+     */
+    fun clearHighlightedCandidate() {
+        highlightedCandidateNumber = -1
+        invalidate()
     }
 
     /**
