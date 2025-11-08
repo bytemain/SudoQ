@@ -26,7 +26,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".controller.SudoqCompatActivity" />
-        <activity android:name=".controller.menus.MainActivity" />
+        <activity
+            android:name=".controller.menus.MainActivity"
+            android:launchMode="singleTask"
+            android:exported="false" />
         <activity
             android:name=".controller.menus.NewSudokuActivity"
             android:label="@string/sf_sudokupreferences_title" />

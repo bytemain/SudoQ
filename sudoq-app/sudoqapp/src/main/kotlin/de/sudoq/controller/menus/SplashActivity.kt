@@ -243,14 +243,11 @@ class SplashActivity : SudoqCompatActivity() {
      * Wechselt in die MainMenu-Activity
      */
     private fun goToMainMenu() {
-        finish()
-        // overridePendingTransition(android.R.anim.fade_in,
-        // android.R.anim.fade_out);
         val startMainMenuIntent = Intent(this, MainActivity::class.java)
-        // startMainMenuIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startMainMenuIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(startMainMenuIntent)
-        // overridePendingTransition(android.R.anim.fade_in,
-        // android.R.anim.fade_out);
+        finish()
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
     /**
