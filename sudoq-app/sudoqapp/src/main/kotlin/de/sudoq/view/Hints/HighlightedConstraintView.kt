@@ -115,17 +115,17 @@ class HighlightedConstraintView(
             /*  */if (isRight && !isBottom && !belowRightMember) {
                 canvas.drawLine(
                     rightX,
-                        topMargin + (p.y + 1) * cellSizeAndSpacing - spacing,
+                    (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing).toFloat(),
                     rightX,
-                        topMargin + (p.y + 1) * cellSizeAndSpacing,
+                    (topMargin + (p.y + 1) * cellSizeAndSpacing).toFloat(),
                     paint
                 )
             }
             /*For a cell at the bottom, initializeWith edge to right neighbour */if (isBottom && !isRight && !belowRightMember) {
                 canvas.drawLine(
-                        leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing,
+                    (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing).toFloat(),
                     bottomY,
-                        leftMargin + (p.x + 1) * cellSizeAndSpacing,
+                    (leftMargin + (p.x + 1) * cellSizeAndSpacing).toFloat(),
                     bottomY,
                     paint
                 )
@@ -136,9 +136,9 @@ class HighlightedConstraintView(
             ) {
                 canvas.drawLine(
                     leftX,
-                        topMargin + p.y * cellSizeAndSpacing - spacing,
+                    (topMargin + p.y * cellSizeAndSpacing - spacing).toFloat(),
                     leftX,
-                        topMargin + p.y * cellSizeAndSpacing,
+                    (topMargin + p.y * cellSizeAndSpacing).toFloat(),
                     paint
                 )
             }
@@ -148,9 +148,9 @@ class HighlightedConstraintView(
                 ))
             ) {
                 canvas.drawLine(
-                        leftMargin + p.x * cellSizeAndSpacing - spacing,
+                    (leftMargin + p.x * cellSizeAndSpacing - spacing).toFloat(),
                     topY,
-                        leftMargin + p.x * cellSizeAndSpacing,
+                    (leftMargin + p.x * cellSizeAndSpacing).toFloat(),
                     topY,
                     paint
                 )
