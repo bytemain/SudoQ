@@ -20,7 +20,7 @@ import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import de.sudoq.R
 import de.sudoq.controller.SudoqCompatActivity
-import de.sudoq.controller.menus.preferences.NewSudokuPreferencesActivity
+import de.sudoq.controller.menus.preferences.PlayerPreferencesActivity
 import de.sudoq.controller.sudoku.SudokuActivity
 import de.sudoq.model.game.GameManager
 import de.sudoq.model.game.GameSettings
@@ -327,14 +327,8 @@ class NewSudokuActivity : SudoqCompatActivity() {
             .apply()
     }
 
-    /**
-     * Ruft die AssistancesPrefererencesActivity auf.
-     *
-     * @param view
-     * von android xml übergebene View
-     */
     fun switchToAssistances(view: View?) {
-        val assistancesIntent = Intent(this, NewSudokuPreferencesActivity::class.java)
+        val assistancesIntent = Intent(this, PlayerPreferencesActivity::class.java)
         startActivity(assistancesIntent)
     }
 

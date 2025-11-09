@@ -8,6 +8,7 @@
 package de.sudoq.controller.sudoku
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.gesture.GestureOverlayView
 import android.gesture.GestureStore
 import android.graphics.Bitmap.CompressFormat
@@ -16,6 +17,7 @@ import android.os.Handler
 import android.util.Log
 import android.view.Gravity
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.View.MeasureSpec
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
@@ -29,6 +31,7 @@ import androidx.fragment.app.FragmentManager
 import de.sudoq.R
 import de.sudoq.controller.SudoqCompatActivity
 import de.sudoq.controller.menus.Utility
+import de.sudoq.controller.menus.preferences.PlayerPreferencesActivity
 import de.sudoq.controller.sudoku.CellInteractionListener.SelectEvent
 import de.sudoq.controller.sudoku.board.CellViewPainter.Companion.instance
 import de.sudoq.controller.sudoku.board.CellViewStates
@@ -597,6 +600,15 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
      */
     public override fun onResume() {
         super.onResume()
+        
+        // Reload profile settings to apply any changes made in preferences
+        if (game != null) {
+            val pm = ProfileManager(profilesFile, ProfileRepo(profilesFile), ProfilesListRepo(profilesFile))
+            pm.loadCurrentProfile()
+            game!!.setAssistances(pm.assistances)
+            Log.d(LOG_TAG, "Reloaded game assistances from profile in onResume")
+        }
+        
         if (!finished) timeHandler.postDelayed(timeUpdate, 1000)
     }
 
@@ -783,6 +795,17 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         mMenu = menu
         return super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                val settingsIntent = Intent(this, PlayerPreferencesActivity::class.java)
+                startActivity(settingsIntent)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     /**

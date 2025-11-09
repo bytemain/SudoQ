@@ -55,6 +55,7 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         restrictCandidates = findViewById<View>(R.id.checkbox_restrictCandidates) as CheckBox
         autoFillUniqueCandidates = findViewById<View>(R.id.checkbox_autoFillUniqueCandidates) as CheckBox
         showCompletedDigits = findViewById<View>(R.id.checkbox_showCompletedDigits) as CheckBox
+        helper = findViewById<View>(R.id.checkbox_hints_provider) as CheckBox
         name = findViewById<View>(R.id.edittext_profilename) as EditText
         name!!.clearFocus()
         name!!.isSingleLine = true // no multiline names
@@ -80,6 +81,7 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         restrictCandidates!!.isChecked = profile.getAssistance(Assistances.restrictCandidates)
         autoFillUniqueCandidates!!.isChecked = profile.getAssistance(Assistances.autoFillUniqueCandidates)
         showCompletedDigits!!.isChecked = profile.getAssistance(Assistances.showCompletedDigits)
+        helper!!.isChecked = profile.assistances.isHelperSet
     }
 
     /**
@@ -147,6 +149,7 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         saveAssistance(Assistances.restrictCandidates, restrictCandidates!!)
         saveAssistance(Assistances.autoFillUniqueCandidates, autoFillUniqueCandidates!!)
         saveAssistance(Assistances.showCompletedDigits, showCompletedDigits!!)
+        p.setHelperActive(helper!!.isChecked)
         p.saveChanges()
     }
 

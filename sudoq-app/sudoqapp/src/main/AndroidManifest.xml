@@ -34,9 +34,6 @@
             android:name=".controller.menus.NewSudokuActivity"
             android:label="@string/sf_sudokupreferences_title" />
         <activity
-            android:name=".controller.menus.preferences.NewSudokuPreferencesActivity"
-            android:label="@string/sf_sudokupreferences_title" />
-        <activity
             android:name=".controller.menus.SudokuLoadingActivity"
             android:configChanges="orientation"
             android:label="@string/sf_sudokuloading_title"

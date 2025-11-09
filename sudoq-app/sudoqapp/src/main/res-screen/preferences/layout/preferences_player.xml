@@ -114,6 +114,14 @@
 	        android:layout_height="wrap_content" 
 	        android:textColor="@android:color/black"/>
 
+	    <CheckBox
+	        android:id="@+id/checkbox_hints_provider"
+	        android:text="@string/profile_preference_title_intelligent_assistant"
+	   		android:layout_margin="5dp"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content" 
+	        android:textColor="@android:color/black"/>
+
 	    <Button
 	        android:id="@+id/button_advencedPreferences"
 	        android:layout_width="fill_parent"
