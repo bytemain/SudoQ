@@ -190,6 +190,19 @@ class VirtualKeyboardLayout(context: Context?, attrs: AttributeSet?) : LinearLay
     }
 
     /**
+     * Sets whether to display a checkmark for the specified symbol button.
+     *
+     * @param symbol
+     * The symbol of the button to update
+     * @param showCheckmark
+     * true to show checkmark, false to show the original symbol
+     */
+    fun setButtonCheckmark(symbol: Int, showCheckmark: Boolean) {
+        val buttonsPerRow = buttons!!.size
+        buttons!![symbol % buttonsPerRow][symbol / buttonsPerRow].setShowCheckmark(showCheckmark)
+    }
+
+    /**
      * {@inheritDoc}
      */
     override fun invalidate() {

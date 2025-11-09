@@ -50,6 +50,7 @@ class NewSudokuPreferencesActivity : PreferencesActivity() {
         markWrongSymbol = findViewById<View>(R.id.checkbox_markWrongSymbol) as CheckBox
         restrictCandidates = findViewById<View>(R.id.checkbox_restrictCandidates) as CheckBox
         autoFillUniqueCandidates = findViewById<View>(R.id.checkbox_autoFillUniqueCandidates) as CheckBox
+        showCompletedDigits = findViewById<View>(R.id.checkbox_showCompletedDigits) as CheckBox
         Log.i(
             "gameSettings",
             "NewSudokuPreferencesActivity onCreate end is gameSettings null?" + (NewSudokuActivity.gameSettings == null)
@@ -67,6 +68,8 @@ class NewSudokuPreferencesActivity : PreferencesActivity() {
             confSettings!!.getAssistance(Assistances.restrictCandidates)
         autoFillUniqueCandidates!!.isChecked =
             confSettings!!.getAssistance(Assistances.autoFillUniqueCandidates)
+        showCompletedDigits!!.isChecked =
+            confSettings!!.getAssistance(Assistances.showCompletedDigits)
 
         val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
         val pm = ProfileManager(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
@@ -96,6 +99,7 @@ class NewSudokuPreferencesActivity : PreferencesActivity() {
         saveCheckbox(markWrongSymbol!!, Assistances.markWrongSymbol, confSettings!!)
         saveCheckbox(restrictCandidates!!, Assistances.restrictCandidates, confSettings!!)
         saveCheckbox(autoFillUniqueCandidates!!, Assistances.autoFillUniqueCandidates, confSettings!!)
+        saveCheckbox(showCompletedDigits!!, Assistances.showCompletedDigits, confSettings!!)
         //confSettings.setHelper();
         //confSettings.setCrash();
         //todo singleton not necessary
@@ -122,6 +126,8 @@ class NewSudokuPreferencesActivity : PreferencesActivity() {
         saveAssistance(Assistances.markRowColumn, markRowColumn!!)
         saveAssistance(Assistances.markWrongSymbol, markWrongSymbol!!)
         saveAssistance(Assistances.restrictCandidates, restrictCandidates!!)
+        saveAssistance(Assistances.autoFillUniqueCandidates, autoFillUniqueCandidates!!)
+        saveAssistance(Assistances.showCompletedDigits, showCompletedDigits!!)
         p.setHelperActive(confSettings!!.isHelperSet)
         p.setLefthandActive(confSettings!!.isLefthandModeSet)
 

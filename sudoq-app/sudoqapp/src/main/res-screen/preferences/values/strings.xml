@@ -15,6 +15,7 @@
     <string name="profile_preference_title_assistance_allowGetHint">Hint For Easy Cell</string>
     <string name="profile_preference_title_assistance_autoAdjustNotes">Auto Adjust Notices</string>
     <string name="profile_preference_title_assistance_autoFillUniqueCandidates">Auto-Fill Cells with Unique Candidates</string>
+    <string name="profile_preference_title_assistance_showCompletedDigits">Show Checkmark for Completed Digits</string>
     <string name="profile_preference_title_profile">Profile</string>
     <string name="profile_preference_button_statistics">Statistics</string>
     <string name="profile_preference_button_gesture_builder">Gesture Builder</string>

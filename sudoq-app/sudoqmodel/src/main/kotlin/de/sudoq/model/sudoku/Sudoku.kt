@@ -269,6 +269,33 @@ open class Sudoku : ObservableModelImpl<Cell>, Iterable<Cell>, ModelChangeListen
     }
 
     /**
+     * Checks if all instances of a symbol have been filled correctly in the sudoku.
+     * A symbol is considered completed when it appears exactly numberOfSymbols times
+     * and all occurrences are correct (match the solution).
+     *
+     * @param symbol the symbol value to check (0-based index, e.g., 0 for "1" in a standard sudoku)
+     * @return true if the symbol appears numberOfSymbols times correctly, false otherwise
+     */
+    fun isSymbolCompleted(symbol: Int): Boolean {
+        if (symbol < 0 || symbol >= sudokuType!!.numberOfSymbols) {
+            return false
+        }
+        
+        var count = 0
+        for (cell in cells!!.values) {
+            if (cell.currentValue == symbol) {
+                // Check if this cell is correctly solved
+                if (!cell.isSolvedCorrect) {
+                    return false
+                }
+                count++
+            }
+        }
+        
+        return count == sudokuType!!.numberOfSymbols
+    }
+
+    /**
      * Finds all cells that have exactly one candidate (note) set and are not yet solved.
      * These cells have a unique solution based on the current notes.
      *

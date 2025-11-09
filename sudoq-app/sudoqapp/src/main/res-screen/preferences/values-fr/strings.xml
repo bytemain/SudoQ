@@ -14,6 +14,7 @@
     <string name="profile_preference_title_assistance_allowGetHint">Conseils</string>
     <string name="profile_preference_title_assistance_autoAdjustNotes">Adapter les remarques automatiquement</string>
     <string name="profile_preference_title_assistance_autoFillUniqueCandidates">Remplir automatiquement les cellules avec des candidats uniques</string>
+    <string name="profile_preference_title_assistance_showCompletedDigits">Afficher la coche pour les chiffres complets</string>
     <string name="profile_preference_title_profile">Profil</string>
     <string name="profile_preference_button_statistics">Statistiques</string>
     <string name="profile_preference_button_gesture_builder">définir des gestes</string>

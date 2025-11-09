@@ -103,6 +103,22 @@
 	        		android:layout_width="wrap_content"
 		        	android:layout_height="wrap_content" 
 		        	android:textColor="@android:color/black"/>
+
+	    		<CheckBox
+			        android:id="@+id/checkbox_autoFillUniqueCandidates"
+			        android:text="@string/profile_preference_title_assistance_autoFillUniqueCandidates"
+	   				android:layout_margin="5dp"
+	        		android:layout_width="wrap_content"
+		        	android:layout_height="wrap_content" 
+		        	android:textColor="@android:color/black"/>
+
+	    		<CheckBox
+			        android:id="@+id/checkbox_showCompletedDigits"
+			        android:text="@string/profile_preference_title_assistance_showCompletedDigits"
+	   				android:layout_margin="5dp"
+	        		android:layout_width="wrap_content"
+		        	android:layout_height="wrap_content" 
+		        	android:textColor="@android:color/black"/>
 		    </LinearLayout>
 		    
 		</LinearLayout>
