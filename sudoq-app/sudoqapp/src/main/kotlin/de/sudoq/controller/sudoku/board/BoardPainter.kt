@@ -32,39 +32,36 @@ class BoardPainter(var sl: SudokuLayout, var type: SudokuType) {
             val isTop = p.y == 0 || !c.includes(Position[p.x, p.y - 1])
             val isBottom = !c.includes(Position[p.x, p.y + 1])
             // (0,0) is in the top left
-            for (i in 1..spacing) { //?
-                //deklariert hier, weil wir es nicht früher brauchen, effizienter wäre weiter oben
+            for (i in 1..spacing) {
                 val cellSizeAndSpacing = sl.currentCellViewSize + spacing
-                /* these first 4 seem similar. drawing the black line around?*/
-                /* cells that touch the edge: Paint your edge but leave space at the corners*/
-                //paint.setColor(Color.GREEN);
+                /* Draw block borders - extend to corners only when both edges meet at that corner */
+                
                 if (isLeft) {
                     val x = (leftMargin + p.x * cellSizeAndSpacing - i).toFloat()
-                    val startY = (topMargin + p.y * cellSizeAndSpacing - if (isTop) i else 0).toFloat()
-                    val stopY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing + if (isBottom) i else 0).toFloat()
+                    // Extend to top corner only if this is also top edge
+                    val startY = (topMargin + p.y * cellSizeAndSpacing + if (!isTop) 0 else -i).toFloat()
+                    // Extend to bottom corner only if this is also bottom edge  
+                    val stopY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing + if (!isBottom) 0 else i).toFloat()
                     canvas.drawLine(x, startY, x, stopY, paint)
                 }
                 if (isRight) {
-                    val x =
-                        (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat()
-                    val startY = (topMargin + p.y * cellSizeAndSpacing - if (isTop) i else 0).toFloat()
-                    val stopY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing + if (isBottom) i else 0).toFloat()
+                    val x = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat()
+                    val startY = (topMargin + p.y * cellSizeAndSpacing + if (!isTop) 0 else -i).toFloat()
+                    val stopY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing + if (!isBottom) 0 else i).toFloat()
                     canvas.drawLine(x, startY, x, stopY, paint)
                 }
                 if (isTop) {
-                    val startX = (leftMargin + p.x * cellSizeAndSpacing - if (isLeft) i else 0).toFloat()
-                    val stopX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing + if (isRight) i else 0).toFloat()
+                    val startX = (leftMargin + p.x * cellSizeAndSpacing + if (!isLeft) 0 else -i).toFloat()
+                    val stopX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing + if (!isRight) 0 else i).toFloat()
                     val y = (topMargin + p.y * cellSizeAndSpacing - i).toFloat()
                     canvas.drawLine(startX, y, stopX, y, paint)
                 }
                 if (isBottom) {
-                    val startX = (leftMargin + p.x * cellSizeAndSpacing - if (isLeft) i else 0).toFloat()
-                    val stopX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing + if (isRight) i else 0).toFloat()
+                    val startX = (leftMargin + p.x * cellSizeAndSpacing + if (!isLeft) 0 else -i).toFloat()
+                    val stopX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing + if (!isRight) 0 else i).toFloat()
                     val y = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat()
                     canvas.drawLine(startX, y, stopX, y, paint)
                 }
-
-                /* Corners are now square with complete intersections - no fill needed */
             }
         }
     }
