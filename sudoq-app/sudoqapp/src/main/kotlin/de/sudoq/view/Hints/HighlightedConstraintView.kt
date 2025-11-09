@@ -83,22 +83,22 @@ class HighlightedConstraintView(
             if (isLeft) {
                     val startY = topMargin + p.y * cellSizeAndSpacing
                     val stopY = topMargin + (p.y + 1) * cellSizeAndSpacing - spacing
-                canvas.drawLine(leftX, startY, leftX, stopY, paint)
+                canvas.drawLine(leftX, startY.toFloat(), leftX, stopY.toFloat(), paint)
             }
             if (isRight) {
                     val startY = topMargin + p.y * cellSizeAndSpacing
                     val stopY = topMargin + (p.y + 1) * cellSizeAndSpacing - spacing
-                canvas.drawLine(rightX, startY, rightX, stopY, paint)
+                canvas.drawLine(rightX, startY.toFloat(), rightX, stopY.toFloat(), paint)
             }
             if (isTop) {
                     val startX = leftMargin + p.x * cellSizeAndSpacing
                     val stopX = leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing
-                canvas.drawLine(startX, topY, stopX, topY, paint)
+                canvas.drawLine(startX.toFloat(), topY, stopX.toFloat(), topY, paint)
             }
             if (isBottom) {
                     val startX = leftMargin + p.x * cellSizeAndSpacing
                     val stopX = leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing
-                canvas.drawLine(startX, bottomY, stopX, bottomY, paint)
+                canvas.drawLine(startX.toFloat(), bottomY, stopX.toFloat(), bottomY, paint)
             }
 
                 /* Corners are now square - no circles needed */
