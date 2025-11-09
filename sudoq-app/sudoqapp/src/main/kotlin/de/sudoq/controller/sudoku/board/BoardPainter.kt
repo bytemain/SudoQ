@@ -40,26 +40,26 @@ class BoardPainter(var sl: SudokuLayout, var type: SudokuType) {
                 //paint.setColor(Color.GREEN);
                 if (isLeft) {
                     val x = (leftMargin + p.x * cellSizeAndSpacing - i).toFloat()
-                    val startY = topMargin + p.y * cellSizeAndSpacing
-                    val stopY = topMargin + (p.y + 1) * cellSizeAndSpacing - spacing
+                    val startY = (topMargin + p.y * cellSizeAndSpacing).toFloat()
+                    val stopY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing).toFloat()
                     canvas.drawLine(x, startY, x, stopY, paint)
                 }
                 if (isRight) {
                     val x =
                         (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat()
-                    val startY = topMargin + p.y * cellSizeAndSpacing
-                    val stopY = topMargin + (p.y + 1) * cellSizeAndSpacing - spacing
+                    val startY = (topMargin + p.y * cellSizeAndSpacing).toFloat()
+                    val stopY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing).toFloat()
                     canvas.drawLine(x, startY, x, stopY, paint)
                 }
                 if (isTop) {
-                    val startX = leftMargin + p.x * cellSizeAndSpacing
-                    val stopX = leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing
+                    val startX = (leftMargin + p.x * cellSizeAndSpacing).toFloat()
+                    val stopX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing).toFloat()
                     val y = (topMargin + p.y * cellSizeAndSpacing - i).toFloat()
                     canvas.drawLine(startX, y, stopX, y, paint)
                 }
                 if (isBottom) {
-                    val startX = leftMargin + p.x * cellSizeAndSpacing
-                    val stopX = leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing
+                    val startX = (leftMargin + p.x * cellSizeAndSpacing).toFloat()
+                    val stopX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing).toFloat()
                     val y = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat()
                     canvas.drawLine(startX, y, stopX, y, paint)
                 }
@@ -75,21 +75,20 @@ class BoardPainter(var sl: SudokuLayout, var type: SudokuType) {
                  */
                 if (isRight && !isBottom && !belowRightMember) {
                     canvas.drawLine(
-                        (
-                                leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat(),
-                        topMargin + (p.y + 1) * cellSizeAndSpacing - spacing, (
-                                leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat(),
-                        topMargin + (p.y + 1) * cellSizeAndSpacing,
+                        (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat(),
+                        (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing).toFloat(),
+                        (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat(),
+                        (topMargin + (p.y + 1) * cellSizeAndSpacing).toFloat(),
                         paint
                     )
                 }
                 /*For a cell at the bottom, initializeWith edge to right neighbour */
                 if (isBottom && !isRight && !belowRightMember) {
                     canvas.drawLine(
-                        leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing, (
-                                topMargin + (p.y + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat(),
-                        leftMargin + (p.x + 1) * cellSizeAndSpacing, (
-                                topMargin + (p.y + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat(),
+                        (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing).toFloat(),
+                        (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat(),
+                        (leftMargin + (p.x + 1) * cellSizeAndSpacing).toFloat(),
+                        (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat(),
                         paint
                     )
                 }
@@ -97,21 +96,20 @@ class BoardPainter(var sl: SudokuLayout, var type: SudokuType) {
                 /*For a cell on the left border, initializeWith edge to upper neighbour*/
                 if (isLeft && !isTop && (p.x == 0 || !c.includes(Position[p.x - 1, p.y - 1]))) {
                     canvas.drawLine(
-                        (
-                                leftMargin + p.x * cellSizeAndSpacing - i).toFloat(),
-                        topMargin + p.y * cellSizeAndSpacing - spacing, (
-                                leftMargin + p.x * cellSizeAndSpacing - i).toFloat(),
-                        topMargin + p.y * cellSizeAndSpacing,
+                        (leftMargin + p.x * cellSizeAndSpacing - i).toFloat(),
+                        (topMargin + p.y * cellSizeAndSpacing - spacing).toFloat(),
+                        (leftMargin + p.x * cellSizeAndSpacing - i).toFloat(),
+                        (topMargin + p.y * cellSizeAndSpacing).toFloat(),
                         paint
                     )
                 }
                 /*For a cell at the top initializeWith to the left*/
                 if (isTop && !isLeft && (p.y == 0 || !c.includes(Position[p.x - 1, p.y - 1]))) {
                     canvas.drawLine(
-                        leftMargin + p.x * cellSizeAndSpacing - spacing, (
-                                topMargin + p.y * cellSizeAndSpacing - i).toFloat(),
-                        leftMargin + p.x * cellSizeAndSpacing, (
-                                topMargin + p.y * cellSizeAndSpacing - i).toFloat(),
+                        (leftMargin + p.x * cellSizeAndSpacing - spacing).toFloat(),
+                        (topMargin + p.y * cellSizeAndSpacing - i).toFloat(),
+                        (leftMargin + p.x * cellSizeAndSpacing).toFloat(),
+                        (topMargin + p.y * cellSizeAndSpacing - i).toFloat(),
                         paint
                     )
                 }
