@@ -37,6 +37,20 @@
         <!-- Prevent edge-to-edge layout that causes UI to go under status bar -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">#004d40</item>
+        <!-- Set default toolbar style to use dark theme (white icons) -->
+        <item name="toolbarStyle">@style/Widget.AppCompat.Toolbar</item>
+        <item name="actionOverflowButtonStyle">@style/Widget.AppCompat.ActionButton.Overflow</item>
+    </style>
+
+    <!-- Custom Toolbar style with white icons -->
+    <style name="ToolbarStyle" parent="Widget.AppCompat.Toolbar">
+        <item name="android:theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+    </style>
+    
+    <!-- Custom theme overlay for toolbar to ensure white icons -->
+    <style name="CustomToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="colorControlNormal">@android:color/white</item>
     </style>
 
     <style name="Theme.DesignDemo.Dialog" parent="Theme.AppCompat.Dialog">
