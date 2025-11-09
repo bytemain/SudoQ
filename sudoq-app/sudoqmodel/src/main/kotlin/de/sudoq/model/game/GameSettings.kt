@@ -27,15 +27,11 @@ open class GameSettings(
                 "Not supposed to be used by others."
     ) val assistances: BitSet = BitSet(),
     isLeftHandModeSet: Boolean = false,
-    isHelperSet: Boolean = false,
     isGestureSet: Boolean = false,
     val wantedTypesList: ArrayList<SudokuTypes> = ArrayList(listOf(*SudokuTypes.values()))
 ) {
 
     var isLefthandModeSet = isLeftHandModeSet
-        private set
-
-    var isHelperSet = isHelperSet
         private set
 
     var isGesturesSet = isGestureSet
@@ -78,10 +74,6 @@ open class GameSettings(
 
     fun setLefthandMode(value: Boolean) {
         isLefthandModeSet = value
-    }
-
-    fun setHelper(value: Boolean) {
-        isHelperSet = value
     }
 
 }

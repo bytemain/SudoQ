@@ -9,7 +9,6 @@ object GameSettingsMapper {
         return GameSettingsBE(
             gs.assistances,
             gs.isLefthandModeSet,
-            gs.isHelperSet,
             gs.isGesturesSet,
             SudokuTypesListBE(gs.wantedTypesList)
         )
@@ -19,7 +18,6 @@ object GameSettingsMapper {
         return GameSettings(
             gs.assistances,
             gs.isLefthandModeSet,
-            gs.isHelperSet,
             gs.isGesturesSet,
             gs.wantedTypesList)
     }

@@ -137,13 +137,7 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
         }
     }
 
-    /**
-     * Aktualisiert die Werte in den Views
-     *
-     */
     override fun refreshValues() {
-        //myCaller.lefthand.setChecked(gameSettings.isLefthandModeSet());
-        //myCaller.helper.setChecked(  gameSettings.isHelperSet());
     }
 
     /**

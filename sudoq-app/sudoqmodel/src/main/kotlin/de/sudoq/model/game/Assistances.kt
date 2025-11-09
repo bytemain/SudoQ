@@ -53,5 +53,12 @@ enum class Assistances {
      * When enabled, completed digits display a checkmark (✓) instead of the number on the keyboard.
      * (passive)
      */
-    showCompletedDigits
+    showCompletedDigits,
+
+    /**
+     * Provides intelligent hints and suggestions to help solve the puzzle.
+     * When enabled, users can request hints at any time during the game.
+     * (active - triggered by user)
+     */
+    provideHints
 }

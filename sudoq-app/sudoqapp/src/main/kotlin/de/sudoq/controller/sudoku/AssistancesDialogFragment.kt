@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import de.sudoq.R
 import de.sudoq.controller.sudoku.hints.HintFormulator.getText
+import de.sudoq.model.game.Assistances
 import de.sudoq.model.game.Game
 import de.sudoq.model.profile.ProfileSingleton
 import de.sudoq.model.solvingAssistant.SolvingAssistant.giveAHint
@@ -51,12 +52,12 @@ class AssistancesDialogFragment : DialogFragment() {
         )
         val p = ProfileSingleton.getInstance(profilesDir, ProfileRepo(profilesDir),
                                              ProfilesListRepo(profilesDir))
-        if (p.assistances.isHelperSet) itemStack.add(getString(R.string.sf_sudoku_assistances_give_hint))
+        if (p.getAssistance(Assistances.provideHints)) itemStack.add(getString(R.string.sf_sudoku_assistances_give_hint))
         if (p.appSettings.isDebugSet) itemStack.add(getString(R.string.sf_sudoku_assistances_crash))
 
         // TODO why this no work? final CharSequence[] items = (CharSequence[]) itemStack.toArray();
         val items = itemStack.toTypedArray()
-        val builder = AlertDialog.Builder(getActivity()!!)
+        val builder = AlertDialog.Builder(requireActivity())
         builder.setTitle(getString(R.string.sf_sudoku_assistances_title))
         builder.setItems(items) { dialog, item ->
             when (item) {

@@ -31,7 +31,8 @@ class ProfileRepo(private val profilesDir: File) : IRepo<Profile> {
         newProfile.assistances.setAssistance(Assistances.restrictCandidates)
         newProfile.assistances.setAssistance(Assistances.autoFillUniqueCandidates)
         newProfile.assistances.setAssistance(Assistances.markWrongSymbol)
-        newProfile.assistances.setAssistance(Assistances.showCompletedDigits)  // Default enabled
+        newProfile.assistances.setAssistance(Assistances.showCompletedDigits)
+        newProfile.assistances.setAssistance(Assistances.provideHints)
 
         newProfile.statistics = IntArray(Statistics.values().size)
         newProfile.statistics!![Statistics.fastestSolvingTime.ordinal] = ProfileManager.INITIAL_TIME_RECORD

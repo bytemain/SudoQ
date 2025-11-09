@@ -13,7 +13,6 @@ import de.sudoq.model.game.GameSettings
 import de.sudoq.model.persistence.IRepo
 import de.sudoq.model.persistence.xml.profile.IProfilesListRepo
 import java.io.File
-import java.util.*
 import kotlin.collections.ArrayList
 
 /**
@@ -298,10 +297,6 @@ open class ProfileManager() : ObservableModelImpl<ProfileManager>() {
     /*Advanced Settings*/
     fun setLefthandActive(value: Boolean) {
         assistances.setLefthandMode(value)
-    }
-
-    fun setHelperActive(value: Boolean) {
-        assistances.setHelper(value)
     }
 
     fun setDebugActive(value: Boolean) {

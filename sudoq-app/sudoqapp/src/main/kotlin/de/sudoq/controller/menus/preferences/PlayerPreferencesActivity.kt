@@ -81,7 +81,7 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         restrictCandidates!!.isChecked = profile.getAssistance(Assistances.restrictCandidates)
         autoFillUniqueCandidates!!.isChecked = profile.getAssistance(Assistances.autoFillUniqueCandidates)
         showCompletedDigits!!.isChecked = profile.getAssistance(Assistances.showCompletedDigits)
-        helper!!.isChecked = profile.assistances.isHelperSet
+        helper!!.isChecked = profile.getAssistance(Assistances.provideHints)
     }
 
     /**
@@ -149,7 +149,7 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         saveAssistance(Assistances.restrictCandidates, restrictCandidates!!)
         saveAssistance(Assistances.autoFillUniqueCandidates, autoFillUniqueCandidates!!)
         saveAssistance(Assistances.showCompletedDigits, showCompletedDigits!!)
-        p.setHelperActive(helper!!.isChecked)
+        saveAssistance(Assistances.provideHints, helper!!)
         p.saveChanges()
     }
 

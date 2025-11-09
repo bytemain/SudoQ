@@ -11,7 +11,6 @@ import kotlin.math.pow
 
 class GameSettingsBE(val assistances: BitSet = BitSet(),
                      var isLefthandModeSet: Boolean = false,
-                     var isHelperSet: Boolean = false,
                      var isGesturesSet: Boolean = false,
                      val wantedTypesList: SudokuTypesListBE = SudokuTypesListBE(listOf(*SudokuTypes.values()))
 ) : Xmlable {
@@ -39,7 +38,6 @@ class GameSettingsBE(val assistances: BitSet = BitSet(),
         ) //TODO scrap that, representation as 0,1 is ugly -> save all with name, then make all of the boolean assistances enums
         representation.addAttribute(XmlAttribute("gestures", isGesturesSet))
         representation.addAttribute(XmlAttribute("left", isLefthandModeSet))
-        representation.addAttribute(XmlAttribute("helper", isHelperSet))
         representation.addChild(wantedTypesList.toXmlTree())
         return representation
     }
@@ -51,8 +49,6 @@ class GameSettingsBE(val assistances: BitSet = BitSet(),
             java.lang.Boolean.parseBoolean(xmlTreeRepresentation.getAttributeValue("gestures"))
         isLefthandModeSet =
             java.lang.Boolean.parseBoolean(xmlTreeRepresentation.getAttributeValue("left"))
-        isHelperSet =
-            java.lang.Boolean.parseBoolean(xmlTreeRepresentation.getAttributeValue("helper"))
         for (xt in xmlTreeRepresentation) if (xt.name == SudokuTypesListBE.ROOT_NAME) wantedTypesList.fillFromXml(
             xt
         )
