@@ -34,16 +34,6 @@
             android:onClick="selectTypesToRestrict"
             android:text="@string/profile_preference_button_provide_restricted_set_of_types" />
 
-        <CheckBox
-            android:id="@+id/checkbox_hints_provider"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:onClick="helperSelected"
-            android:text="@string/profile_preference_title_intelligent_assistant"
-            android:textColor="@android:color/black"
-            android:visibility="visible" />
-
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">

@@ -33,7 +33,6 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
     var lefthand: CheckBox? = null
 
     //    override var restricttypes: Button? = null
-    override var helper: CheckBox? = null
     private var debug: CheckBox? = null
     private var debugCounter: Byte = 0
     private var langSpinnerInit = true
@@ -56,7 +55,6 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
         ab.setTitle(R.string.sf_advancedpreferences_title)
         lefthand = findViewById<View>(R.id.checkbox_lefthand_mode) as CheckBox
         restricttypes = findViewById<View>(R.id.button_provide_restricted_set_of_types) as Button
-        helper = findViewById<View>(R.id.checkbox_hints_provider) as CheckBox
         debug = findViewById<View>(R.id.checkbox_debug) as CheckBox
         //exporter      = (CheckBox) findViewById(R.id.checkbox_exportcrash_trigger);
         gameSettings = NewSudokuActivity.gameSettings
@@ -71,7 +69,6 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
                 if (debug!!.isChecked) {
                     debug!!.visibility = View.VISIBLE
                 }
-                helper!!.isChecked = gameSettings!!.isHelperSet
                 lefthand!!.isChecked = gameSettings!!.isLefthandModeSet
             }
             ParentActivity.PROFILE, ParentActivity.NOT_SPECIFIED -> {
@@ -79,7 +76,6 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
                     debug!!.visibility = View.VISIBLE
                 }
                 debug!!.isChecked = pm.appSettings.isDebugSet
-                helper!!.isChecked = profileGameSettings.isHelperSet
                 lefthand!!.isChecked = profileGameSettings.isLefthandModeSet
             }
         }
@@ -162,30 +158,10 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
         startActivity(Intent(this, RestrictTypesActivity::class.java))
     }
 
-    fun helperSelected(view: View) {
-        val cb = view as CheckBox
-        if (cb.isChecked) { //if it is now, after click selected
-            askConfirmation(cb)
-        }
-    }
-
     fun count(view: View?) {
         debugCounter++
         if (debugCounter >= 10)
             debug!!.visibility = View.VISIBLE
-    }
-
-    private fun askConfirmation(cb: CheckBox) {
-        val builder = AlertDialog.Builder(this)
-        builder.setPositiveButton(getString(R.string.dialog_yes)) { dialog, which ->
-            // pass
-        }
-        builder.setNegativeButton(getString(R.string.dialog_no)) { dialog, which ->
-            cb.isChecked = false
-        }
-        builder.setMessage("This feature is still in development. Are you sure you want to activate it?")
-        val alertDialog = builder.create()
-        alertDialog.show()
     }
 
     override fun adjustValuesAndSave() {
@@ -207,9 +183,8 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
     }
 
     private fun saveToGameSettings() {
-        if (lefthand != null && helper != null) {
+        if (lefthand != null) {
             gameSettings!!.setLefthandMode(lefthand!!.isChecked)
-            gameSettings!!.setHelper(helper!!.isChecked)
         }
     }
 
@@ -220,7 +195,6 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
         check(!pm.noProfiles()) { "there are no profiles. this is  unexpected. they should be initialized in splashActivity" }
         pm.loadCurrentProfile()
         if (debug != null) pm.setDebugActive(debug!!.isChecked)
-        if (helper != null) pm.setHelperActive(helper!!.isChecked)
         if (lefthand != null) pm.setLefthandActive(lefthand!!.isChecked)
         //restrict types is automatically saved to profile...
         pm.saveChanges()
