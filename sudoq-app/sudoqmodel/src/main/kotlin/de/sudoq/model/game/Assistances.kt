@@ -46,5 +46,12 @@ enum class Assistances {
      * When enabled, the game can automatically fill cells that have exactly one candidate (note) set.
      * (active - triggered by user)
      */
-    autoFillUniqueCandidates
+    autoFillUniqueCandidates,
+
+    /**
+     * Shows checkmarks on keyboard buttons when all instances of a digit are correctly placed.
+     * When enabled, completed digits display a checkmark (✓) instead of the number on the keyboard.
+     * (passive)
+     */
+    showCompletedDigits
 }
