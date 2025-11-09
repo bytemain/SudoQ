@@ -414,6 +414,10 @@ class UserInteractionMediator(
                     ) && noteMode
                 ) CellViewStates.SELECTED_NOTE_BORDER else CellViewStates.DEFAULT_BORDER
             virtualKeyboard.markCell(i, state)
+            
+            // Check if the symbol is completed and show checkmark if so
+            val isCompleted = game.sudoku!!.isSymbolCompleted(i)
+            virtualKeyboard.setButtonCheckmark(i, isCompleted)
         }
         virtualKeyboard.invalidate()
     }

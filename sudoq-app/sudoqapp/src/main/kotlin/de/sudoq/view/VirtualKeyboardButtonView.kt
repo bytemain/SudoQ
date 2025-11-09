@@ -34,6 +34,11 @@ class VirtualKeyboardButtonView(context: Context?, private val symbol: Int) : Vi
     private val drawnSymbol: String
 
     /**
+     * Flag indicating whether to show a checkmark instead of the symbol
+     */
+    private var showCheckmark: Boolean = false
+
+    /**
      * Diese Listener werden benachrichtigt, wenn der Benutzer mit diesem
      * VirtualKeyboardButtonView interagiert, bspw. durch Anlicken.
      */
@@ -65,9 +70,22 @@ class VirtualKeyboardButtonView(context: Context?, private val symbol: Int) : Vi
      */
     public override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        CellViewPainter.instance!!.markCell(canvas, this, drawnSymbol, justText = false, darken = false)
+        val displayText = if (showCheckmark) "✓" else drawnSymbol
+        CellViewPainter.instance!!.markCell(canvas, this, displayText, justText = false, darken = false)
         if (!this.isEnabled) {
             canvas.drawARGB(100, 10, 10, 10)
+        }
+    }
+
+    /**
+     * Sets whether to display a checkmark instead of the symbol.
+     *
+     * @param show true to show checkmark, false to show the original symbol
+     */
+    fun setShowCheckmark(show: Boolean) {
+        if (showCheckmark != show) {
+            showCheckmark = show
+            invalidate()
         }
     }
 
