@@ -283,6 +283,33 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     }
 
     /**
+     * Check if the touch event is within the sudoku board area
+     * Returns true if inside the board, false if outside (e.g., on buttons or other UI elements)
+     */
+    private fun isTouchInBoardArea(x: Float, y: Float): Boolean {
+        val sudokuType = game.sudoku!!.sudokuType
+        if (sudokuCellViews == null || sudokuCellViews!!.isEmpty()) {
+            return false
+        }
+        
+        // Get the bounds of the entire board by finding min/max coordinates of all cells
+        var minLeft = Int.MAX_VALUE
+        var minTop = Int.MAX_VALUE
+        var maxRight = Int.MIN_VALUE
+        var maxBottom = Int.MIN_VALUE
+        
+        for (p in sudokuType!!.validPositions) {
+            val cellView = getSudokuCellView(p)
+            minLeft = minOf(minLeft, cellView.left)
+            minTop = minOf(minTop, cellView.top)
+            maxRight = maxOf(maxRight, cellView.right)
+            maxBottom = maxOf(maxBottom, cellView.bottom)
+        }
+        
+        val isInBoard = x >= minLeft && x <= maxRight && y >= minTop && y <= maxBottom
+        Log.d(LOG_TAG, "isTouchInBoardArea: x=$x, y=$y, board bounds: [$minLeft, $minTop, $maxRight, $maxBottom], result=$isInBoard")
+        return isInBoard
+    }    /**
      * Intercept touch events in multi-selection mode to handle drag selection
      */
     @RequiresApi(Build.VERSION_CODES.KITKAT)
@@ -299,13 +326,20 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
             }
         }
         
-        // In multi-selection mode, intercept MOVE events to handle drag selection
+        // In multi-selection mode, only intercept if touch is in board area
         if (isMultiSelectionMode) {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    // User touched down in multi-select mode, prepare to intercept drags
-                    shouldInterceptForDrag = true
-                    Log.d(LOG_TAG, "Multi-select mode ACTION_DOWN: shouldInterceptForDrag=true, returning false")
+                    // Check if touch is in board area
+                    if (isTouchInBoardArea(event.x, event.y)) {
+                        // User touched down in board area, prepare to intercept drags
+                        shouldInterceptForDrag = true
+                        Log.d(LOG_TAG, "Multi-select mode ACTION_DOWN in board: shouldInterceptForDrag=true, returning false")
+                    } else {
+                        // Touch is outside board (e.g., on buttons), don't intercept
+                        shouldInterceptForDrag = false
+                        Log.d(LOG_TAG, "Multi-select mode ACTION_DOWN outside board: shouldInterceptForDrag=false, returning false")
+                    }
                     return false  // Don't intercept DOWN, let children handle it first
                 }
                 MotionEvent.ACTION_MOVE -> {
@@ -332,12 +366,20 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onTouchEvent(event: MotionEvent): Boolean {
         Log.d(LOG_TAG, "onTouchEvent ${MotionEvent.actionToString(event.actionMasked)} isMultiSelectionMode=${isMultiSelectionMode}")
+        
         // Only handle touch events in multi-selection mode
         if (!isMultiSelectionMode) {
             return false
         }
+        
+        // Only handle touches in board area - let buttons and other UI handle their own touches
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                // Check if touch is in board area
+                if (!isTouchInBoardArea(event.x, event.y)) {
+                    Log.d(LOG_TAG, "ACTION_DOWN outside board area, not handling")
+                    return false
+                }
                 // Start of touch, clear the drag tracking set
                 touchedCellsDuringDrag.clear()
                 // Request parent not to intercept touch events during multi-selection
