@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hint_panel_continue">fortsetzen</string>
-    <string name="hint_panel_execute">Tu das</string>
+<string name="hint_panel_continue">Zurück</string>
+<string name="hint_panel_execute">Für mich lösen</string>
 </resources>

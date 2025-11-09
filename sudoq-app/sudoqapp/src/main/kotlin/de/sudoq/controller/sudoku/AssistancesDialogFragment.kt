@@ -2,12 +2,33 @@ package de.sudoq.controller.sudoku
 
 import android.app.Dialog
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.DialogFragment
 import de.sudoq.R
 import de.sudoq.controller.sudoku.hints.HintFormulator.getText
@@ -100,79 +121,119 @@ class AssistancesDialogFragment : DialogFragment() {
 
     private fun hint(activity: SudokuActivity) {
         val sd = giveAHint(game!!.sudoku!!)
-        val tv = activity.findViewById<View>(R.id.hintText) as TextView
-        tv.text = getText(activity, sd)
         activity.setModeHint()
         sl!!.hintPainter.realizeHint(sd)
         sl!!.hintPainter.invalidateAll()
 
-
-        /* user pressed `continue`, game is resumed*/
-        val b = activity.findViewById<View>(R.id.hintOkButton) as Button
-        b.setOnClickListener {
-            activity.setModeRegular()
-            sl!!.hintPainter.deleteAll()
-            sl!!.invalidate()
-            sl!!.hintPainter.invalidateAll()
-        }
-        val bExecute = activity.findViewById<View>(R.id.hintExecuteButton) as Button
-        bExecute.visibility = if (sd.hasActionListCapability()) View.VISIBLE else View.GONE
-
-        /* user pressed `make it so` so we execute the action for him*/
-        bExecute.setOnClickListener {
-            activity.setModeRegular()
-            sl!!.hintPainter.deleteAll()
-            sl!!.invalidate()
-            sl!!.hintPainter.invalidateAll()
-            for (a in sd.getActionList(game!!.sudoku!!)) {
-                controller!!.onHintAction(a)
-                activity.onInputAction()
-                /* in case we delete a note in the focussed cell */
-                activity.mediator!!.restrictCandidates()
+        val composeView = activity.findViewById<ComposeView>(R.id.hintComposeView)
+        composeView.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                MaterialTheme {
+                    HintPanelContent(
+                        text = getText(activity, sd).toString(),
+                        showExecute = sd.hasActionListCapability(),
+                        onContinue = {
+                            activity.setModeRegular()
+                            sl!!.hintPainter.deleteAll()
+                            sl!!.invalidate()
+                            sl!!.hintPainter.invalidateAll()
+                        },
+                        onExecute = {
+                            activity.setModeRegular()
+                            sl!!.hintPainter.deleteAll()
+                            sl!!.invalidate()
+                            sl!!.hintPainter.invalidateAll()
+                            for (a in sd.getActionList(game!!.sudoku!!)) {
+                                controller!!.onHintAction(a)
+                                activity.onInputAction()
+                                // in case we delete a note in the focussed cell
+                                activity.mediator!!.restrictCandidates()
+                            }
+                        }
+                    )
+                }
             }
         }
-
-
-        //Toast.makeText(SudokuActivity.this, "a hint was requested: "+sd, Toast.LENGTH_LONG).show();
     }
 
-    //    private void restrictCandidates() {
-    //		this.virtualKeyboard.enableAllButtons();
-    //
-    //		Field currentField = this.sudokuView.getCurrentFieldView().getField();
-    //		SudokuType type = this.game.getSudoku().getSudokuType();
-    //		/* only if assistance 'input assistance' if enabled */
-    //		if (this.game.isAssistanceAvailable(Assistances.restrictCandidates)) {
-    //
-    //			/* save val of current view */
-    //			int save = currentField.getCurrentValue();
-    //
-    //			/* iterate over all symbols e.g. 0-8 */
-    //			for (int i = 0; i < type.getNumberOfSymbols(); i++) {
-    //				/* set cellval to current symbol */
-    //				currentField.setCurrentValue(i, false);
-    //				/* for every constraint */
-    //				for (Constraint c : type) {
-    //					/* if constraint not satisfied -> disable*/
-    //					boolean constraintViolated = !c.isSaturated(this.game.getSudoku());
-    //
-    //					/* Github Issue #116
-    //					 * it would be stupid if we were in the mode where notes are set
-    //					 * and would disable a note that has been set.
-    //					 * Because then, it can't be unset by the user*/
-    //					boolean noteNotSet = ! (noteMode && currentField.isNoteSet(i));
-    //
-    //					if (constraintViolated && noteNotSet) {
-    //						this.virtualKeyboard.disableButton(i);
-    //						break;
-    //					}
-    //				}
-    //				currentField.setCurrentValue(Field.EMPTYVAL, false);
-    //			}
-    //			currentField.setCurrentValue(save, false);
-    //
-    //		}
-    //	}
+    @Composable
+    private fun HintPanelContent(
+        text: String,
+        showExecute: Boolean,
+        onContinue: () -> Unit,
+        onExecute: () -> Unit
+    ) {
+        val scrollState = rememberScrollState()
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+        if (isLandscape) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF282828))
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(scrollState)
+                        .padding(4.dp)
+                ) {
+                    Text(text = text, color = Color.White)
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.35f)
+                ) {
+                    Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
+                        Text(text = stringResource(id = R.string.hint_panel_continue))
+                    }
+                    if (showExecute) {
+                        Spacer(modifier = Modifier.size(12.dp))
+                        Button(onClick = onExecute, modifier = Modifier.fillMaxWidth()) {
+                            Text(text = stringResource(id = R.string.hint_panel_execute))
+                        }
+                    }
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF282828))
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(scrollState)
+                            .padding(4.dp)
+                    ) {
+                        Text(text = text, color = Color.White)
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(onClick = onContinue, modifier = Modifier.weight(1f)) {
+                        Text(text = stringResource(id = R.string.hint_panel_continue))
+                    }
+                    if (showExecute) {
+                        Button(onClick = onExecute, modifier = Modifier.weight(1f)) {
+                            Text(text = stringResource(id = R.string.hint_panel_execute))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     override fun onDestroyView() {
         //this is added to prevent dialog from disappearing on orientation change.
         // http://stackoverflow.com/a/12434038/3014199
