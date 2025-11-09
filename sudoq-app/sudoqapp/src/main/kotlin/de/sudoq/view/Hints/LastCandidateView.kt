@@ -29,7 +29,7 @@ class LastCandidateView(context: Context, sl: SudokuLayout, d: SolveDerivation) 
      */
     init {
         val constraintV: View =
-            HighlightedCellView(context, sl, (d as LastCandidateDerivation).position, Color.GREEN)
+        HighlightedCellView(context, sl, (d as LastCandidateDerivation).position, Color.RED)
         highlightedObjects.add(constraintV)
     }
 }

@@ -31,7 +31,7 @@ class NakedSetView(context: Context, sl: SudokuLayout, d: NakedSetDerivation) :
         val constraintV: View = HighlightedConstraintView(context, sl, d.constraint!!, Color.BLUE)
         highlightedObjects.add(constraintV)
         for (df in d.getSubsetMembers()) {
-            highlightedObjects.add(HighlightedCellView(context, sl, df.position, Color.GREEN))
+        highlightedObjects.add(HighlightedCellView(context, sl, df.position, Color.RED))
         }
     }
 }

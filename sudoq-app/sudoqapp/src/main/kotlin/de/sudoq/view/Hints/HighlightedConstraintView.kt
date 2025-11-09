@@ -53,9 +53,7 @@ class HighlightedConstraintView(
         val thickness = 5
         paint.strokeWidth = (thickness * sl.currentSpacing).toFloat()
         val c = constraint
-        //Log.d("HighlightCV", "This is happening!");
 
-        //canvas.drawLine(0, 0, 600, 600, paint);
         val topMargin = sl.currentTopMargin
         val leftMargin = sl.currentLeftMargin
         val spacing = sl.currentSpacing
@@ -70,12 +68,10 @@ class HighlightedConstraintView(
             val isBottom = !c.includes(Position[p.x, p.y + 1])
             // (0,0) is in the top right
 
-
             //deklariert hier, weil wir es nicht früher brauchen, effizienter wäre weiter oben
             val cellSizeAndSpacing = sl.currentCellViewSize + spacing
             /* these first 4 seem similar. drawing the black line around?*/
             /* cells that touch the edge: Paint your edge but leave space at the corners*/
-            //paint.setColor(Color.GREEN);
             val leftX = (leftMargin + p.x * cellSizeAndSpacing - spacing / 2).toFloat()
             val rightX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing / 2).toFloat()
             val topY = (topMargin + p.y * cellSizeAndSpacing - spacing / 2).toFloat()

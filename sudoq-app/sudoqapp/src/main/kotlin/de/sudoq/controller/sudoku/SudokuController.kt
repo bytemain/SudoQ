@@ -137,11 +137,15 @@ class SudokuController(
             target
         } ?: return false
 
+        // Detect solvability first; if no solution available, fail fast
+        val solution = cellToSolve.solution
+        if (solution == Cell.EMPTYVAL) return false
+
         // Briefly highlight the cell (green frame), then fill the value
         val sl = context.sudokuLayout ?: return false
         val pos = sudoku.getPosition(cellToSolve.id) ?: return false
         val highlightView = de.sudoq.view.Hints.HighlightedCellView(
-            context, sl, pos, android.graphics.Color.GREEN
+            context, sl, pos, android.graphics.Color.RED
         )
         // Add overlay to show which cell is being solved
         sl.addView(highlightView, sl.width, sl.height)
@@ -151,7 +155,7 @@ class SudokuController(
         handler.postDelayed({
             // Remove highlight and perform the solve
             try { sl.removeView(highlightView) } catch (_: Exception) {}
-            val res = game.solveCell(cellToSolve)
+            game.solveCell(cellToSolve)
             if (game.isFinished()) {
                 updateStatistics()
                 handleFinish(false)

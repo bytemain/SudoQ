@@ -28,7 +28,7 @@ class XWingView(context: Context, sl: SudokuLayout, d: XWingDerivation) : HintVi
      */
     init {
         for (c in d.getReducibleConstraints()) { //'note' appears not only in intersection
-            val reducibleConstraintV: View = HighlightedConstraintView(context, sl, c, Color.GREEN)
+        val reducibleConstraintV: View = HighlightedConstraintView(context, sl, c, Color.RED)
             highlightedObjects.add(reducibleConstraintV)
         }
         for (c in d.getLockedConstraints()) { //'note' appears only in intersection. this is painted after the blue ones so people don't mistakenly remove notes of the intersection cause the cell is green
