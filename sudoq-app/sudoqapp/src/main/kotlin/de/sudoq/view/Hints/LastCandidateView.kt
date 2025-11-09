@@ -14,19 +14,10 @@ import de.sudoq.model.solverGenerator.solution.LastCandidateDerivation
 import de.sudoq.model.solverGenerator.solution.SolveDerivation
 import de.sudoq.view.SudokuLayout
 
-/**
- * Diese Subklasse des von der Android API bereitgestellten Views stellt ein
- * einzelnes Feld innerhalb eines Sudokus dar. Es erweitert den Android View um
- * Funktionalität zur Benutzerinteraktion und Färben.
- */
+
 class LastCandidateView(context: Context, sl: SudokuLayout, d: SolveDerivation) :
     HintView(context, sl, d) {
-    /**
-     * Erstellt einen LastDigitView
-     *
-     * @param context    der Applikationskontext
-     * @throws IllegalArgumentException Wird geworfen, falls eines der Argumente null ist
-     */
+
     init {
         val constraintV: View =
             HighlightedCellView(context, sl, (d as LastCandidateDerivation).position, Color.GREEN)

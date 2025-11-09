@@ -13,20 +13,10 @@ import android.view.View
 import de.sudoq.model.solverGenerator.solution.HiddenSetDerivation
 import de.sudoq.view.SudokuLayout
 
-/**
- * Diese Subklasse des von der Android API bereitgestellten Views stellt ein
- * einzelnes Feld innerhalb eines Sudokus dar. Es erweitert den Android View um
- * Funktionalität zur Benutzerinteraktion und Färben.
- */
+
 class HiddenSetView(context: Context, sl: SudokuLayout, d: HiddenSetDerivation) :
     HintView(context, sl, d) {
-    /**
-     * Erstellt einen SudokuFieldView und initialisiert die Attribute der
-     * Klasse.
-     *
-     * @param context    der Applikationskontext
-     * @throws IllegalArgumentException Wird geworfen, falls eines der Argumente null ist
-     */
+
     init {
         val constraintV: View = HighlightedConstraintView(context, sl, d.constraint!!, Color.BLUE)
         highlightedObjects.add(constraintV)

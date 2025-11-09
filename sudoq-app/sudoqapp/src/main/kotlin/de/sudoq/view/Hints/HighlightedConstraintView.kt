@@ -19,11 +19,7 @@ import de.sudoq.model.sudoku.Constraint
 import de.sudoq.model.sudoku.Position
 import de.sudoq.view.SudokuLayout
 
-/**
- * Diese Subklasse des von der Android API bereitgestellten Views stellt ein
- * einzelnes Feld innerhalb eines Sudokus dar. Es erweitert den Android View um
- * Funktionalität zur Benutzerinteraktion und Färben.
- */
+
 class HighlightedConstraintView(
     context: Context, sl: SudokuLayout,
     /** The Constraint represented by this View */

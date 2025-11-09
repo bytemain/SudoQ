@@ -18,13 +18,7 @@ import de.sudoq.model.sudoku.Cell
 import de.sudoq.model.sudoku.Position
 import de.sudoq.view.SudokuLayout
 
-/**
- * Diese Subklasse des von der Android API bereitgestellten Views stellt ein
- * einzelnes Feld innerhalb eines Sudokus dar. Es erweitert den Android View um
- * Funktionalität zur Benutzerinteraktion und Färben.
- *
- * @property position Position of the cell represented by this View
- */
+
 class HighlightedCellView(
     context: Context, sl: SudokuLayout,
     private val position: Position, color: Int

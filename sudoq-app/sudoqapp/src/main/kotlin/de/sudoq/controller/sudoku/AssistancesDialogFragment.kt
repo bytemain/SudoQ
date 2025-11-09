@@ -125,8 +125,23 @@ class AssistancesDialogFragment : DialogFragment() {
         sl!!.hintPainter.realizeHint(sd)
         sl!!.hintPainter.invalidateAll()
 
-        val composeView = activity.findViewById<ComposeView>(R.id.hintComposeView)
-        composeView.apply {
+        // Resolve ComposeView safely; fall back to creating one under hintPanel when ID is unavailable
+        val composeViewId = activity.resources.getIdentifier("hintComposeView", "id", activity.packageName)
+        val composeView = if (composeViewId != 0)
+            activity.findViewById<ComposeView>(composeViewId)
+        else null
+        val safeComposeView = composeView ?: run {
+            val panelId = activity.resources.getIdentifier("hintPanel", "id", activity.packageName)
+            val parent = if (panelId != 0) activity.findViewById<View>(panelId) as? android.widget.LinearLayout else null
+            val cv = ComposeView(activity)
+            cv.layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            parent?.addView(cv)
+            cv
+        }
+        safeComposeView.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 MaterialTheme {
@@ -144,17 +159,70 @@ class AssistancesDialogFragment : DialogFragment() {
                             sl!!.hintPainter.deleteAll()
                             sl!!.invalidate()
                             sl!!.hintPainter.invalidateAll()
-                            for (a in sd.getActionList(game!!.sudoku!!)) {
-                                controller!!.onHintAction(a)
-                                activity.onInputAction()
-                                // in case we delete a note in the focussed cell
-                                activity.mediator!!.restrictCandidates()
-                            }
+                            previewAndExecuteHintActions(activity, sd)
                         }
                     )
                 }
             }
         }
+    }
+
+    /**
+     * Shows a red indicator preview on all target cells, then executes actions sequentially.
+     * This improves clarity for bulk note deletions (e.g., X-Wing), similar to auto-fill.
+     */
+    private fun previewAndExecuteHintActions(activity: SudokuActivity, sd: de.sudoq.model.solverGenerator.solution.SolveDerivation) {
+        val actions = sd.getActionList(game!!.sudoku!!)
+        val layout = activity.sudokuLayout ?: return
+        val painter = de.sudoq.controller.sudoku.board.CellViewPainter.instance ?: return
+
+        // 1) Preview: small red indicator boxes on each affected cell, aligned to the note when possible
+        for (a in actions) {
+            try {
+                val cell = a.cell
+                val pos = game!!.sudoku!!.getPosition(cell.id) ?: continue
+                val cellView = layout.getSudokuCellView(pos)
+                // Compute preview symbol for alignment:
+                // - NoteAction: use note index directly
+                // - SolveAction: use final value = currentValue + diff
+                val symbolStr = when (a) {
+                    is de.sudoq.model.actionTree.NoteAction -> de.sudoq.controller.sudoku.Symbol.getInstance().getMapping(a.diff)
+                    is de.sudoq.model.actionTree.SolveAction -> {
+                        val absIdx = (a.cell.currentValue + a.diff).coerceAtLeast(0)
+                        de.sudoq.controller.sudoku.Symbol.getInstance().getMapping(absIdx)
+                    }
+                    else -> null
+                }
+                painter.showPreFillIndicator(cellView, android.graphics.Color.RED, symbolStr)
+            } catch (_: Exception) { /* best-effort preview */ }
+        }
+
+        // 2) Execute: one-by-one with short delay, removing indicator for each cell
+        val delayPerAction = 160L
+        var index = 0
+        val execRunnable = object : Runnable {
+            override fun run() {
+                if (index >= actions.size) return
+                val a = actions[index]
+                try {
+                    controller!!.onHintAction(a)
+                    activity.onInputAction()
+                    activity.mediator!!.restrictCandidates()
+                    // Hide indicator for this cell after applying
+                    val pos = game!!.sudoku!!.getPosition(a.cell.id)
+                    if (pos != null) {
+                        val cellView = layout.getSudokuCellView(pos)
+                        painter.hidePreFillIndicator(cellView)
+                    }
+                } catch (_: Exception) { /* continue */ }
+
+                index++
+                if (index < actions.size) {
+                    layout.postDelayed(this, delayPerAction)
+                }
+            }
+        }
+        layout.postDelayed(execRunnable, delayPerAction)
     }
 
     @Composable

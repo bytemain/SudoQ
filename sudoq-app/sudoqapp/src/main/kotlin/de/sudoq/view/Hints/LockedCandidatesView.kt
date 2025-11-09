@@ -13,20 +13,10 @@ import android.view.View
 import de.sudoq.model.solverGenerator.solution.LockedCandidatesDerivation
 import de.sudoq.view.SudokuLayout
 
-/**
- * Diese Subklasse des von der Android API bereitgestellten Views stellt ein
- * einzelnes Feld innerhalb eines Sudokus dar. Es erweitert den Android View um
- * Funktionalität zur Benutzerinteraktion und Färben.
- */
+
 class LockedCandidatesView(context: Context, sl: SudokuLayout, d: LockedCandidatesDerivation) :
     HintView(context, sl, d) {
-    /**
-     * Erstellt einen SudokuFieldView und initialisiert die Attribute der
-     * Klasse.
-     *
-     * @param context    der Applikationskontext
-     * @throws IllegalArgumentException Wird geworfen, falls eines der Argumente null ist
-     */
+
     init {
         val lockedConstraintV: View =
             HighlightedConstraintView(context, sl, d.lockedConstraint!!, Color.BLUE)

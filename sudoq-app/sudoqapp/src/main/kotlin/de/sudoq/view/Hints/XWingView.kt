@@ -13,19 +13,8 @@ import android.view.View
 import de.sudoq.model.solverGenerator.solution.XWingDerivation
 import de.sudoq.view.SudokuLayout
 
-/**
- * Diese Subklasse des von der Android API bereitgestellten Views stellt ein
- * einzelnes Feld innerhalb eines Sudokus dar. Es erweitert den Android View um
- * Funktionalität zur Benutzerinteraktion und Färben.
- */
 class XWingView(context: Context, sl: SudokuLayout, d: XWingDerivation) : HintView(context, sl, d) {
-    /**
-     * Erstellt einen SudokuFieldView und initialisiert die Attribute der
-     * Klasse.
-     *
-     * @param context    der Applikationskontext
-     * @throws IllegalArgumentException Wird geworfen, falls eines der Argumente null ist
-     */
+
     init {
         for (c in d.getReducibleConstraints()) { //'note' appears not only in intersection
             val reducibleConstraintV: View = HighlightedConstraintView(context, sl, c, Color.GREEN)

@@ -13,19 +13,9 @@ import android.view.View
 import de.sudoq.model.solverGenerator.solution.NoNotesDerivation
 import de.sudoq.view.SudokuLayout
 
-/**
- * Diese Subklasse des von der Android API bereitgestellten Views stellt ein
- * einzelnes Feld innerhalb eines Sudokus dar. Es erweitert den Android View um
- * Funktionalität zur Benutzerinteraktion und Färben.
- */
 class NoNotesView(context: Context, sl: SudokuLayout, d: NoNotesDerivation) :
     HintView(context, sl, d) {
-    /**
-     * Erstellt einen LastDigitView
-     *
-     * @param context    der Applikationskontext
-     * @throws IllegalArgumentException Wird geworfen, falls eines der Argumente null ist
-     */
+ 
     init {
         val i = d.cellIterator
         while (i.hasNext()) {//todo can this be a for loop
