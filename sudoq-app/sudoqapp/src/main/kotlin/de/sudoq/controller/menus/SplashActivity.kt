@@ -98,13 +98,13 @@ class SplashActivity : SudoqCompatActivity() {
 
         /* get version value */
         try {
-            currentVersionName = this.packageManager.getPackageInfo(this.packageName, 0).versionName
+            currentVersionName = this.packageManager.getPackageInfo(this.packageName, 0).versionName ?: ""
         } catch (e: PackageManager.NameNotFoundException) {
             e.message?.let { Log.v(LOG_TAG, it) }
         }
 
         /* is this a new version? */
-        val oldVersionName = settings.getString(VERSION_TAG, NO_VERSION_YET)!!
+        val oldVersionName = settings.getString(VERSION_TAG, NO_VERSION_YET) ?: NO_VERSION_YET
         if (updateSituation(oldVersionName) && !startedCopying) {
 
             /*hint*/

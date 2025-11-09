@@ -10,5 +10,6 @@
     <string name="sf_mainmenu_continue">Fortsetzen</string>
     <string name="sf_mainmenu_load_sudoku">Sudoku Laden</string>
     <string name="sf_mainmenu_profile">Profil</string>
+    <string name="sf_mainmenu_preferences">Einstellungen</string>
 
 </resources>

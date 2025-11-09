@@ -177,7 +177,7 @@ class AssistancesDialogFragment : DialogFragment() {
         // http://stackoverflow.com/a/12434038/3014199
         //it fixes a bug in the supportLibrary
         if (dialog != null && retainInstance) {
-            dialog.setDismissMessage(null)
+            dialog?.setDismissMessage(null)
         }
         super.onDestroyView()
     }

@@ -23,7 +23,7 @@ abstract class PreferencesActivity : SudoqCompatActivity(), ModelChangeListener<
     var restrictCandidates: CheckBox? = null
     var autoFillUniqueCandidates: CheckBox? = null
     var showCompletedDigits: CheckBox? = null
-    var helper: CheckBox? = null
+    open var helper: CheckBox? = null
 
     //CheckBox lefthand;
     var restricttypes: Button? = null

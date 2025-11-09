@@ -10,5 +10,6 @@
     <string name="sf_mainmenu_continue">Continuer</string>
     <string name="sf_mainmenu_load_sudoku">Charger un sudoku</string>
     <string name="sf_mainmenu_profile">Profil</string>
+    <string name="sf_mainmenu_preferences">Paramètres</string>
 
 </resources>

@@ -13,19 +13,24 @@ allprojects {
 android {
     namespace = "de.sudoq"
     testNamespace = "de.sudoq.test"
-    compileSdk = 30
+    compileSdk = 36
     
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "21"
+        freeCompilerArgs += listOf(
+            "-Xno-param-assertions",
+            "-Xno-call-assertions",
+            "-Xno-receiver-assertions"
+        )
     }
     
     kotlin {
-        jvmToolchain(17)
+        jvmToolchain(21)
     }
     
     buildFeatures {
@@ -34,8 +39,8 @@ android {
     
     defaultConfig {
         applicationId = "de.sudoq"
-        minSdk = 14
-        targetSdk = 33
+        minSdk = 21
+        targetSdk = 36
         
         resourceConfigurations.addAll(listOf("en", "de", "fr"))
         

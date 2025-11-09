@@ -20,6 +20,7 @@ local.properties
 *.class
 *.cfg
 *.bin
+*.hprof
 lint.xml
 sudoq-model/bin
 test-model/bin

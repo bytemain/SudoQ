@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="sudoqmodel">
+    <CLASSES />
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/sudoq-app/sudoqmodel" />
+      <root url="file://$PROJECT_DIR$/sudoq-app/sudoqmodel/src/main/java" />
+      <root url="file://$PROJECT_DIR$/sudoq-app/sudoqmodel/src/otherTests/java" />
+      <root url="file://$PROJECT_DIR$/sudoq-app/sudoqmodel/src/solverTests/java" />
+      <root url="file://$PROJECT_DIR$/sudoq-app/sudoqmodel/src/test/java" />
+    </SOURCES>
+  </library>
+</component>

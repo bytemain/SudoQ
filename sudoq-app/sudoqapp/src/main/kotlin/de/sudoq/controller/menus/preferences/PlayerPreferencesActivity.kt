@@ -156,7 +156,7 @@ class PlayerPreferencesActivity : PreferencesActivity() {
     /* parameter View only needed to be found by xml who clicks this */
     fun switchToAdvancedPreferences(view: View?) {
         val advIntent = Intent(this, AdvancedPreferencesActivity::class.java)
-        AdvancedPreferencesActivity.caller = ParentActivity.PROFILE
+        AdvancedPreferencesActivity.parentActivity = ParentActivity.PROFILE
         //AdvancedPreferencesActivity.gameSettings = this.gameSettings;
         startActivity(advIntent)
     }

@@ -66,7 +66,7 @@ class FullScrollLayout : LinearLayout {
      */
     constructor(context: Context?, set: AttributeSet?) : super(context, set) {
         initialize()
-        scaleGestureDetector = ScaleGestureDetector(context, ScaleGestureListener())
+        scaleGestureDetector = ScaleGestureDetector(context!!, ScaleGestureListener())
     }
 
     /**
@@ -78,7 +78,7 @@ class FullScrollLayout : LinearLayout {
      */
     constructor(context: Context?) : super(context) {
         initialize()
-        scaleGestureDetector = ScaleGestureDetector(context, ScaleGestureListener())
+        scaleGestureDetector = ScaleGestureDetector(context!!, ScaleGestureListener())
     }
 
     /**

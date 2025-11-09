@@ -33,7 +33,7 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
     var lefthand: CheckBox? = null
 
     //    override var restricttypes: Button? = null
-    private var helper: CheckBox? = null
+    override var helper: CheckBox? = null
     private var debug: CheckBox? = null
     private var debugCounter: Byte = 0
     private var langSpinnerInit = true
@@ -65,7 +65,7 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
         check(!pm.noProfiles()) { "there are no profiles. this is  unexpected. they should be initialized in splashActivity" }
         pm.loadCurrentProfile()
         val profileGameSettings = pm.assistances
-        when (caller) {
+        when (parentActivity) {
             ParentActivity.NEW_SUDOKU -> {
                 debug!!.isChecked = pm.appSettings.isDebugSet
                 if (debug!!.isChecked) {
@@ -189,7 +189,7 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
     }
 
     override fun adjustValuesAndSave() {
-        when (caller) {
+        when (parentActivity) {
             ParentActivity.NEW_SUDOKU -> {
                 saveToGameSettings()
                 if (debug != null) {
@@ -241,7 +241,7 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
     companion object {
 
         /*this is still a hack! this activity can be called in newSudoku-pref and in player(profile)Pref, but has different behaviours*/
-        var caller = ParentActivity.NOT_SPECIFIED
+        var parentActivity = ParentActivity.NOT_SPECIFIED
         var gameSettings: GameSettings? = null
     }
 }
