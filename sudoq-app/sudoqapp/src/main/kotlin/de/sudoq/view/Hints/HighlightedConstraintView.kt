@@ -81,80 +81,28 @@ class HighlightedConstraintView(
             val topY = (topMargin + p.y * cellSizeAndSpacing - spacing / 2).toFloat()
             val bottomY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing / 2).toFloat()
             if (isLeft) {
-                    val startY = topMargin + p.y * cellSizeAndSpacing
-                    val stopY = topMargin + (p.y + 1) * cellSizeAndSpacing - spacing
-                canvas.drawLine(leftX, startY.toFloat(), leftX, stopY.toFloat(), paint)
+                val startY = (topMargin + p.y * cellSizeAndSpacing - if (isTop) spacing / 2 else 0).toFloat()
+                val stopY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing / 2 + if (isBottom) spacing / 2 else 0).toFloat()
+                canvas.drawLine(leftX, startY, leftX, stopY, paint)
             }
             if (isRight) {
-                    val startY = topMargin + p.y * cellSizeAndSpacing
-                    val stopY = topMargin + (p.y + 1) * cellSizeAndSpacing - spacing
-                canvas.drawLine(rightX, startY.toFloat(), rightX, stopY.toFloat(), paint)
+                val startY = (topMargin + p.y * cellSizeAndSpacing - if (isTop) spacing / 2 else 0).toFloat()
+                val stopY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing / 2 + if (isBottom) spacing / 2 else 0).toFloat()
+                canvas.drawLine(rightX, startY, rightX, stopY, paint)
             }
             if (isTop) {
-                    val startX = leftMargin + p.x * cellSizeAndSpacing
-                    val stopX = leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing
-                canvas.drawLine(startX.toFloat(), topY, stopX.toFloat(), topY, paint)
+                val startX = (leftMargin + p.x * cellSizeAndSpacing - if (isLeft) spacing / 2 else 0).toFloat()
+                val stopX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing / 2 + if (isRight) spacing / 2 else 0).toFloat()
+                canvas.drawLine(startX, topY, stopX, topY, paint)
             }
             if (isBottom) {
-                    val startX = leftMargin + p.x * cellSizeAndSpacing
-                    val stopX = leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing
-                canvas.drawLine(startX.toFloat(), bottomY, stopX.toFloat(), bottomY, paint)
+                val startX = (leftMargin + p.x * cellSizeAndSpacing - if (isLeft) spacing / 2 else 0).toFloat()
+                val stopX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing / 2 + if (isRight) spacing / 2 else 0).toFloat()
+                canvas.drawLine(startX, bottomY, stopX, bottomY, paint)
             }
 
-                /* Corners are now square - no circles needed */
+            /* Corners are now square with complete intersections */
             paint.color = marginColor
-
-                /* Edge filling logic - no longer needed with square corners, but kept for edge cases */
-            val belowRightMember = c.includes(Position[p.x + 1, p.y + 1])
-            /*For a cell on the right border, initializeWith edge to neighbour below
-					 *
-					 * !isBottom excludes:      corner to the left -> no neighbour directly below i.e. unwanted filling
-					 *  3rd condition excludes: corner to the right-> member below right          i.e. unwanted filling
-					 *
-					 * */
-            /*  */if (isRight && !isBottom && !belowRightMember) {
-                canvas.drawLine(
-                    rightX,
-                    (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing).toFloat(),
-                    rightX,
-                    (topMargin + (p.y + 1) * cellSizeAndSpacing).toFloat(),
-                    paint
-                )
-            }
-            /*For a cell at the bottom, initializeWith edge to right neighbour */if (isBottom && !isRight && !belowRightMember) {
-                canvas.drawLine(
-                    (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing).toFloat(),
-                    bottomY,
-                    (leftMargin + (p.x + 1) * cellSizeAndSpacing).toFloat(),
-                    bottomY,
-                    paint
-                )
-            }
-            /*For a cell on the left border, initializeWith edge to upper neighbour*/if (isLeft && !isTop && (p.x == 0 || !c.includes(
-                    Position[p.x - 1, p.y - 1]
-                ))
-            ) {
-                canvas.drawLine(
-                    leftX,
-                    (topMargin + p.y * cellSizeAndSpacing - spacing).toFloat(),
-                    leftX,
-                    (topMargin + p.y * cellSizeAndSpacing).toFloat(),
-                    paint
-                )
-            }
-
-            /*For a cell at the top initializeWith to the left*/if (isTop && !isLeft && (p.y == 0 || !c.includes(
-                    Position[p.x - 1, p.y - 1]
-                ))
-            ) {
-                canvas.drawLine(
-                    (leftMargin + p.x * cellSizeAndSpacing - spacing).toFloat(),
-                    topY,
-                    (leftMargin + p.x * cellSizeAndSpacing).toFloat(),
-                    topY,
-                    paint
-                )
-            }
         }
 
         /* uncomment to paint focuspoint of zooming

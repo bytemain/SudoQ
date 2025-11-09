@@ -40,79 +40,31 @@ class BoardPainter(var sl: SudokuLayout, var type: SudokuType) {
                 //paint.setColor(Color.GREEN);
                 if (isLeft) {
                     val x = (leftMargin + p.x * cellSizeAndSpacing - i).toFloat()
-                    val startY = (topMargin + p.y * cellSizeAndSpacing).toFloat()
-                    val stopY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing).toFloat()
+                    val startY = (topMargin + p.y * cellSizeAndSpacing - if (isTop) i else 0).toFloat()
+                    val stopY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing + if (isBottom) i else 0).toFloat()
                     canvas.drawLine(x, startY, x, stopY, paint)
                 }
                 if (isRight) {
                     val x =
                         (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat()
-                    val startY = (topMargin + p.y * cellSizeAndSpacing).toFloat()
-                    val stopY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing).toFloat()
+                    val startY = (topMargin + p.y * cellSizeAndSpacing - if (isTop) i else 0).toFloat()
+                    val stopY = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing + if (isBottom) i else 0).toFloat()
                     canvas.drawLine(x, startY, x, stopY, paint)
                 }
                 if (isTop) {
-                    val startX = (leftMargin + p.x * cellSizeAndSpacing).toFloat()
-                    val stopX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing).toFloat()
+                    val startX = (leftMargin + p.x * cellSizeAndSpacing - if (isLeft) i else 0).toFloat()
+                    val stopX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing + if (isRight) i else 0).toFloat()
                     val y = (topMargin + p.y * cellSizeAndSpacing - i).toFloat()
                     canvas.drawLine(startX, y, stopX, y, paint)
                 }
                 if (isBottom) {
-                    val startX = (leftMargin + p.x * cellSizeAndSpacing).toFloat()
-                    val stopX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing).toFloat()
+                    val startX = (leftMargin + p.x * cellSizeAndSpacing - if (isLeft) i else 0).toFloat()
+                    val stopX = (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing + if (isRight) i else 0).toFloat()
                     val y = (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat()
                     canvas.drawLine(startX, y, stopX, y, paint)
                 }
 
-                /* Corners are now square - no circles needed */
-
-                /* Edge filling logic - no longer needed with square corners, but kept for edge cases */
-                val belowRightMember = c.includes(Position[p.x + 1, p.y + 1])
-                /*For a cell on the right border, initializeWith edge to neighbour below
-                 *
-                 * !isBottom excludes:      corner to the left -> no neighbour directly below i.e. unwanted filling
-                 *  3rd condition excludes: corner to the right-> member below right          i.e. unwanted filling
-                 */
-                if (isRight && !isBottom && !belowRightMember) {
-                    canvas.drawLine(
-                        (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat(),
-                        (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing).toFloat(),
-                        (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat(),
-                        (topMargin + (p.y + 1) * cellSizeAndSpacing).toFloat(),
-                        paint
-                    )
-                }
-                /*For a cell at the bottom, initializeWith edge to right neighbour */
-                if (isBottom && !isRight && !belowRightMember) {
-                    canvas.drawLine(
-                        (leftMargin + (p.x + 1) * cellSizeAndSpacing - spacing).toFloat(),
-                        (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat(),
-                        (leftMargin + (p.x + 1) * cellSizeAndSpacing).toFloat(),
-                        (topMargin + (p.y + 1) * cellSizeAndSpacing - spacing - 1 + i).toFloat(),
-                        paint
-                    )
-                }
-
-                /*For a cell on the left border, initializeWith edge to upper neighbour*/
-                if (isLeft && !isTop && (p.x == 0 || !c.includes(Position[p.x - 1, p.y - 1]))) {
-                    canvas.drawLine(
-                        (leftMargin + p.x * cellSizeAndSpacing - i).toFloat(),
-                        (topMargin + p.y * cellSizeAndSpacing - spacing).toFloat(),
-                        (leftMargin + p.x * cellSizeAndSpacing - i).toFloat(),
-                        (topMargin + p.y * cellSizeAndSpacing).toFloat(),
-                        paint
-                    )
-                }
-                /*For a cell at the top initializeWith to the left*/
-                if (isTop && !isLeft && (p.y == 0 || !c.includes(Position[p.x - 1, p.y - 1]))) {
-                    canvas.drawLine(
-                        (leftMargin + p.x * cellSizeAndSpacing - spacing).toFloat(),
-                        (topMargin + p.y * cellSizeAndSpacing - i).toFloat(),
-                        (leftMargin + p.x * cellSizeAndSpacing).toFloat(),
-                        (topMargin + p.y * cellSizeAndSpacing - i).toFloat(),
-                        paint
-                    )
-                }
+                /* Corners are now square with complete intersections - no fill needed */
             }
         }
     }
