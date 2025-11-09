@@ -246,10 +246,9 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         Log.d(LOG_TAG, "SudokuLayout.onDraw()")
-        val edgeRadius = currentCellViewSize / 20.0f
         paint.reset()
         paint.color = Color.BLACK
-        boardPainter.paintBoard(paint, canvas, edgeRadius)
+        boardPainter.paintBoard(paint, canvas)
         hintPainter.invalidateAll()
     }
 

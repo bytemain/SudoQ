@@ -243,8 +243,8 @@ class CellViewPainter private constructor() {
         paint.strokeWidth = 1.0f * density
         paint.color = color
         paint.isAntiAlias = true
-        val radius = 1.5f * density
-        canvas.drawRoundRect(rect, radius, radius, paint)
+        // Draw without rounded corners for square cells
+        canvas.drawRect(rect, paint)
     }
 
     /**
@@ -276,16 +276,10 @@ class CellViewPainter private constructor() {
         }
         mainPaint.color = color
         val rect = RectF(0f, 0f, cell.width.toFloat(), cell.height.toFloat())
-        if (round) {
-            canvas.drawRoundRect(rect, cell.width / 20.0f, cell.height / 20.0f, mainPaint)
-            if (darken) {
-                canvas.drawRoundRect(rect, cell.width / 20.0f, cell.height / 20.0f, darkenPaint!!)
-            }
-        } else {
-            canvas.drawRect(rect, mainPaint)
-            if (darken) {
-                canvas.drawRect(rect, darkenPaint!!)
-            }
+        // Draw without rounded corners for square cells
+        canvas.drawRect(rect, mainPaint)
+        if (darken) {
+            canvas.drawRect(rect, darkenPaint!!)
         }
     }
 
@@ -312,16 +306,10 @@ class CellViewPainter private constructor() {
         }
         mainPaint.color = color
         val rect = RectF(2f, 2f, (cell.width - 2).toFloat(), (cell.height - 2).toFloat())
-        if (round) {
-            canvas.drawRoundRect(rect, cell.width / 20.0f, cell.height / 20.0f, mainPaint)
-            if (darken) {
-                canvas.drawRoundRect(rect, cell.width / 20.0f, cell.height / 20.0f, darkenPaint!!)
-            }
-        } else {
-            canvas.drawRect(rect, mainPaint)
-            if (darken) {
-                canvas.drawRect(rect, darkenPaint!!)
-            }
+        // Draw without rounded corners for square cells
+        canvas.drawRect(rect, mainPaint)
+        if (darken) {
+            canvas.drawRect(rect, darkenPaint!!)
         }
     }
 

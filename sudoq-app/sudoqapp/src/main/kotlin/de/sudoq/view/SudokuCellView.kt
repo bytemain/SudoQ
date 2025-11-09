@@ -183,7 +183,8 @@ class SudokuCellView(
                     bgPaint.color = Color.rgb(180, 230, 180)  // Same color as SAME_NUMBER state
                     bgPaint.isAntiAlias = true
                     val bgRect = RectF(left + 1f, top + 1f, right - 1f, bottom - 1f)
-                    canvas.drawRoundRect(bgRect, 2f, 2f, bgPaint)
+                    // Draw without rounded corners for square cells
+                    canvas.drawRect(bgRect, bgPaint)
                 }
                 
                 canvas.drawText(note + "", cx, baseline, notePaint)

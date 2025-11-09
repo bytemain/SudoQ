@@ -54,77 +54,7 @@ class HighlightedCellView(
         drawNewMethod(position, canvas, marginColor) //red
     }
 
-    private fun drawOldMethod(p: Position, canvas: Canvas) {
-        val edgeRadius = sl.currentCellViewSize / 20.0f
-        paint.reset()
-        val thickness = 10
-        paint.strokeWidth = (thickness * sl.currentSpacing).toFloat()
-
-
-        //deklariert hier, weil wir es nicht früher brauchen, effizienter wäre weiter oben
-        val cellSizeAndSpacing = sl.currentCellViewSize + sl.currentSpacing
-        /* these first 4 seem similar. drawing the black line around?*/
-        /* cells that touch the edge: Paint your edge but leave space at the corners*/paint.reset()
-        paint.strokeWidth = (thickness * sl.currentSpacing).toFloat()
-        paint.color = marginColor
-        val leftX: Float =
-            (sl.currentLeftMargin + p.x * cellSizeAndSpacing - sl.currentSpacing / 2).toFloat()
-        val rightX: Float =
-            (sl.currentLeftMargin + (p.x + 1) * cellSizeAndSpacing - sl.currentSpacing / 2).toFloat()
-        val topY: Float =
-            (sl.currentTopMargin + p.y * cellSizeAndSpacing - sl.currentSpacing / 2).toFloat()
-        val bottomY: Float =
-            (sl.currentTopMargin + (p.y + 1) * cellSizeAndSpacing - sl.currentSpacing / 2).toFloat()
-
-        /* left edge */
-        val startY: Float = sl.currentTopMargin + p.y * cellSizeAndSpacing + edgeRadius
-        val stopY: Float =
-            sl.currentTopMargin + (p.y + 1) * cellSizeAndSpacing - edgeRadius - sl.currentSpacing
-        canvas.drawLine(leftX, startY, leftX, stopY, paint)
-
-        /* right edge */canvas.drawLine(rightX, startY, rightX, stopY, paint)
-
-        /* top edge */
-        val startX: Float = sl.currentLeftMargin + p.x * cellSizeAndSpacing + edgeRadius
-        val stopX: Float =
-            sl.currentLeftMargin + (p.x + 1) * cellSizeAndSpacing - edgeRadius - sl.currentSpacing
-        canvas.drawLine(startX, topY, stopX, topY, paint)
-
-        /* bottom edge */canvas.drawLine(startX, bottomY, stopX, bottomY, paint)
-
-
-        /* Cells at corners of their block draw a circle for a round circumference*/paint.style =
-            Paint.Style.FILL_AND_STROKE
-        val radius = edgeRadius + sl.currentSpacing / 2
-        val angle = (90 + 10).toShort()
-        /*TopLeft*/
-        var centerX: Float = sl.currentLeftMargin + p.x * cellSizeAndSpacing + edgeRadius
-        var centerY: Float = sl.currentTopMargin + p.y * cellSizeAndSpacing + edgeRadius
-        oval[centerX - radius, centerY - radius, centerX + radius] = centerY + radius
-        canvas.drawArc(oval, (180 - 5).toFloat(), angle.toFloat(), false, paint)
-
-        /* Top Right*/centerX =
-            sl.currentLeftMargin + (p.x + 1) * cellSizeAndSpacing - sl.currentSpacing - edgeRadius
-        centerY = sl.currentTopMargin + p.y * cellSizeAndSpacing + edgeRadius
-        oval[centerX - radius, centerY - radius, centerX + radius] = centerY + radius
-        canvas.drawArc(oval, (270 - 5).toFloat(), angle.toFloat(), false, paint)
-
-        /*Bottom Left*/centerX = sl.currentLeftMargin + p.x * cellSizeAndSpacing + edgeRadius
-        centerY =
-            sl.currentTopMargin + (p.y + 1) * cellSizeAndSpacing - edgeRadius - sl.currentSpacing
-        oval[centerX - radius, centerY - radius, centerX + radius] = centerY + radius
-        canvas.drawArc(oval, (90 - 5).toFloat(), angle.toFloat(), false, paint)
-
-        /*BottomRight*/centerX =
-            sl.currentLeftMargin + (p.x + 1) * cellSizeAndSpacing - edgeRadius - sl.currentSpacing
-        centerY =
-            sl.currentTopMargin + (p.y + 1) * cellSizeAndSpacing - edgeRadius - sl.currentSpacing
-        oval[centerX - radius, centerY - radius, centerX + radius] = centerY + radius
-        canvas.drawArc(oval, (0 - 5).toFloat(), angle.toFloat(), false, paint)
-    }
-
     private fun drawNewMethod(p: Position, canvas: Canvas, color: Int) {
-        val edgeRadius = sl.currentCellViewSize / 20.0f
         paint.reset()
         paint.color = color
         paint.style = Paint.Style.STROKE
@@ -138,10 +68,9 @@ class HighlightedCellView(
             (sl.currentLeftMargin + (p.x + 1) * cellSizeAndSpacing - sl.currentSpacing / 2).toFloat()
         val bottom =
             (sl.currentTopMargin + (p.y + 1) * cellSizeAndSpacing - sl.currentSpacing / 2).toFloat()
-        canvas.drawRoundRect(
+        // Draw without rounded corners for square cells
+        canvas.drawRect(
             RectF(left, top, right, bottom),
-            edgeRadius + sl.currentSpacing / 2,
-            edgeRadius + sl.currentSpacing / 2,
             paint
         )
     }
