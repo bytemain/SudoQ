@@ -1,2 +1,0 @@
-include ':sudoqmodel', ':Playaround'
-include ':sudoqapp'
