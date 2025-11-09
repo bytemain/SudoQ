@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SudoQ is a Sudoku-App for Adroid Devices with Version 2.2 at least. -->
+<!-- Copyright (C) 2012  Haiko Klare, Julian Geppert, Jan-Bernhard Kordaß, Jonathan Kieling, Tim Zeitz, Timo Abele -->
+<!-- This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.  -->
+<!-- This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.  -->
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation" >
+
+    <!-- Action Bar Entries -->
+    <string name="action_show_tutorial">教程</string>
+
+    <string name="action_new_profile">创建新配置文件</string>
+    <string name="action_delete_profile">删除此配置文件</string>
+    <string name="action_switch_profile">切换配置文件</string>
+    <string name="action_delete_all_gestures">删除所有手势</string>
+    <string name="action_delete_single_gesture">删除特定手势</string>
+    <string name="action_restore_all">全部恢复</string>
+    
+    
+    <!-- Error Messages -->
+    <string name="error_profile_dir_not_found">错误！无法找到配置文件文件夹！</string>
+    <string name="error_sudoku_preference_incomplete">错误！设置不完整！</string>
+    <string name="error_gestures_no_library">手势不可用！</string>
+    <string name="error_thumbnail_get">暂停时无法捕获屏幕！</string>
+    <string name="error_thumbnail_saved">无法保存捕获的缩略图！</string>
+    <string name="error_thumbnail_load">无法加载指定游戏的缩略图！</string>
+    <string name="error_gestures_not_complete">您需要为配置文件中的所有符号定义手势！</string>
+    <string name="error_cant_switch_symbols">没有可用的备用符号集！</string>
+    
+    <!-- Toasts -->
+    <string name="toast_solved_wrong">单元格未正确求解</string>
+    <string name="toast_solved_correct">全部正确求解</string>
+    <string name="toast_invalid_symbol">无效符号</string>
+    <string name="toast_restricted_symbol">符号受限</string>
+    <string name="toast_stop_that">停下！！！</string>
+    <string name="toast_multi_select_activated">多选模式已激活</string>
+    <string name="toast_multi_select_deactivated">多选模式已停用</string>
+    <string name="toast_cell_not_editable">此单元格不可编辑</string>
+    <string name="button_exit_multi_select">取消选择</string>
+    
+    <!-- Splash -->
+    <string name="splash_text">SudoQ 正在初始化首次启动</string>    
+    
+    <!-- Dialogs -->
+    <string name="dialog_yes">是</string>
+    <string name="dialog_no">否</string>
+    <string name="dialog_won_title">你赢了！</string>
+    <string name="dialog_surrender_title">你认输了！</string>
+    <string name="dialog_won_text">你想退出吗？</string>
+    <string name="dialog_won_statistics">统计</string>
+    <string name="dialog_won_timeneeded">所用时间</string>
+    <string name="dialog_won_score">分数</string>
+    
+    <!-- Statistics -->
+    <string name="statistics_title">统计</string>
+    <string name="statistics_counters">计数器</string>
+    <string name="statistics_played_sudokus">已玩数独</string>
+    <string name="statistics_played_easy_sudokus"  >已玩简单数独</string>
+    <string name="statistics_played_medium_sudokus">已玩中等数独</string>
+    <string name="statistics_played_difficult_sudokus">已玩困难数独</string>
+    <string name="statistics_played_infernal_sudokus" >已玩地狱数独</string>
+	<string name="statistics_records">记录</string>
+	<string name="statistics_score">最高分</string>
+	<string name="statistics_fastest_solving_time">最快解题时间</string>
+        
+	<!-- Profile preference titles und textviews -->
+
+	<!-- Profile list -->
+	<string name="profile_list_profile_changed">配置文件已更改为</string>
+	    
+	<!-- Player Preferences Button -->
+	<string name="player_preferences_button_changeprofile">更改配置文件</string>
+    
+
+    <!-- GestureBuilder -->
+    <string name="gesture_builder_title">手势构建器</string>
+    <string name="gesture_builder_define_gesture">定义手势</string>
+    
+    <!-- GameTypeSelection Buttons -->
+    <string name="sf_gametypeselection_local_sudoku" >数独</string>
+    <string name="sf_gametypeselection_server_sudoku">官方数独</string>
+    <string name="sf_gametypeselection_create_mp"    >创建</string>
+    <string name="sf_gametypeselection_join_mp"      >加入</string>
+    
+    <!-- SudokuPreferences Buttons und TextViews -->    
+    <string name="subtitle_sudokupreferences_sudokutype">数独类型：</string>
+    <string name="subtitle_sudokupreferences_sudokucomplexity">难度：</string>
+    <string name="sf_sudokupreferences_start">开始</string>
+    <string name="sf_sudokupreferences_sudokutype">选择数独类型</string>
+    <string name="sf_sudokupreferences_sudokucomplexity">选择难度</string>
+    <string name="sf_sudokupreferences_assistances">调整辅助功能</string>
+    <string name="sf_sudokupreferences_copying">模板正在复制中，请稍候。</string>
+
+    <!-- SudokuActivity -->
+    <string name="sf_sudoku_button_bookmark">书签</string>
+    <string name="sf_sudoku_button_close">关闭</string>
+    <string name="sf_sudoku_assistances_title">辅助功能</string>
+    <string name="sf_sudoku_assistances_check">检查解法</string>
+    <string name="sf_sudoku_assistances_solve_specific">求解选中单元格</string>
+    <string name="sf_sudoku_assistances_solve_random">求解随机单元格</string>
+    <string name="sf_sudoku_assistances_solve_surrender">认输</string>
+    <string name="sf_sudoku_assistances_back_to_valid_state">返回到最后正确状态</string>
+    <string name="sf_sudoku_assistances_back_to_bookmark">返回到最后书签</string>
+    <string name="sf_sudoku_assistances_give_hint">给出提示</string>
+
+    <string name="sf_sudoku_title_gesture_input_entry">通过手势输入符号</string>
+    <string name="sf_sudoku_title_gesture_input_note">通过手势输入笔记</string>
+
+    <string name="sf_sudoku_title_action_tree">操作历史</string>
+    <string name="sf_sudoku_assistances_crash">崩溃应用</string>
+    
+    <!-- Fill Candidates Button -->
+    <string name="sf_sudoku_button_fill_candidates">填充候选数字</string>
+    <string name="sf_sudoku_fill_candidates_progress">正在填充候选数字…</string>
+
+    <!-- Titles -->
+    <string name="title_mainmenu">SudoQ</string>
+    <string name="title_gametypeselection">新数独</string>
+    
+    <!-- Subtitles -->
+	<string name="subtitle_gametypeselection_mp">多人游戏</string>  
+	
+	<!-- Complexity -->
+    <string name="complexity_easy">简单</string>
+    <string name="complexity_medium">中等</string>
+    <string name="complexity_difficult">困难</string>
+    <string name="complexity_infernal">地狱</string>
+    
+    <!-- Sudoku Types -->
+    <string name="sudoku_type_standard_9x9"  >标准数独 9x9</string>
+    <string name="sudoku_type_standard_16x16">标准数独 16x16</string>
+    <string name="sudoku_type_standard_6x6"  >标准数独 6x6</string>
+    <string name="sudoku_type_standard_4x4"  >标准数独 4x4</string>
+    <string name="sudoku_type_squiggly_a_9x9">Squiggly 数独 9x9</string>
+    <string name="sudoku_type_squiggly_b_9x9">Squoggly 数独 9x9</string>
+    <string name="sudoku_type_stairstep_9x9" >阶梯数独 9x9</string>
+    <string name="sudoku_type_samurai"       >武士数独</string>
+    <string name="sudoku_type_hyper"         >超级数独</string>
+    <string name="sudoku_type_xsudoku"       >X 数独</string>
+    
+    <string name="sf_sudokupreferences_title">数独设置</string>
+    <string name="sf_advancedpreferences_title">高级设置</string>
+    <string name="sf_advancedpreferences_restricttypes_title">提供的类型</string>
+    
+        
+    <!-- Game states -->    
+
+    <!-- Sudoku Loading -->
+    <string name="tx_no_sudokus_to_load">没有已保存的数独可用。</string>
+    <string name="sudokuloading_delete_finished">删除已完成的数独</string>
+    <string name="sudokuloading_delete_all"     >删除所有数独</string>
+    <string name="sf_loading_back">返回！</string>
+    <string name="sudokuloading_dialog_play">开始</string>
+    <string name="sudokuloading_dialog_delete">删除</string>
+    
+    <!--  Defaults -->
+    <string name="default_user_name">配置文件 1</string>
+    <string name="fab_go_back">点击删除。\n再次点击按钮停止删除</string>
+    <string name="sf_sudokuloading_title">已保存的数独</string>
+
+    <!-- Hints -->
+
+    <string name="hint_lastdigit">看看高亮显示的{shape}！只剩下一个单元格了。</string>
+
+    <string name="constraintshape_row_accusative_determined"     >行</string>
+    <string name="constraintshape_column_accusative_determined"  >列</string>
+    <string name="constraintshape_diagonal_accusative_determined">对角线</string>
+    <string name="constraintshape_block_accusative_determined"   >宫</string>
+    <string name="constraintshape_other_accusative_determined"   >组</string>
+
+    <string name="constraintshape_row_genitive_determined"     >行</string>
+    <string name="constraintshape_column_genitive_determined"  >列</string>
+    <string name="constraintshape_diagonal_genitive_determined">对角线</string>
+    <string name="constraintshape_block_genitive_determined"   >宫</string>
+    <string name="constraintshape_other_genitive_determined"   >组</string>
+
+    <string name="constraintshape_row_dative_determined"     >行</string>
+    <string name="constraintshape_column_dative_determined"  >列</string>
+    <string name="constraintshape_diagonal_dative_determined">对角线</string>
+    <string name="constraintshape_block_dative_determined"   >宫</string>
+    <string name="constraintshape_other_dative_determined"   >组</string>
+
+    <string name="gender_maskulin">m</string>
+    <string name="gender_feminin">f</string>
+    <string name="gender_neutral">n</string>
+
+    <string name="maskuline_accusative_determiner"></string>
+    <string name="feminine_accusative_determiner"></string>
+    <string name="neutral_accusative_determiner"></string>
+
+    <string name="maskuline_accusative_suffix"></string>
+    <string name="feminine_accusative_suffix"></string>
+    <string name="neutral_accusative_suffix"></string>
+
+    <string name="hint_lastcandidate">看看高亮显示的单元格。只剩下一个候选数字了。</string>
+    <string name="hint_leftovernote">看看高亮显示的{shape}。由于{note}已设置，可以删除它的任何笔记。</string>
+
+    <string name="hint_nakedsingle_look">看，这里有一个唯一候选数！</string>
+    <string name="hint_nakedsingle_note">{note}是高亮显示单元格中唯一剩下的笔记。</string>
+    <string name="hint_nakedsingle_remove">可以在那里设置它，并从此{shape}中的所有其他单元格中删除。</string>
+
+    <string name="hint_nakedset">看，这里有一个显性数组！{symbols}将以某种方式分布在高亮显示的单元格中。可以从该组中的所有其他单元格中删除它们。</string>
+
+    
+    <string name="hint_hiddensingle">看，这里有一个隐性唯一数！在高亮显示形状的所有单元格中，"{note}"仅出现在高亮显示的单元格中。可以在那里设置它。</string>
+
+    <string name="hint_hiddenset">看，这里有一个隐性数组！{symbols}将以某种方式分布在高亮显示的单元格中。因此，可以删除这些单元格中的任何其他候选数字。</string>
+
+    
+    <string name="hint_lockedcandidates">这里有一个锁定候选数：{note}在蓝色组中只出现一次。因此可以在绿色组的所有其他单元格中删除它。</string>
+
+    <string name="hint_xWing">如果你看看绿色和蓝色组的交叉点，某些笔记在蓝色组中的其他地方都不出现。因此可以在绿色组中删除它们。</string>
+
+    
+    <string name="hint_backtracking">如前所述，我还在开发中。所以我没有更多想法了，我最好的建议是设置一个书签并猜测一个单元格。</string>
+    <string name="hint_fill_out_notes">顺便说一句，有一个单元格里面没有笔记。如果我在单元格中看不到笔记，我会假设你已经排除了它。如果单元格中的所有仍然被认为可能的数字都被设置为笔记，我的工作效果最好。如果你愿意，我可以为你输入笔记。</string>
+
+
+</resources>

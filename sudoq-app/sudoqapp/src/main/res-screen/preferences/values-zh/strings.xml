@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_preference_title">用户设置</string>
+    <string name="profile_preference_title_name">名称</string>
+    <string name="profile_preference_title_gesture">手势输入</string>
+    <string name="profile_preference_title_intelligent_assistant">启用提示与辅助</string>
+    <string name="profile_preference_title_left_hand_mode">左手模式</string>
+    <string name="profile_preference_title_cat_profile">配置文件设置</string>
+    <string name="profile_preference_title_cat_assistances">辅助功能</string>
+    <string name="profile_preference_title_assistance_markRowColumn">高亮显示行/列</string>
+    <string name="profile_preference_title_assistance_markWrongSymbol">高亮显示错误条目</string>
+    <string name="profile_preference_title_assistance_restrictCandidates">限制无效候选数字</string>
+    <string name="profile_preference_title_assistance_allowSolveSpecificCell">允许求解选中单元格</string>
+    <string name="profile_preference_title_assistance_allowSolveRandomCell">允许求解随机单元格</string>
+    <string name="profile_preference_title_assistance_allowGetHint">显示最简单单元格的提示</string>
+    <string name="profile_preference_title_assistance_autoAdjustNotes">自动更新笔记</string>
+    <string name="profile_preference_title_assistance_autoFillUniqueCandidates">自动填充唯一候选数字单元格</string>
+    <string name="profile_preference_title_assistance_showCompletedDigits">为完成的数字显示对勾</string>
+    <string name="profile_preference_title_profile">配置文件</string>
+    <string name="profile_preference_button_statistics">统计</string>
+    <string name="profile_preference_button_gesture_builder">手势构建器</string>
+    <string name="profile_preference_button_save">保存</string>
+    <string name="profile_preference_button_advanced_preferences">高级设置</string>
+    <string name="profile_preference_button_provide_restricted_set_of_types">选择提供的类型</string>
+    <string name="profile_preference_new_profile">未命名</string>
+    <string name="profile_preference_title_crash_trigger">崩溃应用</string>
+    <string name="profile_preference_title_debug">调试</string>
+
+    <!-- restrict types -->
+    <string name="advanced_settings_restrict_types_empty_warning">您必须至少保留一种类型，否则将无法开始新的数独游戏。</string>
+    <!-- Sudoku Types -->
+    <string name="advanced_settings_restrict_item_standard_9x9"  >标准数独</string>
+    <string name="advanced_settings_restrict_item_standard_16x16">16x16 数独</string>
+    <string name="advanced_settings_restrict_item_standard_6x6"  >6x6 数独</string>
+    <string name="advanced_settings_restrict_item_standard_4x4"  >4x4 数独</string>
+    <string name="advanced_settings_restrict_item_squiggly_a_9x9">Squiggly 数独 9x9</string>
+    <string name="advanced_settings_restrict_item_squiggly_b_9x9">Squoggly 数独 9x9</string>
+    <string name="advanced_settings_restrict_item_stairstep_9x9" >阶梯数独 9x9</string>
+    <string name="advanced_settings_restrict_item_samurai"       >武士数独</string>
+    <string name="advanced_settings_restrict_item_hyper"         >超级数独</string>
+    <string name="advanced_settings_restrict_item_xsudoku"       >X 数独</string>
+
+    <!-- language -->
+    <string name="advanced_settings_language_spinner_dummy">选择语言</string>
+    <string name="advanced_settings_language_spinner_label">语言</string>
+    <string name="language_english">英语</string>
+    <string name="language_french">法语</string>
+    <string name="language_german">德语</string>
+    <string name="language_chinese">简体中文</string>
+    <string name="language_system">系统语言</string>
+
+</resources>

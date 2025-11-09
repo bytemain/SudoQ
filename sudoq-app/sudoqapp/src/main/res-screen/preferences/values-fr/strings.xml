@@ -6,14 +6,14 @@
     <string name="profile_preference_title_left_hand_mode">mode gaucher</string>
     <string name="profile_preference_title_cat_profile">Paramètres du profil</string>
     <string name="profile_preference_title_cat_assistances">Aide</string>
-    <string name="profile_preference_title_assistance_markRowColumn">Séléctionner la ligne/ la colonne</string>
-    <string name="profile_preference_title_assistance_markWrongSymbol">Séléctionner les symboles faux</string>
-    <string name="profile_preference_title_assistance_restrictCandidates">Aide de saisie</string>
-    <string name="profile_preference_title_assistance_allowSolveSpecificCell">Résoudre la case choisie</string>
-    <string name="profile_preference_title_assistance_allowSolveRandomCell">Résoudre une case au hasard</string>
-    <string name="profile_preference_title_assistance_allowGetHint">Conseils</string>
-    <string name="profile_preference_title_assistance_autoAdjustNotes">Adapter les remarques automatiquement</string>
-    <string name="profile_preference_title_assistance_autoFillUniqueCandidates">Remplir automatiquement les cellules avec des candidats uniques</string>
+    <string name="profile_preference_title_assistance_markRowColumn">Surligner la ligne/colonne</string>
+    <string name="profile_preference_title_assistance_markWrongSymbol">Surligner les entrées incorrectes</string>
+    <string name="profile_preference_title_assistance_restrictCandidates">Restreindre les candidats invalides</string>
+    <string name="profile_preference_title_assistance_allowSolveSpecificCell">Autoriser la résolution de la case sélectionnée</string>
+    <string name="profile_preference_title_assistance_allowSolveRandomCell">Autoriser la résolution d\'une case aléatoire</string>
+    <string name="profile_preference_title_assistance_allowGetHint">Afficher un indice pour la case la plus facile</string>
+    <string name="profile_preference_title_assistance_autoAdjustNotes">Mettre à jour automatiquement les notes</string>
+    <string name="profile_preference_title_assistance_autoFillUniqueCandidates">Remplir automatiquement les cellules à candidat unique</string>
     <string name="profile_preference_title_assistance_showCompletedDigits">Afficher la coche pour les chiffres complets</string>
     <string name="profile_preference_title_profile">Profil</string>
     <string name="profile_preference_button_statistics">Statistiques</string>
@@ -39,11 +39,12 @@
 
 
     <string name="profile_preference_title_crash_trigger">crasher l\'application</string>
-    <string name="profile_preference_title_intelligent_assistant">Assistant Intelligent</string>
+    <string name="profile_preference_title_intelligent_assistant">Activer les indices &amp; l\'assistance</string>
     <string name="language_system">Langue de système</string>
     <string name="language_german">Allemand</string>
     <string name="language_french">Français</string>
     <string name="language_english">Anglaise</string>
+    <string name="language_chinese">Chinois simplifié</string>
     <string name="advanced_settings_language_spinner_label">Langue</string>
     <string name="advanced_settings_language_spinner_dummy">Choisissez une langue</string>
 

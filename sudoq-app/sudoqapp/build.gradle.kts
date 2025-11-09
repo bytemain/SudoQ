@@ -43,8 +43,6 @@ android {
         minSdk = 21
         targetSdk = 36
         
-        resourceConfigurations.addAll(listOf("en", "de", "fr"))
-        
         testApplicationId = "de.sudoq.test"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

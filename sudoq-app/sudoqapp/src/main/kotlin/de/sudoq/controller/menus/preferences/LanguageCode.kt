@@ -4,21 +4,22 @@ import android.util.Log
 
 /**
  * The LanguageCode class represents the language setting which the users chooses.
- * There are three translations of this apps strings: English, German and French.
- * The user may enforce one of these three or follow the system default.
+ * There are four translations of this apps strings: English, German, French and Chinese.
+ * The user may enforce one of these or follow the system default.
  * If the system default is not supported, the chosen language will be english.
  */
 enum class LanguageCode {
     system,
     de,
     en,
-    fr;
+    fr,
+    zh;
 
     companion object {
         /**
          * Returns the LanguageCode for the given language code, or the language code for english, if the language code is unknown.
          *
-         * @param code the language code (de, en, fr, ...)
+         * @param code the language code (de, en, fr, zh, ...)
          * @return the LanguageCode representing this language code, or english if not supported
          * @throws IllegalArgumentException if the string 'system' was supplied
          */
@@ -38,7 +39,7 @@ enum class LanguageCode {
          * Returns the LanguageCode for the given code, if the code is not supported.
          * This method is meant to parse the system language preferences.
          *
-         * @param code the language setting code (system, de, en, fr)
+         * @param code the language setting code (system, de, en, fr, zh)
          * @return the LanguageCode for that code, or system if the code is not supported
          */
         @JvmStatic

@@ -6,14 +6,14 @@
     <string name="profile_preference_title_left_hand_mode">Linkshänder-Modus</string>
     <string name="profile_preference_title_cat_profile">Profileinstellungen</string>
     <string name="profile_preference_title_cat_assistances">Hilfestellungen</string>
-    <string name="profile_preference_title_assistance_markRowColumn">Zeile/Spalte markieren</string>
-    <string name="profile_preference_title_assistance_markWrongSymbol">Falsche Symbole markieren</string>
-    <string name="profile_preference_title_assistance_restrictCandidates">Eingabehilfe</string>
-    <string name="profile_preference_title_assistance_allowSolveSpecificCell">Ausgewähltes Feld lösen</string>
-    <string name="profile_preference_title_assistance_allowSolveRandomCell">Zufälliges Feld lösen</string>
-    <string name="profile_preference_title_assistance_allowGetHint">Tipps</string>
-    <string name="profile_preference_title_assistance_autoAdjustNotes">Notizen automatisch anpassen</string>
-    <string name="profile_preference_title_assistance_autoFillUniqueCandidates">Zellen mit eindeutigen Kandidaten automatisch ausfüllen</string>
+    <string name="profile_preference_title_assistance_markRowColumn">Zeile/Spalte hervorheben</string>
+    <string name="profile_preference_title_assistance_markWrongSymbol">Fehlerhafte Einträge hervorheben</string>
+    <string name="profile_preference_title_assistance_restrictCandidates">Ungültige Kandidaten einschränken</string>
+    <string name="profile_preference_title_assistance_allowSolveSpecificCell">Ausgewähltes Feld lösen erlauben</string>
+    <string name="profile_preference_title_assistance_allowSolveRandomCell">Zufälliges Feld lösen erlauben</string>
+    <string name="profile_preference_title_assistance_allowGetHint">Hinweis für leichtestes Feld zeigen</string>
+    <string name="profile_preference_title_assistance_autoAdjustNotes">Notizen automatisch aktualisieren</string>
+    <string name="profile_preference_title_assistance_autoFillUniqueCandidates">Felder mit einem Kandidaten automatisch ausfüllen</string>
     <string name="profile_preference_title_assistance_showCompletedDigits">Häkchen für vollständige Ziffern anzeigen</string>
     <string name="profile_preference_title_profile">Profil</string>
     <string name="profile_preference_button_statistics">Statistik</string>
@@ -39,10 +39,11 @@
     <string name="advanced_settings_restrict_item_xsudoku"       >X-Sudoku</string>
 
     <string name="profile_preference_title_crash_trigger">App abstürzen lassen</string>
-    <string name="profile_preference_title_intelligent_assistant">Intelligenter Assistent</string>
+    <string name="profile_preference_title_intelligent_assistant">Hinweise &amp; Hilfen aktivieren</string>
     <string name="language_english">Englisch</string>
     <string name="language_french">Französisch</string>
     <string name="language_german">Deutsch</string>
+    <string name="language_chinese">Vereinfachtes Chinesisch</string>
     <string name="language_system">Systemsprache</string>
     <string name="advanced_settings_language_spinner_label">Sprache</string>
     <string name="advanced_settings_language_spinner_dummy">Wähle eine Sprache</string>

@@ -2,7 +2,6 @@ package de.sudoq.controller.menus.preferences
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import java.util.*
 
 /**
@@ -32,7 +31,7 @@ object LanguageUtility {
     fun loadLanguageCodeFromPreferences(context: Context): LanguageCode {
         val sharedPreferences = context.getSharedPreferences(SUDOQ_SHARED_PREFS_FILE, Context.MODE_PRIVATE)
         val languageCodeOrSystem = sharedPreferences.getString(LANGUAGE_KEY, LanguageCode.system.name)
-        return LanguageCode.getFromString(languageCodeOrSystem!!) // Null check pointless, but Kotlin does not like that we could potentially get null here.
+        return LanguageCode.getFromString(languageCodeOrSystem!!)
     }
 
     /**
@@ -66,7 +65,7 @@ object LanguageUtility {
 
     /**
      * Gets the [LanguageCode] for the currently chosen resource language.
-     * There are only 3 possible resource languages, if however the resource is something else, this returns English.
+     * There are only 4 possible resource languages, if however the resource is something else, this returns English.
      *
      * @param context a [Context] of this application (any activity)
      * @return the [LanguageCode] which the resource is set to
@@ -75,7 +74,12 @@ object LanguageUtility {
     fun getResourceLanguageCode(context: Context): LanguageCode {
         val resources = context.resources
         val configuration = resources.configuration
-        val languageCode = configuration.locale.language
+        val languageCode = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            configuration.locales[0].language
+        } else {
+            @Suppress("DEPRECATION")
+            configuration.locale.language
+        }
         return LanguageCode.getFromLanguageCode(languageCode)
     }
 
@@ -88,14 +92,24 @@ object LanguageUtility {
      */
     @JvmStatic
     fun setResourceLocale(context: Context, languageCode: LanguageCode) {
-        Log.d("SudoQLanguage", "Setting resource from context '" + context.javaClass.simpleName + "' to '" + languageCode + "'")
         require(languageCode != LanguageCode.system) { "The resource locale may never be set to system!" }
+        
         val newLocale = Locale(languageCode.name)
+        Locale.setDefault(newLocale)
+        
         val resources = context.resources
-        val displayMetrics = resources.displayMetrics
         val configuration = resources.configuration
-        configuration.locale = newLocale
-        resources.updateConfiguration(configuration, displayMetrics)
+        
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            configuration.setLocale(newLocale)
+            @Suppress("DEPRECATION")
+            resources.updateConfiguration(configuration, resources.displayMetrics)
+        } else {
+            @Suppress("DEPRECATION")
+            configuration.locale = newLocale
+            @Suppress("DEPRECATION")
+            resources.updateConfiguration(configuration, resources.displayMetrics)
+        }
     }
 
     // ### App language: ###
@@ -111,7 +125,6 @@ object LanguageUtility {
     fun getDesiredLanguage(context: Context): LanguageCode {
         val languageCode = loadLanguageCodeFromPreferences(context)
         return if (languageCode == LanguageCode.system) {
-            //Load system language:
             resolveSystemLanguage()
         } else {
             languageCode
