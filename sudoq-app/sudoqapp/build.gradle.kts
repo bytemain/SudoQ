@@ -35,6 +35,7 @@ android {
     
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     
     defaultConfig {
@@ -66,6 +67,14 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Use different package name for debug builds to allow installation alongside release version
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-DEBUG"
+            // Debug version will display as "SudoQ DEBUG"
+            resValue("string", "app_name", "SudoQ DEBUG")
+        }
+        
         release {
             // minifyEnabled = true
             // proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")

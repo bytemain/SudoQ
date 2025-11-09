@@ -23,6 +23,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import de.sudoq.BuildConfig
 import de.sudoq.R
 import de.sudoq.controller.SudoqListActivity
 import de.sudoq.controller.sudoku.SudokuActivity
@@ -318,7 +319,7 @@ class SudokuLoadingActivity : SudoqListActivity(), OnItemClickListener, OnItemLo
                     Log.v("file-share", "gamefile getParent " + gameFile.parent)
                     val fileUri = FileProvider.getUriForFile(
                         this@SudokuLoadingActivity,
-                        "de.sudoq.fileprovider", tmpFile
+                        "${BuildConfig.APPLICATION_ID}.fileprovider", tmpFile
                     )
                     Log.v("file-share", "uri is null? " + (fileUri == null))
                     val sendIntent = Intent()
