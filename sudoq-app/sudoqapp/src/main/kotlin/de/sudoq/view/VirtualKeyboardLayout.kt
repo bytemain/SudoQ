@@ -172,10 +172,14 @@ class VirtualKeyboardLayout(context: Context?, attrs: AttributeSet?) : LinearLay
     }
 
     /**
-     * Aktiviert alle Buttons dieses Keyboards.
+     * Enable all buttons of this keyboard.
      */
     fun enableAllButtons() {
         for (b in buttonIterator) b.isEnabled = true
+    }
+
+    fun disableAllButtons() {
+        for (b in buttonIterator) b.isEnabled = false
     }
 
     /**

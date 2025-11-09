@@ -140,7 +140,7 @@ class ControlPanelFragment : Fragment() {
         Buttons.fillCandidatesButton!!.alpha = if (!actionTreeShown && !finished) 1.0f else 0.3f
         
         val sudokuView = sl
-        activity.mediator!!.setKeyboardState(!finished && sudokuView.currentCellView != null)
+        activity.mediator!!.setKeyboardState(!finished)
     }
 
     val gestureButton: ImageButton?

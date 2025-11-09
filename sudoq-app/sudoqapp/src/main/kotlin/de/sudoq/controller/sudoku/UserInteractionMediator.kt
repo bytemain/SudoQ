@@ -335,13 +335,14 @@ class UserInteractionMediator(
             highlightCellsWithSameNumber(currentField)
         } else {
             noteMode = !noteMode
-            currentField!!.setNoteState(noteMode)
+            currentField.setNoteState(noteMode)
         }
         if (currentField.cell.isEditable) {
             restrictCandidates()
             virtualKeyboard.isActivated = true
         } else {
-            virtualKeyboard.isActivated = false
+            virtualKeyboard.disableAllButtons()
+            virtualKeyboard.isActivated = true
         }
     }
 
@@ -371,7 +372,8 @@ class UserInteractionMediator(
                 restrictCandidates()
                 virtualKeyboard.isActivated = true
             } else {
-                virtualKeyboard.isActivated = false
+                virtualKeyboard.disableAllButtons()
+                virtualKeyboard.isActivated = true
             }
             if (e == SelectEvent.Long && currentCell.isEditable) {
                 //Long press -> user can input note directly
@@ -381,7 +383,8 @@ class UserInteractionMediator(
             }
             /* second click on the same cell*/
         } else {
-            currentCell = currentCellView!!.cell
+            currentCell = currentCellView.cell
+
             /* set solution via touchy swypy*/
             if (currentCell.isEditable) {
 
@@ -394,9 +397,8 @@ class UserInteractionMediator(
                 restrictCandidates()
                 if (noteMode) gestureOverlay!!.activateForNote() else gestureOverlay!!.activateForEntry()
             } else {
-                //if it is not editable don't do anything
-                //this.noteMode = !this.noteMode;
-                //restrictCandidates();
+                virtualKeyboard.disableAllButtons()
+                virtualKeyboard.isActivated = true
             }
         }
     }
@@ -560,9 +562,6 @@ class UserInteractionMediator(
         }
     }
 
-    /**
-     * 限制键盘上的候选项。
-     */
     fun restrictCandidates() {
         Log.d(LOG_TAG, "restrictCandidates: Starting, enabling all buttons first")
         virtualKeyboard.enableAllButtons()
