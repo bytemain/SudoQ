@@ -125,12 +125,41 @@ class SudokuController(
      * {@inheritDoc}
      */
     override fun onSolveOne(): Boolean {
-        val res = game.solveCell()
-        if (game.isFinished()) {
-            updateStatistics()
-            handleFinish(false)
-        }
-        return res
+        val sudoku = game.sudoku ?: return false
+        if (sudoku.hasErrors()) return false
+
+        // Pick the next unsolved cell (same behavior as previous implementation)
+        val cellToSolve = run {
+            var target: Cell? = null
+            for (f in sudoku) {
+                if (f.isNotSolved) { target = f; break }
+            }
+            target
+        } ?: return false
+
+        // Briefly highlight the cell (green frame), then fill the value
+        val sl = context.sudokuLayout ?: return false
+        val pos = sudoku.getPosition(cellToSolve.id) ?: return false
+        val highlightView = de.sudoq.view.Hints.HighlightedCellView(
+            context, sl, pos, android.graphics.Color.GREEN
+        )
+        // Add overlay to show which cell is being solved
+        sl.addView(highlightView, sl.width, sl.height)
+
+        val delayMs = 350L
+        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        handler.postDelayed({
+            // Remove highlight and perform the solve
+            try { sl.removeView(highlightView) } catch (_: Exception) {}
+            val res = game.solveCell(cellToSolve)
+            if (game.isFinished()) {
+                updateStatistics()
+                handleFinish(false)
+            }
+        }, delayMs)
+
+        // Indicate the action was scheduled
+        return true
     }
 
     /**

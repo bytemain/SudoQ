@@ -58,7 +58,7 @@ class HighlightedCellView(
         paint.reset()
         paint.color = color
         paint.style = Paint.Style.STROKE
-        val thickness = 10
+        val thickness = 5
         paint.strokeWidth = (thickness * sl.currentSpacing).toFloat()
         val cellSizeAndSpacing = sl.currentCellViewSize + sl.currentSpacing
         val left =
@@ -114,7 +114,7 @@ class HighlightedCellView(
      */
     init {
         paint.color = marginColor
-        val thickness = 10
+        val thickness = 5
         paint.strokeWidth = (thickness * sl.currentSpacing).toFloat()
         style = paint.style
     }

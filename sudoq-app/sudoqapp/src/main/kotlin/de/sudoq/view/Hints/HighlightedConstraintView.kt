@@ -50,7 +50,7 @@ class HighlightedConstraintView(
         super.onDraw(canvas)
         paint.reset()
         paint.color = marginColor
-        val thickness = 10
+        val thickness = 5
         paint.strokeWidth = (thickness * sl.currentSpacing).toFloat()
         val c = constraint
         //Log.d("HighlightCV", "This is happening!");
