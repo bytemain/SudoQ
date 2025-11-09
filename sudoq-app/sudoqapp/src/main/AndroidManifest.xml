@@ -5,7 +5,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto" android:versionCode="42" android:versionName="2.1.0">
 
     <application android:allowClearUserData="true" android:icon="@drawable/launcher" android:label="@string/app_name" android:theme="@style/Theme.DesignDemo">
-        <activity android:name=".controller.menus.SplashActivity" android:configChanges="orientation" android:exported="true" android:noHistory="true" android:theme="@style/Theme.AppCompat.NoActionBar" android:windowActionBar="false">
+        <activity android:name=".controller.menus.SplashActivity" android:configChanges="orientation" android:exported="true" android:noHistory="true" android:theme="@style/Theme.DesignDemo" android:windowActionBar="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

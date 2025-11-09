@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- API 21+ (Lollipop and above) specific theme attributes -->
+    <style name="Base.Theme.DesignDemo" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">#00695c</item>
+        <item name="colorPrimaryDark">#004d40</item>
+        <item name="colorAccent">#7c6354</item>
+        <item name="android:windowBackground">@color/window_background</item>
+        <!-- Enable translucent status bar for fitsSystemWindows to work properly -->
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <!-- Enable drawing system bar backgrounds (API 21+) -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <!-- Set status bar color to match app theme -->
+        <item name="android:statusBarColor">#004d40</item>
+    </style>
+</resources>

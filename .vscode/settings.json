@@ -4,4 +4,10 @@
     "chat.tools.terminal.autoApprove": {
         "./gradlew": true
     },
+    // Disable auto-formatting for XML files
+    "[xml]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false
+    }
 }
