@@ -29,7 +29,7 @@ class NoNotesView(context: Context, sl: SudokuLayout, d: NoNotesDerivation) :
     init {
         val i = d.cellIterator
         while (i.hasNext()) {//todo can this be a for loop
-        val cellView: View = HighlightedCellView(context, sl, i.next().position, Color.RED)
+            val cellView: View = HighlightedCellView(context, sl, i.next().position, Color.GREEN)
             highlightedObjects.add(cellView)
         }
     }

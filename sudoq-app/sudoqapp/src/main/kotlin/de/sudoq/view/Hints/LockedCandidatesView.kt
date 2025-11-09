@@ -32,7 +32,7 @@ class LockedCandidatesView(context: Context, sl: SudokuLayout, d: LockedCandidat
             HighlightedConstraintView(context, sl, d.lockedConstraint!!, Color.BLUE)
         highlightedObjects.add(lockedConstraintV)
         val reducibleConstraintV: View =
-        HighlightedConstraintView(context, sl, d.reducibleConstraint!!, Color.RED)
+            HighlightedConstraintView(context, sl, d.reducibleConstraint!!, Color.GREEN)
         highlightedObjects.add(reducibleConstraintV)
     }
 }
