@@ -73,7 +73,6 @@ abstract class LanguageAdaptingCompatActivity : AppCompatActivity() {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         finish()
         startActivity(intent)
-        @Suppress("DEPRECATION")
         overridePendingTransition(0, 0)
     }
 }

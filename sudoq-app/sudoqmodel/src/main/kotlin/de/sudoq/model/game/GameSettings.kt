@@ -42,7 +42,6 @@ open class GameSettings(
      *
      * @param assistance The assistance to set
      */
-    @Suppress("DEPRECATION")
     fun setAssistance(assistance: Assistances) {
         assistances.set(
             2.0.pow((assistance.ordinal + 1).toDouble()).toInt()
@@ -54,7 +53,6 @@ open class GameSettings(
      *
      * @param assistance The assistance to set
      */
-    @Suppress("DEPRECATION")
     fun clearAssistance(assistance: Assistances) {
         assistances.clear(2.0.pow((assistance.ordinal + 1).toDouble()).toInt())
     }
@@ -65,7 +63,6 @@ open class GameSettings(
      * @param assistance [Assistances] to check
      * @return true, if assistance is set, false otherwise
      */
-    @Suppress("DEPRECATION")
     open fun getAssistance(assistance: Assistances): Boolean {
         return assistances[2.0.pow((assistance.ordinal + 1).toDouble()).toInt()]
     }

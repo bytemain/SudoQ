@@ -5,8 +5,6 @@
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
  * You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
-@file:Suppress("DEPRECATION")
-
 package de.sudoq.controller.menus
 
 import android.annotation.SuppressLint
@@ -83,7 +81,7 @@ class SplashActivity : SudoqCompatActivity() {
         }
         //confirm that there is a profile
         val profileDir = pm.profilesDir
-        val filenames = profileDir?.list() ?: emptyArray()
+        val filenames = profileDir!!.list()
         Log.d("ProfileD", "onCreate: after init: ${filenames.joinToString(", ")}")
         check(filenames.size >= 2) { "Too few files. initialization was not successfull" }
 
@@ -113,7 +111,6 @@ class SplashActivity : SudoqCompatActivity() {
             alertIfNoAssetFolder()
             Log.v(LOG_TAG, "we will do an initialization")
             val sudokus : File = getDir(getString(R.string.path_rel_sudokus), MODE_PRIVATE)
-            @Suppress("DEPRECATION")
             Initialization(sudokus).execute(null, null, null)
             startedCopying = true
         } else
@@ -177,7 +174,7 @@ class SplashActivity : SudoqCompatActivity() {
             val letter = m.group(4)!!
             if (letter.length == 1) result[3] = letter[0] - 'a' + 1
         }
-        for (i in intArrayOf(1, 2, 3)) result[i - 1] = m.group(i)?.toInt() ?: 0
+        for (i in intArrayOf(1, 2, 3)) result[i - 1] = m.group(i).toInt()
         return result
     }
 
@@ -228,9 +225,7 @@ class SplashActivity : SudoqCompatActivity() {
     /**
      * {@inheritdoc}
      */
-    @Deprecated("Deprecated in favor of OnBackPressedDispatcher")
     override fun onBackPressed() {
-        @Suppress("DEPRECATION")
         super.onBackPressed()
         splashThread!!.interrupt()
         finish()
@@ -252,7 +247,6 @@ class SplashActivity : SudoqCompatActivity() {
         startMainMenuIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(startMainMenuIntent)
         finish()
-        @Suppress("DEPRECATION")
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
@@ -260,11 +254,9 @@ class SplashActivity : SudoqCompatActivity() {
      * Ein AsyncTask zur Initialisierung des Benutzers und der Vorlagen für den
      * ersten Start.
      */
-    @Suppress("DEPRECATION")
     private inner class Initialization(val sudokuDir: File) : AsyncTask<Void?, Void?, Void?>() {
 
 
-        @Deprecated("Deprecated as part of AsyncTask")
         public override fun onPostExecute(v: Void?) {
             val settings = getSharedPreferences("Prefs", 0)
             settings.edit().putBoolean(INITIALIZED_TAG, true).commit()
@@ -341,7 +333,7 @@ class SplashActivity : SudoqCompatActivity() {
          * @param destinationPath
          */
         private fun copyFile(sourcePath: String, destinationPath: String) {
-            File(destinationPath).parentFile?.mkdirs()
+            File(destinationPath).parentFile.mkdirs()
             val destination = File(destinationPath)
             val `in`: InputStream
             val out: OutputStream
