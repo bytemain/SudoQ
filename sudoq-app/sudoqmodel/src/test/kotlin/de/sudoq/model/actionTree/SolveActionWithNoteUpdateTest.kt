@@ -2,8 +2,6 @@ package de.sudoq.model.actionTree
 
 import de.sudoq.model.sudoku.*
 import de.sudoq.model.sudoku.sudokuTypes.SudokuType
-import de.sudoq.model.sudoku.sudokuTypes.ComplexityConstraintBuilder
-import de.sudoq.model.sudoku.sudokuTypes.SudokuTypes
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

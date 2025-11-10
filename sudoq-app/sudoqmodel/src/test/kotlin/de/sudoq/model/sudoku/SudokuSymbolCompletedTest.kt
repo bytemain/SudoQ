@@ -1,7 +1,6 @@
 package de.sudoq.model.sudoku
 
 import de.sudoq.model.sudoku.sudokuTypes.SudokuType
-import de.sudoq.model.sudoku.sudokuTypes.SudokuTypes
 import org.amshove.kluent.*
 import org.junit.jupiter.api.Test
 
