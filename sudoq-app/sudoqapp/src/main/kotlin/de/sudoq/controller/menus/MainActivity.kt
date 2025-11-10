@@ -81,6 +81,7 @@ class MainActivity : SudoqCompatActivity() {
             R.id.button_mainmenu_continue -> {
                 val continueSudokuIntent = Intent(this, SudokuActivity::class.java)
                 startActivity(continueSudokuIntent)
+                @Suppress("DEPRECATION")
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
             }
             R.id.button_mainmenu_load_sudoku -> {

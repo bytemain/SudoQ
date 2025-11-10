@@ -198,11 +198,13 @@ class GestureBuilder : SudoqCompatActivity(), OnGesturePerformedListener, InputL
         virtualKeyboard!!.registerListener(this)
     }
 
+    @Deprecated("Deprecated in favor of OnBackPressedDispatcher")
     override fun onBackPressed() {
         if (gestureOverlay!!.isShown) {
             gestureOverlay!!.visibility = View.INVISIBLE
         } else {
             saveGestures()
+            @Suppress("DEPRECATION")
             super.onBackPressed()
         }
     }

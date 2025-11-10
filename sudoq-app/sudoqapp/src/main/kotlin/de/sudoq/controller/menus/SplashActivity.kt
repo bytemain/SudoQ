@@ -11,6 +11,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+@Suppress("DEPRECATION")
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
@@ -81,7 +82,7 @@ class SplashActivity : SudoqCompatActivity() {
         }
         //confirm that there is a profile
         val profileDir = pm.profilesDir
-        val filenames = profileDir!!.list()
+        val filenames = profileDir?.list() ?: emptyArray()
         Log.d("ProfileD", "onCreate: after init: ${filenames.joinToString(", ")}")
         check(filenames.size >= 2) { "Too few files. initialization was not successfull" }
 
@@ -111,6 +112,7 @@ class SplashActivity : SudoqCompatActivity() {
             alertIfNoAssetFolder()
             Log.v(LOG_TAG, "we will do an initialization")
             val sudokus : File = getDir(getString(R.string.path_rel_sudokus), MODE_PRIVATE)
+            @Suppress("DEPRECATION")
             Initialization(sudokus).execute(null, null, null)
             startedCopying = true
         } else
@@ -254,6 +256,7 @@ class SplashActivity : SudoqCompatActivity() {
      * Ein AsyncTask zur Initialisierung des Benutzers und der Vorlagen für den
      * ersten Start.
      */
+    @Suppress("DEPRECATION")
     private inner class Initialization(val sudokuDir: File) : AsyncTask<Void?, Void?, Void?>() {
 
 

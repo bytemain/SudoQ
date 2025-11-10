@@ -218,6 +218,7 @@ class NewSudokuActivity : SudoqCompatActivity() {
             pos: Int,
             id: Long
         ) {
+            @Suppress("UNCHECKED_CAST")
             val item = parent.getItemAtPosition(pos) as StringAndEnum<SudokuTypes>
             parentActivity.setSudokuType(item.enum)
         }
@@ -268,6 +269,7 @@ class NewSudokuActivity : SudoqCompatActivity() {
                 pm.currentGame = game.id
                 pm.saveChanges()
                 startActivity(Intent(this, SudokuActivity::class.java))
+                @Suppress("DEPRECATION")
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
             } catch (e: IllegalArgumentException) {
                 Log.e(LOG_TAG, "exception: $e")
