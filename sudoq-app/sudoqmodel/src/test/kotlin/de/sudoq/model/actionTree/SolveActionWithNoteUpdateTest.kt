@@ -1,7 +1,9 @@
 package de.sudoq.model.actionTree
 
 import de.sudoq.model.sudoku.*
-import de.sudoq.model.sudoku.sudokuTypes.StandardSudokuType9x9
+import de.sudoq.model.sudoku.sudokuTypes.SudokuType
+import de.sudoq.model.sudoku.sudokuTypes.ComplexityConstraintBuilder
+import de.sudoq.model.sudoku.sudokuTypes.SudokuTypes
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,17 +21,60 @@ class SolveActionWithNoteUpdateTest {
 
     @BeforeEach
     fun setUp() {
-        // Create a simple 9x9 Sudoku
-        val sudokuType = StandardSudokuType9x9()
+        // Create a simple 9x9 Sudoku with a minimal SudokuType
+        val sudokuType = createSimple9x9Type()
         val solutionMap = PositionMap<Int>(sudokuType.size!!)
         val setValuesMap = PositionMap<Boolean>(sudokuType.size!!)
         
         sudoku = Sudoku(sudokuType, solutionMap, setValuesMap)
         
         // Get some cells in the same row (constraint)
-        cell1 = sudoku.getCell(Position[0, 0])!! // Cell to fill
-        cell2 = sudoku.getCell(Position[0, 1])!! // Related cell in same row
-        cell3 = sudoku.getCell(Position[0, 2])!! // Another related cell
+        cell1 = sudoku.getCell(Position.get(0, 0))!! // Cell to fill
+        cell2 = sudoku.getCell(Position.get(1, 0))!! // Related cell in same row
+        cell3 = sudoku.getCell(Position.get(2, 0))!! // Another related cell
+    }
+    
+    private fun createSimple9x9Type(): SudokuType {
+        // Create a minimal 9x9 sudoku type for testing
+        val type = SudokuType(9, 9, 9)
+        
+        // Add row constraints
+        for (row in 0..8) {
+            val constraint = Constraint()
+            for (col in 0..8) {
+                constraint.addPosition(Position.get(col, row))
+            }
+            type.constraints.add(constraint)
+        }
+        
+        // Add column constraints
+        for (col in 0..8) {
+            val constraint = Constraint()
+            for (row in 0..8) {
+                constraint.addPosition(Position.get(col, row))
+            }
+            type.constraints.add(constraint)
+        }
+        
+        // Add 3x3 block constraints
+        for (blockRow in 0..2) {
+            for (blockCol in 0..2) {
+                val constraint = Constraint()
+                for (row in 0..2) {
+                    for (col in 0..2) {
+                        constraint.addPosition(
+                            Position.get(
+                                blockCol * 3 + col,
+                                blockRow * 3 + row
+                            )
+                        )
+                    }
+                }
+                type.constraints.add(constraint)
+            }
+        }
+        
+        return type
     }
 
     @Test
