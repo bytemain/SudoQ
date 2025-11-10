@@ -145,7 +145,7 @@ class SudokuSymbolCompletedTest {
         
         // Add row constraints
         for (row in 0..8) {
-            val constraint = Constraint()
+            val constraint = Constraint(UniqueConstraintBehavior(), ConstraintType.LINE)
             for (col in 0..8) {
                 constraint.addPosition(Position.get(col, row))
             }
@@ -154,7 +154,7 @@ class SudokuSymbolCompletedTest {
         
         // Add column constraints
         for (col in 0..8) {
-            val constraint = Constraint()
+            val constraint = Constraint(UniqueConstraintBehavior(), ConstraintType.LINE)
             for (row in 0..8) {
                 constraint.addPosition(Position.get(col, row))
             }
@@ -164,7 +164,7 @@ class SudokuSymbolCompletedTest {
         // Add 3x3 block constraints
         for (blockRow in 0..2) {
             for (blockCol in 0..2) {
-                val constraint = Constraint()
+                val constraint = Constraint(UniqueConstraintBehavior(), ConstraintType.BLOCK)
                 for (row in 0..2) {
                     for (col in 0..2) {
                         constraint.addPosition(
@@ -188,7 +188,7 @@ class SudokuSymbolCompletedTest {
         
         // Add row constraints
         for (row in 0..3) {
-            val constraint = Constraint()
+            val constraint = Constraint(UniqueConstraintBehavior(), ConstraintType.LINE)
             for (col in 0..3) {
                 constraint.addPosition(Position.get(col, row))
             }
@@ -197,7 +197,7 @@ class SudokuSymbolCompletedTest {
         
         // Add column constraints
         for (col in 0..3) {
-            val constraint = Constraint()
+            val constraint = Constraint(UniqueConstraintBehavior(), ConstraintType.LINE)
             for (row in 0..3) {
                 constraint.addPosition(Position.get(col, row))
             }
@@ -207,7 +207,7 @@ class SudokuSymbolCompletedTest {
         // Add 2x2 block constraints
         for (blockRow in 0..1) {
             for (blockCol in 0..1) {
-                val constraint = Constraint()
+                val constraint = Constraint(UniqueConstraintBehavior(), ConstraintType.BLOCK)
                 for (row in 0..1) {
                     for (col in 0..1) {
                         constraint.addPosition(
