@@ -77,6 +77,7 @@ class PositionMap<T>(private var dimension: Position) : Cloneable {
      */
     init {
         require(!(dimension.x < 1 || dimension.y < 1)) { "Specified dimension or one of its components was null." }
+        @Suppress("UNCHECKED_CAST")
         values = Array(dimension.x) { arrayOfNulls<Any>(dimension.y) } as Array<Array<T?>>
     }
 }
