@@ -31,14 +31,14 @@ class Position(var x: Int, var y: Int) {
     /**
      * Tests for equality with other [Position].
      *
-     * @return true if obj is of same type and coordinates match
+     * @return true if other is of same type and coordinates match
      */
-    override fun equals(obj: Any?): Boolean {
-        return if (obj == null || obj !is Position) {
+    override fun equals(other: Any?): Boolean {
+        return if (other == null || other !is Position) {
             false
         } else {
-            x == obj.x
-                    && y == obj.y
+            x == other.x
+                    && y == other.y
         }
     }
 
