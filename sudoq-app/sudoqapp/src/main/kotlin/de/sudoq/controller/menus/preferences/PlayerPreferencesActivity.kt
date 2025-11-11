@@ -8,18 +8,15 @@
 package de.sudoq.controller.menus.preferences
 
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
-import android.view.*
-import android.widget.CheckBox
-import android.widget.EditText
-import androidx.appcompat.widget.Toolbar
+import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.*
 import de.sudoq.R
 import de.sudoq.controller.menus.ProfileListActivity
 import de.sudoq.controller.menus.StatisticsActivity
 import de.sudoq.controller.menus.preferences.AdvancedPreferencesActivity.ParentActivity
 import de.sudoq.model.game.Assistances
-import de.sudoq.model.game.GameSettings
 import de.sudoq.model.profile.ProfileSingleton.Companion.getInstance
 import de.sudoq.persistence.profile.ProfileRepo
 import de.sudoq.persistence.profile.ProfilesListRepo
@@ -27,145 +24,172 @@ import de.sudoq.persistence.profile.ProfilesListRepo
 /**
  * Activity um Profile zu bearbeiten und zu verwalten
  * aufgerufen im Hauptmenü 4. Button
+ * 
+ * Migrated to Jetpack Compose for modern UI
  */
 class PlayerPreferencesActivity : PreferencesActivity() {
-    var name: EditText? = null
-    private var firstStartup = false
-    var gameSettings: GameSettings? = null
-
+    
     /**
-     * Wird aufgerufen, falls die Activity zum ersten Mal gestartet wird. Läd
-     * die Preferences anhand der zur Zeit aktiven Profil-ID.
+     * Wird aufgerufen, falls die Activity zum ersten Mal gestartet wird.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        this.setContentView(R.layout.preferences_player)
-        val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
-        setSupportActionBar(toolbar)
-        val ab = supportActionBar
-        ab!!.setHomeAsUpIndicator(R.drawable.launcher)
-        ab.setDisplayHomeAsUpEnabled(true)
-        ab.setDisplayShowTitleEnabled(true)
-        //set title explicitly so localization kicks in when language is changed
-        ab.setTitle(R.string.profile_preference_title)
-        gesture = findViewById<View>(R.id.checkbox_gesture) as CheckBox
-        autoAdjustNotes = findViewById<View>(R.id.checkbox_autoAdjustNotes) as CheckBox
-        markRowColumn = findViewById<View>(R.id.checkbox_markRowColumn) as CheckBox
-        markWrongSymbol = findViewById<View>(R.id.checkbox_markWrongSymbol) as CheckBox
-        restrictCandidates = findViewById<View>(R.id.checkbox_restrictCandidates) as CheckBox
-        autoFillUniqueCandidates = findViewById<View>(R.id.checkbox_autoFillUniqueCandidates) as CheckBox
-        showCompletedDigits = findViewById<View>(R.id.checkbox_showCompletedDigits) as CheckBox
-        helper = findViewById<View>(R.id.checkbox_hints_provider) as CheckBox
-        name = findViewById<View>(R.id.edittext_profilename) as EditText
-        name!!.clearFocus()
-        name!!.isSingleLine = true // no multiline names
-        firstStartup = false
-        createProfile = true
+        
         val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
-        val p = getInstance(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
-        p.registerListener(this)
+        val profile = getInstance(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
+        profile.registerListener(this)
+        
+        setContent {
+            MaterialTheme {
+                var preferencesData by remember { mutableStateOf(loadPreferencesData()) }
+                
+                PlayerPreferencesScreen(
+                    data = preferencesData,
+                    onProfileNameChange = { newName ->
+                        profile.name = newName
+                        preferencesData = preferencesData.copy(profileName = newName)
+                    },
+                    onGestureChange = { value ->
+                        profile.isGestureActive = value
+                        preferencesData = preferencesData.copy(gestureActive = value)
+                    },
+                    onAutoAdjustNotesChange = { value ->
+                        profile.setAssistance(Assistances.autoAdjustNotes, value)
+                        preferencesData = preferencesData.copy(autoAdjustNotes = value)
+                    },
+                    onMarkRowColumnChange = { value ->
+                        profile.setAssistance(Assistances.markRowColumn, value)
+                        preferencesData = preferencesData.copy(markRowColumn = value)
+                    },
+                    onMarkWrongSymbolChange = { value ->
+                        profile.setAssistance(Assistances.markWrongSymbol, value)
+                        preferencesData = preferencesData.copy(markWrongSymbol = value)
+                    },
+                    onRestrictCandidatesChange = { value ->
+                        profile.setAssistance(Assistances.restrictCandidates, value)
+                        preferencesData = preferencesData.copy(restrictCandidates = value)
+                    },
+                    onAutoFillUniqueCandidatesChange = { value ->
+                        profile.setAssistance(Assistances.autoFillUniqueCandidates, value)
+                        preferencesData = preferencesData.copy(autoFillUniqueCandidates = value)
+                    },
+                    onShowCompletedDigitsChange = { value ->
+                        profile.setAssistance(Assistances.showCompletedDigits, value)
+                        preferencesData = preferencesData.copy(showCompletedDigits = value)
+                    },
+                    onProvideHintsChange = { value ->
+                        profile.setAssistance(Assistances.provideHints, value)
+                        preferencesData = preferencesData.copy(provideHints = value)
+                    },
+                    onBackClick = {
+                        profile.saveChanges()
+                        finish()
+                    },
+                    onNewProfileClick = {
+                        createProfile()
+                        preferencesData = loadPreferencesData()
+                    },
+                    onDeleteProfileClick = {
+                        deleteProfile()
+                        preferencesData = loadPreferencesData()
+                    },
+                    onSwitchProfileClick = {
+                        switchToProfileList()
+                    },
+                    onStatisticsClick = {
+                        viewStatistics()
+                    },
+                    onAdvancedClick = {
+                        switchToAdvancedPreferences()
+                    }
+                )
+            }
+        }
     }
-
+    
     /**
-     * Aktualisiert die Werte in den Views
+     * Load current preferences data from profile
      */
-    override fun refreshValues() {
+    private fun loadPreferencesData(): PlayerPreferencesData {
         val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
-        val profile = getInstance(profilesDir, ProfileRepo(profilesDir),
-                                  ProfilesListRepo(profilesDir))
-        name!!.setText(profile.name)
-        gesture!!.isChecked = profile.isGestureActive
-        autoAdjustNotes!!.isChecked = profile.getAssistance(Assistances.autoAdjustNotes)
-        markRowColumn!!.isChecked = profile.getAssistance(Assistances.markRowColumn)
-        markWrongSymbol!!.isChecked = profile.getAssistance(Assistances.markWrongSymbol)
-        restrictCandidates!!.isChecked = profile.getAssistance(Assistances.restrictCandidates)
-        autoFillUniqueCandidates!!.isChecked = profile.getAssistance(Assistances.autoFillUniqueCandidates)
-        showCompletedDigits!!.isChecked = profile.getAssistance(Assistances.showCompletedDigits)
-        helper!!.isChecked = profile.getAssistance(Assistances.provideHints)
+        val profile = getInstance(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
+        
+        return PlayerPreferencesData(
+            profileName = profile.name ?: "",
+            gestureActive = profile.isGestureActive,
+            autoAdjustNotes = profile.getAssistance(Assistances.autoAdjustNotes),
+            markRowColumn = profile.getAssistance(Assistances.markRowColumn),
+            markWrongSymbol = profile.getAssistance(Assistances.markWrongSymbol),
+            restrictCandidates = profile.getAssistance(Assistances.restrictCandidates),
+            autoFillUniqueCandidates = profile.getAssistance(Assistances.autoFillUniqueCandidates),
+            showCompletedDigits = profile.getAssistance(Assistances.showCompletedDigits),
+            provideHints = profile.getAssistance(Assistances.provideHints),
+            canDeleteProfile = profile.numberOfAvailableProfiles > 1,
+            canSwitchProfile = profile.numberOfAvailableProfiles > 1
+        )
+    }
+    
+    override fun refreshValues() {
+        // No longer needed with Compose state management
+    }
+    
+    override fun adjustValuesAndSave() {
+        saveToProfile()
+    }
+    
+    override fun saveToProfile() {
+        val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
+        val profile = getInstance(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
+        profile.saveChanges()
     }
 
     /**
-     * Wird beim Buttonklick aufgerufen und erstellt ein neues Profil
-     *
-     * @param view
-     * von android xml übergebene View
+     * Erstellt ein neues Profil
      */
     private fun createProfile() {
-        if (firstStartup) {
-            adjustValuesAndSave()
-            finish()
-        } else {
-            adjustValuesAndSave()
-            var newProfileName = getString(R.string.profile_preference_new_profile)
-            var newIndex = 0
-            /* increment newIndex to be bigger than the others */
-            val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
-            val p = getInstance(profilesDir, ProfileRepo(profilesDir),
-                                ProfilesListRepo(profilesDir))
-            val l: List<String> = p.profilesNameList
-            for (s in l) if (s.startsWith(newProfileName)) {
+        val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
+        val p = getInstance(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
+        
+        var newProfileName = getString(R.string.profile_preference_new_profile)
+        var newIndex = 0
+        
+        // Find the next available profile number
+        val l: List<String> = p.profilesNameList
+        for (s in l) {
+            if (s.startsWith(newProfileName)) {
                 val currentIndex = s.substring(newProfileName.length)
                 try {
                     val otherIndex = if (currentIndex == "") 0 else currentIndex.toInt()
                     newIndex = if (newIndex <= otherIndex) otherIndex + 1 else newIndex
                 } catch (e: Exception) {
-                    // TODO: handle exception
+                    // Ignore parsing errors
                 }
             }
-            if (newIndex != 0) newProfileName += newIndex
-            p.createAnotherProfile()
-            name!!.setText(newProfileName)
         }
+        
+        if (newIndex != 0) newProfileName += newIndex
+        p.createAnotherProfile()
+        p.name = newProfileName
+        p.saveChanges()
     }
 
     /**
      * Zeigt die Statistik des aktuellen Profils.
-     *
-     * @param view
-     * unbenutzt
      */
-    fun viewStatistics(view: View?) {
+    private fun viewStatistics() {
         val statisticsIntent = Intent(this, StatisticsActivity::class.java)
         startActivity(statisticsIntent)
     }
 
-    /**
-     * Uebernimmt die Werte der Views im Profil und speichert die aenderungen
-     */
-    override fun adjustValuesAndSave() {
-        val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
-        val p = getInstance(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
-        p.name = name!!.text.toString()
-        saveToProfile()
-    }
-
-    override fun saveToProfile() {
-        val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
-        val p = getInstance(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
-        p.isGestureActive = gesture!!.isChecked
-        saveAssistance(Assistances.autoAdjustNotes, autoAdjustNotes!!)
-        saveAssistance(Assistances.markRowColumn, markRowColumn!!)
-        saveAssistance(Assistances.markWrongSymbol, markWrongSymbol!!)
-        saveAssistance(Assistances.restrictCandidates, restrictCandidates!!)
-        saveAssistance(Assistances.autoFillUniqueCandidates, autoFillUniqueCandidates!!)
-        saveAssistance(Assistances.showCompletedDigits, showCompletedDigits!!)
-        saveAssistance(Assistances.provideHints, helper!!)
-        p.saveChanges()
-    }
-
     /* parameter View only needed to be found by xml who clicks this */
-    fun switchToAdvancedPreferences(view: View?) {
+    private fun switchToAdvancedPreferences() {
         val advIntent = Intent(this, AdvancedPreferencesActivity::class.java)
         AdvancedPreferencesActivity.parentActivity = ParentActivity.PROFILE
-        //AdvancedPreferencesActivity.gameSettings = this.gameSettings;
         startActivity(advIntent)
     }
 
     /**
      * wechselt zur Profil Liste
-     *
-     * @param view
-     * von der android xml übergebene view
      */
     private fun switchToProfileList() {
         val profileListIntent = Intent(this, ProfileListActivity::class.java)
@@ -174,9 +198,6 @@ class PlayerPreferencesActivity : PreferencesActivity() {
 
     /**
      * Löscht das ausgewählte Profil
-     *
-     * @param view
-     * von der android xml übergebene view
      */
     private fun deleteProfile() {
         val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
@@ -184,53 +205,9 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         p.deleteProfile()
     }
 
-    // ///////////////////////////////////////optionsMenue
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.action_bar_player_preferences, menu)
-        return true
-    }
-
-    /**
-     * Stellt das OptionsMenu bereit
-     *
-     * @param item
-     * Das ausgewählte Menü-Item
-     * @return true
-     */
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_new_profile -> {
-                createProfile()
-                true
-            }
-            R.id.action_delete_profile -> {
-                deleteProfile()
-                true
-            }
-            R.id.action_switch_profile -> {
-                switchToProfileList()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        super.onPrepareOptionsMenu(menu)
-        val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
-        val p = getInstance(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
-        val multipleProfiles = p.numberOfAvailableProfiles > 1
-        menu.findItem(R.id.action_delete_profile).isVisible = multipleProfiles
-        menu.findItem(R.id.action_switch_profile).isVisible = multipleProfiles
-        return true
-    }
-
     companion object {
-
         /**
-         * Konstante um anzuzeigen, dass nur die Assistences konfiguriert werden
-         * sollen
+         * Konstante um anzuzeigen, dass nur die Assistences konfiguriert werden sollen
          */
         const val INTENT_ONLYASSISTANCES = "only_assistances"
 
@@ -238,6 +215,5 @@ class PlayerPreferencesActivity : PreferencesActivity() {
          * Konstante um anzuzeigen, dass nur ein neues Profil erzeugt werden soll
          */
         const val INTENT_CREATEPROFILE = "create_profile"
-        private var createProfile = false
     }
 }
