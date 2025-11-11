@@ -34,7 +34,8 @@ fun MainScreen(
     onContinueGameClick: () -> Unit,
     onLoadGameClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onStatisticsClick: () -> Unit
+    onStatisticsClick: () -> Unit,
+    onTutorialClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -92,7 +93,8 @@ fun MainScreen(
             item {
                 QuickActionsSection(
                     onLoadGameClick = onLoadGameClick,
-                    onStatisticsClick = onStatisticsClick
+                    onStatisticsClick = onStatisticsClick,
+                    onTutorialClick = onTutorialClick
                 )
             }
 
@@ -257,7 +259,8 @@ fun ContinueGameCard(
 @Composable
 fun QuickActionsSection(
     onLoadGameClick: () -> Unit,
-    onStatisticsClick: () -> Unit
+    onStatisticsClick: () -> Unit,
+    onTutorialClick: () -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -284,6 +287,13 @@ fun QuickActionsSection(
                 icon = Icons.Default.BarChart,
                 label = stringResource(R.string.sf_mainmenu_statistic),
                 onClick = onStatisticsClick,
+                modifier = Modifier.weight(1f)
+            )
+            
+            QuickActionCard(
+                icon = Icons.Default.School,
+                label = stringResource(R.string.sf_mainmenu_tutorial),
+                onClick = onTutorialClick,
                 modifier = Modifier.weight(1f)
             )
         }

@@ -7,6 +7,7 @@ import de.sudoq.R
 import de.sudoq.controller.SudoqCompatActivity
 import de.sudoq.controller.menus.preferences.PlayerPreferencesActivity
 import de.sudoq.controller.sudoku.SudokuActivity
+import de.sudoq.controller.tutorial.TutorialActivity
 import de.sudoq.model.profile.ProfileManager
 import de.sudoq.persistence.profile.ProfileRepo
 import de.sudoq.persistence.profile.ProfilesListRepo
@@ -49,6 +50,9 @@ class MainActivity : SudoqCompatActivity() {
                     },
                     onStatisticsClick = {
                         startActivity(Intent(this, StatisticsActivity::class.java))
+                    },
+                    onTutorialClick = {
+                        startActivity(Intent(this, TutorialActivity::class.java))
                     }
                 )
             }
@@ -83,6 +87,9 @@ class MainActivity : SudoqCompatActivity() {
                     },
                     onStatisticsClick = {
                         startActivity(Intent(this, StatisticsActivity::class.java))
+                    },
+                    onTutorialClick = {
+                        startActivity(Intent(this, TutorialActivity::class.java))
                     }
                 )
             }

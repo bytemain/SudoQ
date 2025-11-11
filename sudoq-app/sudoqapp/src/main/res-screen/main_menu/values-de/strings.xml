@@ -12,6 +12,7 @@
     <string name="sf_mainmenu_profile">Profil</string>
     <string name="sf_mainmenu_preferences">Einstellungen</string>
     <string name="sf_mainmenu_statistic">Statistiken</string>
+    <string name="sf_mainmenu_tutorial">Anleitung</string>
     
     <!-- Main Screen -->
     <string name="game_in_progress">Spiel läuft</string>
