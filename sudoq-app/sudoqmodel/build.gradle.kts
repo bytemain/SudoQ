@@ -43,6 +43,13 @@ sourceSets {
         compileClasspath += sourceSets["main"].output + sourceSets["test"].output
         runtimeClasspath += sourceSets["main"].output + sourceSets["test"].output
     }
+    create("solverTests") {
+        java.srcDir("$projectDir/src/solverTests/java")
+        kotlin.srcDir("$projectDir/src/solverTests/kotlin")
+        resources.srcDir("$projectDir/src/solverTests/resources")
+        compileClasspath += sourceSets["main"].output + sourceSets["test"].output
+        runtimeClasspath += sourceSets["main"].output + sourceSets["test"].output
+    }
 }
 
 configurations {
@@ -52,9 +59,24 @@ configurations {
     named("kotlintestsRuntimeOnly") {
         extendsFrom(configurations["testRuntimeOnly"])
     }
+    named("solverTestsImplementation") {
+        extendsFrom(configurations["testImplementation"])
+    }
+    named("solverTestsRuntimeOnly") {
+        extendsFrom(configurations["testRuntimeOnly"])
+    }
 }
 
 tasks.register<Test>("kotlinTest") {
     testClassesDirs = sourceSets["kotlintests"].output.classesDirs
     classpath = sourceSets["kotlintests"].runtimeClasspath
+}
+
+tasks.register<Test>("solverTest") {
+    testClassesDirs = sourceSets["solverTests"].output.classesDirs
+    classpath = sourceSets["solverTests"].runtimeClasspath
+}
+
+tasks.named<ProcessResources>("processSolverTestsResources") {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
