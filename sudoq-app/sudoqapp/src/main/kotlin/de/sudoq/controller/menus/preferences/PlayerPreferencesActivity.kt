@@ -14,8 +14,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import de.sudoq.R
 import de.sudoq.controller.menus.ProfileListActivity
-import de.sudoq.controller.menus.StatisticsActivity
-import de.sudoq.controller.menus.preferences.AdvancedPreferencesActivity.ParentActivity
 import de.sudoq.model.game.Assistances
 import de.sudoq.model.profile.ProfileSingleton.Companion.getInstance
 import de.sudoq.persistence.profile.ProfileRepo
@@ -104,14 +102,8 @@ class PlayerPreferencesActivity : PreferencesActivity() {
                     onSwitchProfileClick = {
                         switchToProfileList()
                     },
-                    onStatisticsClick = {
-                        viewStatistics()
-                    },
-                    onAdvancedClick = {
-                        switchToAdvancedPreferences()
-                    },
-                    onThemeClick = {
-                        startActivity(Intent(this, ThemePreferencesActivity::class.java))
+                    onSettingsClick = {
+                        startActivity(Intent(this, AppSettingsActivity::class.java))
                     }
                 )
             }
@@ -182,21 +174,6 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         p.createAnotherProfile()
         p.name = newProfileName
         p.saveChanges()
-    }
-
-    /**
-     * Zeigt die Statistik des aktuellen Profils.
-     */
-    private fun viewStatistics() {
-        val statisticsIntent = Intent(this, StatisticsActivity::class.java)
-        startActivity(statisticsIntent)
-    }
-
-    /* parameter View only needed to be found by xml who clicks this */
-    private fun switchToAdvancedPreferences() {
-        val advIntent = Intent(this, AdvancedPreferencesActivity::class.java)
-        AdvancedPreferencesActivity.parentActivity = ParentActivity.PROFILE
-        startActivity(advIntent)
     }
 
     /**

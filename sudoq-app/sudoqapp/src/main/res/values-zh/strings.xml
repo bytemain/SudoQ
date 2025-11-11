@@ -156,6 +156,17 @@
     <string name="sf_advancedpreferences_title">高级设置</string>
     <string name="sf_advancedpreferences_restricttypes_title">提供的类型</string>
     
+    <!-- App Settings -->
+    <string name="app_settings">应用设置</string>
+    <string name="settings_appearance">外观</string>
+    <string name="settings_game">游戏设置</string>
+    <string name="settings_language">语言</string>
+    <string name="restrict_sudoku_types">限制数独类型</string>
+    <string name="restrict_sudoku_types_desc">选择要显示的数独类型</string>
+    <string name="language_settings">语言</string>
+    <string name="language_settings_desc">更改应用语言</string>
+    <string name="profile_preference_button_settings">设置</string>
+    
         
     <!-- Game states -->    
 

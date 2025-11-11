@@ -164,6 +164,17 @@
     <string name="sf_advancedpreferences_title">Advanced Settings</string>
     <string name="sf_advancedpreferences_restricttypes_title">Offered Types</string>
     
+    <!-- App Settings -->
+    <string name="app_settings">App Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_game">Game Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="restrict_sudoku_types">Restrict Sudoku Types</string>
+    <string name="restrict_sudoku_types_desc">Choose which sudoku types to show</string>
+    <string name="language_settings">Language</string>
+    <string name="language_settings_desc">Change app language</string>
+    <string name="profile_preference_button_settings">Settings</string>
+    
         
     <!-- Game states -->    
         

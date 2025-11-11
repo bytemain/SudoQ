@@ -151,6 +151,17 @@
     <string name="sf_sudokupreferences_title">Sudoku-Einstellungen</string>
     <string name="sf_advancedpreferences_title">Erweiterte Einstellungen</string>
     <string name="sf_advancedpreferences_restricttypes_title">Wählbare Sudokutypen</string>
+    
+    <!-- App Settings -->
+    <string name="app_settings">App-Einstellungen</string>
+    <string name="settings_appearance">Erscheinungsbild</string>
+    <string name="settings_game">Spiel-Einstellungen</string>
+    <string name="settings_language">Sprache</string>
+    <string name="restrict_sudoku_types">Sudoku-Typen einschränken</string>
+    <string name="restrict_sudoku_types_desc">Wählen Sie aus, welche Sudoku-Typen angezeigt werden sollen</string>
+    <string name="language_settings">Sprache</string>
+    <string name="language_settings_desc">App-Sprache ändern</string>
+    <string name="profile_preference_button_settings">Einstellungen</string>
                   
     <!-- Sudoku Loading -->
     <string name="tx_no_sudokus_to_load">Keine gespeicherten Sudokus vorhanden.</string>

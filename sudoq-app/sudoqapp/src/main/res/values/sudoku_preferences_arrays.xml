@@ -24,7 +24,7 @@
 		<item>@string/complexity_infernal</item>
 	</string-array>
 
-	<!-- needs to be in same order as AdvancedPreferencesActivity.LanguageCode -->
+	<!-- Language selection order matches LanguageCode enum -->
 	<string-array name="language_choice_values">
 		<item>@string/language_system</item>
 		<item>@string/language_german</item>

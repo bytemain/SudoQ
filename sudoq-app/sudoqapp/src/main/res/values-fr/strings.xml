@@ -146,6 +146,17 @@
     <string name="sf_sudokupreferences_title">Paramètres du sudoku </string>
     <string name="sf_advancedpreferences_title">Paramètres avancés</string>
     <string name="sf_advancedpreferences_restricttypes_title">Types proposés</string>
+    
+    <!-- App Settings -->
+    <string name="app_settings">Paramètres de l\'application</string>
+    <string name="settings_appearance">Apparence</string>
+    <string name="settings_game">Paramètres du jeu</string>
+    <string name="settings_language">Langue</string>
+    <string name="restrict_sudoku_types">Restreindre les types de sudoku</string>
+    <string name="restrict_sudoku_types_desc">Choisissez les types de sudoku à afficher</string>
+    <string name="language_settings">Langue</string>
+    <string name="language_settings_desc">Changer la langue de l\'application</string>
+    <string name="profile_preference_button_settings">Paramètres</string>
                   
     <!-- Sudoku Loading -->
     <string name="tx_no_sudokus_to_load">Aucun sudoku sauvegardé disponible.</string>
