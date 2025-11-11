@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tutorial Overview -->
+    <string name="sf_tutorial_title">Fortgeschrittene Sudoku-Techniken</string>
+    <string name="sf_tutorial_overview_title">Meistern Sie fortgeschrittene Lösungstechniken</string>
+    <string name="sf_tutorial_overview_description">Lernen Sie leistungsstarke Strategien, um selbst die schwierigsten Sudoku-Rätsel zu lösen. Von einfachen Singles bis hin zu fortgeschrittenen Subset-Techniken - dieser Leitfaden wird Ihre Lösungsfähigkeiten verbessern.</string>
+    
+    <!-- Basic Content -->
+    <string name="sf_tutorial_basic_content_title">Grundlegende Tutorial-Themen</string>
+    
+    <!-- Advanced Techniques -->
+    <string name="sf_tutorial_advanced_techniques_title">Fortgeschrittene Techniken</string>
+    <string name="sf_tutorial_advanced_techniques_short_description">Meistern Sie professionelle Lösungsstrategien von Singles bis Subsets.</string>
+    <string name="sf_tutorial_advanced_techniques_intro">Lernen Sie professionelle Sudoku-Lösungstechniken Schritt für Schritt. Jede Technik baut auf vorherigen auf, beginnen Sie also oben, wenn Sie neu in fortgeschrittenen Strategien sind.</string>
+    
+    <!-- Category Headers -->
+    <string name="sf_tutorial_singles_category">Singles</string>
+    <string name="sf_tutorial_intersections_category">Intersections (Locked Candidates)</string>
+    <string name="sf_tutorial_hidden_subsets_category">Hidden Subsets</string>
+    <string name="sf_tutorial_naked_subsets_category">Naked Subsets</string>
+    
+    <!-- Singles Section -->
+    <string name="sf_tutorial_singles_title">Singles</string>
+    <string name="sf_tutorial_singles_short_description">Die Grundlage aller Sudoku-Lösungen - Zellen identifizieren, in die nur eine Ziffer passt.</string>
+    
+    <string name="sf_tutorial_full_house_title">Full House / Letzte Ziffer</string>
+    <string name="sf_tutorial_full_house_short">Wenn nur eine Zelle in einem House leer ist, füllen Sie die fehlende Ziffer ein.</string>
+    <string name="sf_tutorial_full_house_description">Wenn eine Zeile, Spalte oder ein Block nur noch eine leere Zelle hat, muss diese Zelle die fehlende Ziffer enthalten. Dies ist die einfachste Technik - zählen Sie einfach, welche Ziffer fehlt, und füllen Sie sie ein.</string>
+    
+    <string name="sf_tutorial_hidden_single_title">Hidden Single</string>
+    <string name="sf_tutorial_hidden_single_short">Eine Ziffer, die nur an einer Position in einem House passt, muss dort hin.</string>
+    <string name="sf_tutorial_hidden_single_description">Wenn eine Ziffer nur an einer Position innerhalb einer Zeile, Spalte oder eines Blocks passen kann (auch wenn diese Zelle andere Kandidatenziffern haben könnte), muss sie dort hin. Suchen Sie nach Ziffern, die nur eine mögliche Position in einem House haben.</string>
+    
+    <string name="sf_tutorial_naked_single_title">Naked Single</string>
+    <string name="sf_tutorial_naked_single_short">Eine Zelle mit nur einem verbleibenden Kandidaten muss diese Ziffer enthalten.</string>
+    <string name="sf_tutorial_naked_single_description">Wenn eine Zelle nach Eliminierung aller anderen Möglichkeiten nur noch eine Kandidatenziffer hat, muss diese Ziffer die Lösung sein. Dies geschieht, wenn alle anderen Ziffern 1-9 bereits in der Zeile, Spalte oder dem Block dieser Zelle vorkommen.</string>
+    
+    <!-- Intersections Section -->
+    <string name="sf_tutorial_intersections_title">Intersections (Locked Candidates)</string>
+    <string name="sf_tutorial_intersections_short_description">Nutzen Sie die Beziehung zwischen Blöcken und Zeilen/Spalten, um Kandidaten zu eliminieren.</string>
+    <string name="sf_tutorial_locked_candidates_intro">Locked Candidates, auch bekannt als Zeilen-Block-Reduktion, nutzt die Überschneidung zwischen Blöcken und Zeilen/Spalten. Es gibt zwei Typen:</string>
+    
+    <string name="sf_tutorial_pointing_title">Pointing</string>
+    <string name="sf_tutorial_pointing_short">Kandidaten in einem Block auf eine Linie beschränkt eliminieren außerhalb.</string>
+    <string name="sf_tutorial_pointing_description">Wenn eine Kandidatenziffer in einem Block auf eine Zeile oder Spalte innerhalb dieses Blocks beschränkt ist, kann diese Ziffer aus dem Rest dieser Zeile oder Spalte außerhalb des Blocks eliminiert werden. Die Kandidaten im Block \"zeigen\", um Kandidaten in der Linie zu eliminieren.</string>
+    
+    <string name="sf_tutorial_claiming_title">Claiming</string>
+    <string name="sf_tutorial_claiming_short">Ein Kandidat in einer Linie nur in einem Block eliminiert aus diesem Block.</string>
+    <string name="sf_tutorial_claiming_description">Wenn eine Kandidatenziffer in einer Zeile oder Spalte nur innerhalb eines Blocks erscheint, kann diese Ziffer aus dem Rest dieses Blocks eliminiert werden. Die Zeile oder Spalte \"beansprucht\" diese Ziffer für diese spezifische Block-Überschneidung.</string>
+    
+    <!-- Subsets Section -->
+    <string name="sf_tutorial_subsets_title">Subsets (Paare, Triples, Quads)</string>
+    <string name="sf_tutorial_subsets_short_description">Fortgeschrittene Techniken unter Verwendung von Zellengruppen mit begrenzten Kandidatenziffern.</string>
+    
+    <!-- Hidden Subsets -->
+    <string name="sf_tutorial_hidden_subsets_title">Hidden Subsets</string>
+    <string name="sf_tutorial_hidden_subsets_intro">Wenn n Ziffern auf nur n Zellen in einem House beschränkt sind, können diese Zellen keine anderen Ziffern enthalten. Sie können andere Kandidatenziffern aus diesen Zellen eliminieren.</string>
+    
+    <string name="sf_tutorial_hidden_pair_title">Hidden Pair</string>
+    <string name="sf_tutorial_hidden_pair_short">Zwei Ziffern auf zwei Zellen beschränkt sperren diese nur für diese Ziffern.</string>
+    <string name="sf_tutorial_hidden_pair_description">Wenn zwei Ziffern nur in genau zwei Zellen innerhalb einer Zeile, Spalte oder eines Blocks vorkommen können, können diese beiden Zellen keine anderen Ziffern enthalten. Entfernen Sie alle anderen Kandidaten aus diesen Zellen (n=2).</string>
+    
+    <string name="sf_tutorial_hidden_triple_title">Hidden Triple</string>
+    <string name="sf_tutorial_hidden_triple_short">Drei Ziffern nur in drei Zellen sperren diese Zellen zusammen.</string>
+    <string name="sf_tutorial_hidden_triple_description">Wenn drei Ziffern nur in genau drei Zellen innerhalb eines Houses vorkommen können, sind diese Zellen auf diese drei Ziffern festgelegt. Eliminieren Sie alle anderen Kandidaten aus diesen drei Zellen (n=3).</string>
+    
+    <string name="sf_tutorial_hidden_quadruple_title">Hidden Quadruple</string>
+    <string name="sf_tutorial_hidden_quadruple_short">Vier Ziffern auf vier Zellen beschränkt bilden eine gesperrte Vierergruppe.</string>
+    <string name="sf_tutorial_hidden_quadruple_description">Wenn vier Ziffern nur in genau vier Zellen innerhalb eines Houses vorkommen können, müssen diese Zellen diese vier Ziffern enthalten. Entfernen Sie alle anderen Kandidatenziffern aus diesen vier Zellen (n=4).</string>
+    
+    <!-- Naked Subsets -->
+    <string name="sf_tutorial_naked_subsets_title">Naked Subsets</string>
+    <string name="sf_tutorial_naked_subsets_intro">Wenn n Zellen in einem House nur n Kandidatenziffern zwischen sich enthalten, können diese Ziffern nirgendwo sonst in diesem House erscheinen. Eliminieren Sie diese Ziffern aus allen anderen Zellen im House.</string>
+    
+    <string name="sf_tutorial_naked_pair_title">Naked Pair</string>
+    <string name="sf_tutorial_naked_pair_short">Zwei Zellen mit denselben zwei Kandidaten eliminieren aus dem House.</string>
+    <string name="sf_tutorial_naked_pair_description">Wenn zwei Zellen in einer Zeile, Spalte oder einem Block nur dieselben zwei Kandidatenziffern enthalten, können diese beiden Ziffern in keiner anderen Zelle in diesem House erscheinen. Eliminieren Sie diese Kandidaten aus dem Rest des Houses.</string>
+    
+    <string name="sf_tutorial_locked_pair_title">Locked Pair</string>
+    <string name="sf_tutorial_locked_pair_short">Ein Naked Pair an Linien-Block-Überschneidung eliminiert aus beiden Strukturen.</string>
+    <string name="sf_tutorial_locked_pair_description">Ein Spezialfall von Naked Pair, bei dem das Paar an der Überschneidung einer Zeile/Spalte und eines Blocks erscheint. Die Eliminierung gilt sowohl für die Zeile/Spalte ALS AUCH für den Block, was es mächtiger macht.</string>
+    
+    <string name="sf_tutorial_naked_triple_title">Naked Triple</string>
+    <string name="sf_tutorial_naked_triple_short">Drei Zellen mit drei geteilten Kandidaten sperren diese Ziffern in diese Zellen.</string>
+    <string name="sf_tutorial_naked_triple_description">Wenn drei Zellen in einem House nur drei Kandidatenziffern zwischen sich enthalten (in beliebiger Kombination), müssen diese Ziffern in diesen Zellen sein. Eliminieren Sie diese drei Kandidaten aus allen anderen Zellen im House.</string>
+    
+    <string name="sf_tutorial_locked_triple_title">Locked Triple</string>
+    <string name="sf_tutorial_locked_triple_short">Ein Naked Triple an Linien-Block-Überschneidung mit doppelter Eliminierungskraft.</string>
+    <string name="sf_tutorial_locked_triple_description">Ähnlich wie Locked Pair ist dies ein Naked Triple an der Überschneidung einer Zeile/Spalte und eines Blocks. Kandidaten können gleichzeitig aus der Linie und dem Block eliminiert werden.</string>
+    
+    <string name="sf_tutorial_naked_quadruple_title">Naked Quadruple</string>
+    <string name="sf_tutorial_naked_quadruple_short">Vier Zellen mit vier geteilten Kandidaten erzeugen eine Experten-Eliminierung.</string>
+    <string name="sf_tutorial_naked_quadruple_description">Wenn vier Zellen in einem House nur vier Kandidatenziffern zwischen sich enthalten, sind diese vier Ziffern auf diese Zellen festgelegt. Eliminieren Sie diese Kandidaten aus allen anderen Zellen im House. Hinweis: Dies tritt nur innerhalb eines einzelnen Houses (Zeile, Spalte oder Block) auf.</string>
+    
+    <!-- Difficulty Labels -->
+    <string name="sf_tutorial_difficulty_basic">Grundlegend</string>
+    <string name="sf_tutorial_difficulty_intermediate">Mittelstufe</string>
+    <string name="sf_tutorial_difficulty_advanced">Fortgeschritten</string>
+    <string name="sf_tutorial_difficulty_expert">Experte</string>
+</resources>

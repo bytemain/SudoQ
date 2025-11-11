@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tutorial Overview -->
+    <string name="sf_tutorial_title">数独高级技巧</string>
+    <string name="sf_tutorial_overview_title">掌握高级解题技巧</string>
+    <string name="sf_tutorial_overview_description">学习强大的策略来解决最具挑战性的数独谜题。从基础的唯一解到高级的数组技巧，本指南将提升您的解题能力。</string>
+    
+    <!-- Basic Content -->
+    <string name="sf_tutorial_basic_content_title">基础教程主题</string>
+    
+    <!-- Advanced Techniques -->
+    <string name="sf_tutorial_advanced_techniques_title">高级技巧</string>
+    <string name="sf_tutorial_advanced_techniques_short_description">掌握从唯一解到数组的专业解题策略。</string>
+    <string name="sf_tutorial_advanced_techniques_intro">逐步学习专业数独解题技巧。每个技巧都建立在之前的基础上，如果您是高级策略的新手，请从顶部开始。</string>
+    
+    <!-- Category Headers -->
+    <string name="sf_tutorial_singles_category">唯一解</string>
+    <string name="sf_tutorial_intersections_category">交叉消除（行列消除法）</string>
+    <string name="sf_tutorial_hidden_subsets_category">隐性数组</string>
+    <string name="sf_tutorial_naked_subsets_category">显性数组</string>
+    
+    <!-- Singles Section -->
+    <string name="sf_tutorial_singles_title">唯一解</string>
+    <string name="sf_tutorial_singles_short_description">所有数独解法的基础 - 识别只能填入一个数字的格子。</string>
+    
+    <string name="sf_tutorial_full_house_title">宫内唯余 / 最后数字</string>
+    <string name="sf_tutorial_full_house_short">当区域内只剩一个空格时，填入缺失的数字。</string>
+    <string name="sf_tutorial_full_house_description">当一行、一列或一宫只剩下一个空格时，该格必须包含缺失的数字。这是最简单的技巧 - 只需数出缺少哪个数字并填入即可。</string>
+    
+    <string name="sf_tutorial_hidden_single_title">隐性唯一解</string>
+    <string name="sf_tutorial_hidden_single_short">某个数字在区域内只能放在一个位置时必须放在那里。</string>
+    <string name="sf_tutorial_hidden_single_description">当某个数字在一行、一列或一宫中只能放在一个位置时（即使该格可能有其他候选数字），它必须放在那里。寻找在某个区域中只有一个可能位置的数字。</string>
+    
+    <string name="sf_tutorial_naked_single_title">显性唯一解</string>
+    <string name="sf_tutorial_naked_single_short">只剩一个候选数的格子必须填入该数字。</string>
+    <string name="sf_tutorial_naked_single_description">当一个格子在排除所有其他可能性后只剩下一个候选数字时，该数字必定是解。当该格所在的行、列和宫中已经出现了所有其他数字1-9时会发生这种情况。</string>
+    
+    <!-- Intersections Section -->
+    <string name="sf_tutorial_intersections_title">交叉消除（行列消除法）</string>
+    <string name="sf_tutorial_intersections_short_description">利用宫与行/列之间的关系来排除候选数。</string>
+    <string name="sf_tutorial_locked_candidates_intro">行列消除法，也称为区块关系消除，利用宫与行/列的交叉关系。有两种类型：</string>
+    
+    <string name="sf_tutorial_pointing_title">Pointing（指向消除）</string>
+    <string name="sf_tutorial_pointing_short">宫内候选数限制在一条线上可以消除宫外该线的候选数。</string>
+    <string name="sf_tutorial_pointing_description">当宫内某个候选数字被限制在该宫的某一行或某一列时，该数字可以从该行或该列在宫外的其他部分排除。宫内的候选数"指向"消除该行列中的候选数。</string>
+    
+    <string name="sf_tutorial_claiming_title">Claiming（占位消除）</string>
+    <string name="sf_tutorial_claiming_short">行列中的候选数只出现在一宫内可以从该宫排除。</string>
+    <string name="sf_tutorial_claiming_description">当行或列中的某个候选数字只出现在某一宫内时，该数字可以从该宫的其余部分排除。该行或列为该特定宫交叉位置"占据"该数字。</string>
+    
+    <!-- Subsets Section -->
+    <string name="sf_tutorial_subsets_title">数组技巧（数对、三数组、四数组）</string>
+    <string name="sf_tutorial_subsets_short_description">使用具有有限候选数字的格子组的高级技巧。</string>
+    
+    <!-- Hidden Subsets -->
+    <string name="sf_tutorial_hidden_subsets_title">隐性数组</string>
+    <string name="sf_tutorial_hidden_subsets_intro">当n个数字只能出现在某个区域的n个格子中时，这些格子不能包含任何其他数字。您可以从这些格子中排除其他候选数字。</string>
+    
+    <string name="sf_tutorial_hidden_pair_title">隐性数对</string>
+    <string name="sf_tutorial_hidden_pair_short">两个数字限制在两个格子中会锁定这些格子只能是这些数字。</string>
+    <string name="sf_tutorial_hidden_pair_description">当两个数字只能出现在某行、某列或某宫的恰好两个格子中时，这两个格子不能包含任何其他数字。从这些格子中删除所有其他候选数（n=2）。</string>
+    
+    <string name="sf_tutorial_hidden_triple_title">隐性三数组</string>
+    <string name="sf_tutorial_hidden_triple_short">三个数字只出现在三个格子中会将这些格子锁定在一起。</string>
+    <string name="sf_tutorial_hidden_triple_description">当三个数字只能出现在某个区域的恰好三个格子中时，这些格子被锁定为这三个数字。从这三个格子中排除所有其他候选数（n=3）。</string>
+    
+    <string name="sf_tutorial_hidden_quadruple_title">隐性四数组</string>
+    <string name="sf_tutorial_hidden_quadruple_short">四个数字限制在四个格子中形成锁定的四元组。</string>
+    <string name="sf_tutorial_hidden_quadruple_description">当四个数字只能出现在某个区域的恰好四个格子中时，这些格子必须包含这四个数字。从这四个格子中删除所有其他候选数字（n=4）。</string>
+    
+    <!-- Naked Subsets -->
+    <string name="sf_tutorial_naked_subsets_title">显性数组</string>
+    <string name="sf_tutorial_naked_subsets_intro">当某个区域中的n个格子之间只包含n个候选数字时，这些数字不能出现在该区域的其他任何地方。从该区域的所有其他格子中排除这些数字。</string>
+    
+    <string name="sf_tutorial_naked_pair_title">显性数对</string>
+    <string name="sf_tutorial_naked_pair_short">两个格子有相同的两个候选数可以从区域排除这些数字。</string>
+    <string name="sf_tutorial_naked_pair_description">当行、列或宫中的两个格子只包含相同的两个候选数字时，这两个数字不能出现在该区域的其他格子中。从该区域的其余部分排除这些候选数。</string>
+    
+    <string name="sf_tutorial_locked_pair_title">锁定数对</string>
+    <string name="sf_tutorial_locked_pair_short">行列宫交叉处的显性数对可以从两个结构中排除。</string>
+    <string name="sf_tutorial_locked_pair_description">显性数对的特殊情况，其中数对出现在行/列与宫的交叉处。消除同时适用于行/列和宫，使其更强大。</string>
+    
+    <string name="sf_tutorial_naked_triple_title">显性三数组</string>
+    <string name="sf_tutorial_naked_triple_short">三个格子有三个共享候选数会将这些数字锁定在这些格子中。</string>
+    <string name="sf_tutorial_naked_triple_description">当某个区域中的三个格子之间只包含三个候选数字（以任何组合）时，这些数字必定在这些格子中。从该区域的所有其他格子中排除这三个候选数。</string>
+    
+    <string name="sf_tutorial_locked_triple_title">锁定三数组</string>
+    <string name="sf_tutorial_locked_triple_short">行列宫交叉处的显性三数组具有双重消除能力。</string>
+    <string name="sf_tutorial_locked_triple_description">类似于锁定数对，这是行/列与宫交叉处的显性三数组。候选数可以同时从行列和宫中排除。</string>
+    
+    <string name="sf_tutorial_naked_quadruple_title">显性四数组</string>
+    <string name="sf_tutorial_naked_quadruple_short">四个格子有四个共享候选数创建专家级消除。</string>
+    <string name="sf_tutorial_naked_quadruple_description">当某个区域中的四个格子之间只包含四个候选数字时，这四个数字被锁定在这些格子中。从该区域的所有其他格子中排除这些候选数。注意：这只发生在单个区域（行、列或宫）内。</string>
+    
+    <!-- Difficulty Labels -->
+    <string name="sf_tutorial_difficulty_basic">基础</string>
+    <string name="sf_tutorial_difficulty_intermediate">中级</string>
+    <string name="sf_tutorial_difficulty_advanced">高级</string>
+    <string name="sf_tutorial_difficulty_expert">专家</string>
+</resources>

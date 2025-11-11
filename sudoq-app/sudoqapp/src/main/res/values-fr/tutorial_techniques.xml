@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tutorial Overview -->
+    <string name="sf_tutorial_title">Techniques Avancées de Sudoku</string>
+    <string name="sf_tutorial_overview_title">Maîtrisez les techniques de résolution avancées</string>
+    <string name="sf_tutorial_overview_description">Apprenez des stratégies puissantes pour résoudre même les puzzles Sudoku les plus difficiles. Des singles de base aux techniques de sous-ensembles avancées, ce guide améliorera vos compétences de résolution.</string>
+    
+    <!-- Basic Content -->
+    <string name="sf_tutorial_basic_content_title">Sujets du tutoriel de base</string>
+    
+    <!-- Advanced Techniques -->
+    <string name="sf_tutorial_advanced_techniques_title">Techniques avancées</string>
+    <string name="sf_tutorial_advanced_techniques_short_description">Maîtrisez les stratégies de résolution professionnelles des Singles aux Sous-ensembles.</string>
+    <string name="sf_tutorial_advanced_techniques_intro">Apprenez les techniques de résolution de Sudoku professionnelles étape par étape. Chaque technique s\'appuie sur les précédentes, donc commencez par le haut si vous êtes nouveau dans les stratégies avancées.</string>
+    
+    <!-- Category Headers -->
+    <string name="sf_tutorial_singles_category">Singles</string>
+    <string name="sf_tutorial_intersections_category">Intersections (Candidats verrouillés)</string>
+    <string name="sf_tutorial_hidden_subsets_category">Sous-ensembles cachés</string>
+    <string name="sf_tutorial_naked_subsets_category">Sous-ensembles nus</string>
+    
+    <!-- Singles Section -->
+    <string name="sf_tutorial_singles_title">Singles</string>
+    <string name="sf_tutorial_singles_short_description">La base de toute résolution de Sudoku - identifier les cases où un seul chiffre peut convenir.</string>
+    
+    <string name="sf_tutorial_full_house_title">Full House / Dernier chiffre</string>
+    <string name="sf_tutorial_full_house_short">Quand une seule case reste vide dans une maison, remplissez-la avec le chiffre manquant.</string>
+    <string name="sf_tutorial_full_house_description">Lorsqu\'une ligne, colonne ou bloc n\'a plus qu\'une seule case vide, cette case doit contenir le chiffre manquant. C\'est la technique la plus simple - comptez simplement quel chiffre manque et remplissez-le.</string>
+    
+    <string name="sf_tutorial_hidden_single_title">Hidden Single</string>
+    <string name="sf_tutorial_hidden_single_short">Un chiffre qui ne peut aller qu\'à une position dans une maison doit y aller.</string>
+    <string name="sf_tutorial_hidden_single_description">Lorsqu\'un chiffre ne peut être placé qu\'à une seule position dans une ligne, colonne ou bloc (même si cette case pourrait avoir d\'autres chiffres candidats), il doit y aller. Recherchez les chiffres qui n\'ont qu\'un seul emplacement possible dans une maison.</string>
+    
+    <string name="sf_tutorial_naked_single_title">Naked Single</string>
+    <string name="sf_tutorial_naked_single_short">Une case avec un seul candidat restant doit contenir ce chiffre.</string>
+    <string name="sf_tutorial_naked_single_description">Lorsqu\'une case n\'a plus qu\'un seul chiffre candidat après élimination de toutes les autres possibilités, ce chiffre doit être la solution. Cela se produit lorsque tous les autres chiffres 1-9 apparaissent déjà dans la ligne, la colonne ou le bloc de cette case.</string>
+    
+    <!-- Intersections Section -->
+    <string name="sf_tutorial_intersections_title">Intersections (Candidats verrouillés)</string>
+    <string name="sf_tutorial_intersections_short_description">Utilisez la relation entre les blocs et les lignes/colonnes pour éliminer les candidats.</string>
+    <string name="sf_tutorial_locked_candidates_intro">Les candidats verrouillés, également connus sous le nom de réduction ligne-bloc, exploitent l\'intersection entre les blocs et les lignes/colonnes. Il y a deux types :</string>
+    
+    <string name="sf_tutorial_pointing_title">Pointing</string>
+    <string name="sf_tutorial_pointing_short">Candidats dans un bloc limités à une ligne éliminent à l\'extérieur du bloc.</string>
+    <string name="sf_tutorial_pointing_description">Lorsqu\'un chiffre candidat dans un bloc est limité à une ligne ou colonne au sein de ce bloc, ce chiffre peut être éliminé du reste de cette ligne ou colonne en dehors du bloc. Les candidats dans le bloc \"pointent\" pour éliminer les candidats dans la ligne.</string>
+    
+    <string name="sf_tutorial_claiming_title">Claiming</string>
+    <string name="sf_tutorial_claiming_short">Un candidat dans une ligne apparaissant uniquement dans un bloc l\'élimine de ce bloc.</string>
+    <string name="sf_tutorial_claiming_description">Lorsqu\'un chiffre candidat dans une ligne ou colonne n\'apparaît que dans un seul bloc, ce chiffre peut être éliminé du reste de ce bloc. La ligne ou la colonne \"revendique\" ce chiffre pour cette intersection de bloc spécifique.</string>
+    
+    <!-- Subsets Section -->
+    <string name="sf_tutorial_subsets_title">Sous-ensembles (Paires, Triples, Quadruples)</string>
+    <string name="sf_tutorial_subsets_short_description">Techniques avancées utilisant des groupes de cases avec des chiffres candidats limités.</string>
+    
+    <!-- Hidden Subsets -->
+    <string name="sf_tutorial_hidden_subsets_title">Sous-ensembles cachés</string>
+    <string name="sf_tutorial_hidden_subsets_intro">Lorsque n chiffres sont limités à seulement n cases dans une maison, ces cases ne peuvent contenir aucun autre chiffre. Vous pouvez éliminer les autres chiffres candidats de ces cases.</string>
+    
+    <string name="sf_tutorial_hidden_pair_title">Paire cachée</string>
+    <string name="sf_tutorial_hidden_pair_short">Deux chiffres limités à deux cases verrouillent ces cases sur ces chiffres uniquement.</string>
+    <string name="sf_tutorial_hidden_pair_description">Lorsque deux chiffres ne peuvent apparaître que dans exactement deux cases au sein d\'une ligne, colonne ou bloc, ces deux cases ne peuvent contenir aucun autre chiffre. Supprimez tous les autres candidats de ces cases (n=2).</string>
+    
+    <string name="sf_tutorial_hidden_triple_title">Triple caché</string>
+    <string name="sf_tutorial_hidden_triple_short">Trois chiffres apparaissant uniquement dans trois cases verrouillent ces cases ensemble.</string>
+    <string name="sf_tutorial_hidden_triple_description">Lorsque trois chiffres ne peuvent apparaître que dans exactement trois cases au sein d\'une maison, ces cases sont verrouillées sur ces trois chiffres. Éliminez tous les autres candidats de ces trois cases (n=3).</string>
+    
+    <string name="sf_tutorial_hidden_quadruple_title">Quadruple caché</string>
+    <string name="sf_tutorial_hidden_quadruple_short">Quatre chiffres limités à quatre cases créent un groupe verrouillé de quatre.</string>
+    <string name="sf_tutorial_hidden_quadruple_description">Lorsque quatre chiffres ne peuvent apparaître que dans exactement quatre cases au sein d\'une maison, ces cases doivent contenir ces quatre chiffres. Supprimez tous les autres chiffres candidats de ces quatre cases (n=4).</string>
+    
+    <!-- Naked Subsets -->
+    <string name="sf_tutorial_naked_subsets_title">Sous-ensembles nus</string>
+    <string name="sf_tutorial_naked_subsets_intro">Lorsque n cases dans une maison ne contiennent que n chiffres candidats entre elles, ces chiffres ne peuvent apparaître nulle part ailleurs dans cette maison. Éliminez ces chiffres de toutes les autres cases de la maison.</string>
+    
+    <string name="sf_tutorial_naked_pair_title">Paire nue</string>
+    <string name="sf_tutorial_naked_pair_short">Deux cases avec les deux mêmes candidats éliminent ces chiffres de la maison.</string>
+    <string name="sf_tutorial_naked_pair_description">Lorsque deux cases dans une ligne, colonne ou bloc ne contiennent que les deux mêmes chiffres candidats, ces deux chiffres ne peuvent apparaître dans aucune autre case de cette maison. Éliminez ces candidats du reste de la maison.</string>
+    
+    <string name="sf_tutorial_locked_pair_title">Paire verrouillée</string>
+    <string name="sf_tutorial_locked_pair_short">Une paire nue à l\'intersection ligne-bloc élimine des deux structures.</string>
+    <string name="sf_tutorial_locked_pair_description">Un cas particulier de paire nue où la paire apparaît à l\'intersection d\'une ligne/colonne et d\'un bloc. L\'élimination s\'applique à la fois à la ligne/colonne ET au bloc, ce qui la rend plus puissante.</string>
+    
+    <string name="sf_tutorial_naked_triple_title">Triple nu</string>
+    <string name="sf_tutorial_naked_triple_short">Trois cases avec trois candidats partagés verrouillent ces chiffres dans ces cases.</string>
+    <string name="sf_tutorial_naked_triple_description">Lorsque trois cases dans une maison ne contiennent que trois chiffres candidats entre elles (dans n\'importe quelle combinaison), ces chiffres doivent être dans ces cases. Éliminez ces trois candidats de toutes les autres cases de la maison.</string>
+    
+    <string name="sf_tutorial_locked_triple_title">Triple verrouillé</string>
+    <string name="sf_tutorial_locked_triple_short">Un triple nu à l\'intersection ligne-bloc avec double pouvoir d\'élimination.</string>
+    <string name="sf_tutorial_locked_triple_description">Similaire à la paire verrouillée, c\'est un triple nu à l\'intersection d\'une ligne/colonne et d\'un bloc. Les candidats peuvent être éliminés à la fois de la ligne et du bloc simultanément.</string>
+    
+    <string name="sf_tutorial_naked_quadruple_title">Quadruple nu</string>
+    <string name="sf_tutorial_naked_quadruple_short">Quatre cases avec quatre candidats partagés créent une élimination niveau expert.</string>
+    <string name="sf_tutorial_naked_quadruple_description">Lorsque quatre cases dans une maison ne contiennent que quatre chiffres candidats entre elles, ces quatre chiffres sont verrouillés sur ces cases. Éliminez ces candidats de toutes les autres cases de la maison. Note : Cela ne se produit que dans une seule maison (ligne, colonne ou bloc).</string>
+    
+    <!-- Difficulty Labels -->
+    <string name="sf_tutorial_difficulty_basic">Base</string>
+    <string name="sf_tutorial_difficulty_intermediate">Intermédiaire</string>
+    <string name="sf_tutorial_difficulty_advanced">Avancé</string>
+    <string name="sf_tutorial_difficulty_expert">Expert</string>
+</resources>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tutorial Overview -->
+    <string name="sf_tutorial_title">Advanced Sudoku Techniques</string>
+    <string name="sf_tutorial_overview_title">Master Advanced Solving Techniques</string>
+    <string name="sf_tutorial_overview_description">Learn powerful strategies to solve even the most challenging Sudoku puzzles. From basic singles to advanced subset techniques, this guide will elevate your solving skills.</string>
+    
+    <!-- Basic Content -->
+    <string name="sf_tutorial_basic_content_title">Basic Tutorial Topics</string>
+    
+    <!-- Advanced Techniques -->
+    <string name="sf_tutorial_advanced_techniques_title">Advanced Techniques</string>
+    <string name="sf_tutorial_advanced_techniques_short_description">Master professional solving strategies from Singles to Subsets.</string>
+    <string name="sf_tutorial_advanced_techniques_intro">Learn professional Sudoku solving techniques step by step. Each technique builds upon previous ones, so start from the top if you\'re new to advanced strategies.</string>
+    
+    <!-- Category Headers -->
+    <string name="sf_tutorial_singles_category">Singles</string>
+    <string name="sf_tutorial_intersections_category">Intersections (Locked Candidates)</string>
+    <string name="sf_tutorial_hidden_subsets_category">Hidden Subsets</string>
+    <string name="sf_tutorial_naked_subsets_category">Naked Subsets</string>
+    
+    <!-- Singles Section -->
+    <string name="sf_tutorial_singles_title">Singles</string>
+    <string name="sf_tutorial_singles_short_description">The foundation of all Sudoku solving - identifying cells where only one digit can fit.</string>
+    
+    <string name="sf_tutorial_full_house_title">Full House / Last Digit</string>
+    <string name="sf_tutorial_full_house_short">When only one cell remains empty in a house, fill it with the missing digit.</string>
+    <string name="sf_tutorial_full_house_description">When a row, column, or box has only one empty cell remaining, that cell must contain the missing digit. This is the simplest technique - simply count which digit is missing and fill it in.</string>
+    
+    <string name="sf_tutorial_hidden_single_title">Hidden Single</string>
+    <string name="sf_tutorial_hidden_single_short">A digit that can only fit in one position within a house must go there.</string>
+    <string name="sf_tutorial_hidden_single_description">When a digit can only fit in one position within a row, column, or box (even though that cell might have other candidate digits), it must go there. Look for digits that have only one possible location in a house.</string>
+    
+    <string name="sf_tutorial_naked_single_title">Naked Single</string>
+    <string name="sf_tutorial_naked_single_short">A cell with only one remaining candidate must contain that digit.</string>
+    <string name="sf_tutorial_naked_single_description">When a cell has only one remaining candidate digit after eliminating all other possibilities, that digit must be the solution. This happens when all other digits 1-9 already appear in that cell\'s row, column, or box.</string>
+    
+    <!-- Intersections Section -->
+    <string name="sf_tutorial_intersections_title">Intersections (Locked Candidates)</string>
+    <string name="sf_tutorial_intersections_short_description">Use the relationship between boxes and rows/columns to eliminate candidates.</string>
+    <string name="sf_tutorial_locked_candidates_intro">Locked Candidates, also known as Line-Box Reduction, exploits the intersection between boxes and rows/columns. There are two types:</string>
+    
+    <string name="sf_tutorial_pointing_title">Pointing</string>
+    <string name="sf_tutorial_pointing_short">Candidates in a box restricted to one line eliminate candidates outside that box.</string>
+    <string name="sf_tutorial_pointing_description">When a candidate digit in a box is restricted to one row or column within that box, that digit can be eliminated from the rest of that row or column outside the box. The candidates in the box \"point\" to eliminate candidates in the line.</string>
+    
+    <string name="sf_tutorial_claiming_title">Claiming</string>
+    <string name="sf_tutorial_claiming_short">A candidate in a line appearing only in one box eliminates it from that box.</string>
+    <string name="sf_tutorial_claiming_description">When a candidate digit in a row or column appears only within one box, that digit can be eliminated from the rest of that box. The row or column \"claims\" that digit for that specific box intersection.</string>
+    
+    <!-- Subsets Section -->
+    <string name="sf_tutorial_subsets_title">Subsets (Pairs, Triples, Quads)</string>
+    <string name="sf_tutorial_subsets_short_description">Advanced techniques using groups of cells with limited candidate digits.</string>
+    
+    <!-- Hidden Subsets -->
+    <string name="sf_tutorial_hidden_subsets_title">Hidden Subsets</string>
+    <string name="sf_tutorial_hidden_subsets_intro">When n digits are restricted to only n cells in a house, those cells cannot contain any other digits. You can eliminate other candidate digits from those cells.</string>
+    
+    <string name="sf_tutorial_hidden_pair_title">Hidden Pair</string>
+    <string name="sf_tutorial_hidden_pair_short">Two digits restricted to two cells lock those cells to those digits only.</string>
+    <string name="sf_tutorial_hidden_pair_description">When two digits can only appear in exactly two cells within a row, column, or box, those two cells cannot contain any other digits. Remove all other candidates from those cells (n=2).</string>
+    
+    <string name="sf_tutorial_hidden_triple_title">Hidden Triple</string>
+    <string name="sf_tutorial_hidden_triple_short">Three digits appearing only in three cells lock those cells together.</string>
+    <string name="sf_tutorial_hidden_triple_description">When three digits can only appear in exactly three cells within a house, those cells are locked to those three digits. Eliminate all other candidates from those three cells (n=3).</string>
+    
+    <string name="sf_tutorial_hidden_quadruple_title">Hidden Quadruple</string>
+    <string name="sf_tutorial_hidden_quadruple_short">Four digits restricted to four cells create a locked group of four.</string>
+    <string name="sf_tutorial_hidden_quadruple_description">When four digits can only appear in exactly four cells within a house, those cells must contain those four digits. Remove all other candidate digits from those four cells (n=4).</string>
+    
+    <!-- Naked Subsets -->
+    <string name="sf_tutorial_naked_subsets_title">Naked Subsets</string>
+    <string name="sf_tutorial_naked_subsets_intro">When n cells in a house contain only n candidate digits between them, those digits cannot appear anywhere else in that house. Eliminate those digits from all other cells in the house.</string>
+    
+    <string name="sf_tutorial_naked_pair_title">Naked Pair</string>
+    <string name="sf_tutorial_naked_pair_short">Two cells with the same two candidates eliminate those digits from the house.</string>
+    <string name="sf_tutorial_naked_pair_description">When two cells in a row, column, or box contain only the same two candidate digits, those two digits cannot appear in any other cell in that house. Eliminate those candidates from the rest of the house.</string>
+    
+    <string name="sf_tutorial_locked_pair_title">Locked Pair</string>
+    <string name="sf_tutorial_locked_pair_short">A Naked Pair at line-box intersection eliminates from both structures.</string>
+    <string name="sf_tutorial_locked_pair_description">A special case of Naked Pair where the pair appears at the intersection of a row/column and a box. The elimination applies to both the row/column AND the box, making it more powerful.</string>
+    
+    <string name="sf_tutorial_naked_triple_title">Naked Triple</string>
+    <string name="sf_tutorial_naked_triple_short">Three cells with three shared candidates lock those digits to those cells.</string>
+    <string name="sf_tutorial_naked_triple_description">When three cells in a house contain only three candidate digits between them (in any combination), those digits must be in those cells. Eliminate those three candidates from all other cells in the house.</string>
+    
+    <string name="sf_tutorial_locked_triple_title">Locked Triple</string>
+    <string name="sf_tutorial_locked_triple_short">A Naked Triple at line-box intersection with dual elimination power.</string>
+    <string name="sf_tutorial_locked_triple_description">Similar to Locked Pair, this is a Naked Triple at the intersection of a row/column and box. Candidates can be eliminated from both the line and the box simultaneously.</string>
+    
+    <string name="sf_tutorial_naked_quadruple_title">Naked Quadruple</string>
+    <string name="sf_tutorial_naked_quadruple_short">Four cells with four shared candidates create an expert-level elimination.</string>
+    <string name="sf_tutorial_naked_quadruple_description">When four cells in a house contain only four candidate digits between them, those four digits are locked to those cells. Eliminate those candidates from all other cells in the house. Note: This only occurs within a single house (row, column, or box).</string>
+    
+    <!-- Difficulty Labels -->
+    <string name="sf_tutorial_difficulty_basic">Basic</string>
+    <string name="sf_tutorial_difficulty_intermediate">Intermediate</string>
+    <string name="sf_tutorial_difficulty_advanced">Advanced</string>
+    <string name="sf_tutorial_difficulty_expert">Expert</string>
+</resources>
