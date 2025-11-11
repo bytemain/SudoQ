@@ -89,7 +89,7 @@ class SudokuRepo(
     }
 
     override fun ids(): List<Int> {
-        return sudokusDir.list().map { it.substring(7, it.length - 4).toInt() }
+        return sudokusDir.list()?.map { it.substring(7, it.length - 4).toInt() } ?: emptyList()
     }
 
     /**
@@ -103,7 +103,11 @@ class SudokuRepo(
      * @return der Ordner
      */
     private fun getSudokuDir(type: SudokuTypes, complexity: Complexity): File {
-        return File(outerSudokusDir.absolutePath + File.separator + type.toString() + File.separator + complexity.toString())
+        val dir = File(outerSudokusDir.absolutePath + File.separator + type.toString() + File.separator + complexity.toString())
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+        return dir
     }
 
     /**

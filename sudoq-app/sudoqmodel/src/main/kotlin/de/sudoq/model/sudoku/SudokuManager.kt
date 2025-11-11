@@ -70,10 +70,15 @@ open class SudokuManager(val sudokuTypeRepo: IRepo<SudokuType>,
      * @param t [type][SudokuTypes] of the [Sudoku]
      * @param c [Complexity] of the [Sudoku]
      * @return the new [Sudoku]
+     * @throws IllegalStateException if no sudokus are available for the given type and complexity
      */
     fun getNewSudoku(t: SudokuTypes?, c: Complexity?): Sudoku {
         val sudokuRepo = sudokuRepoProvider.getRepo(t!!, c!!)
-        val randomId = sudokuRepo.ids().random()
+        val ids = sudokuRepo.ids()
+        if (ids.isEmpty()) {
+            throw IllegalStateException("No sudokus available for type $t and complexity $c. Please ensure assets are properly copied.")
+        }
+        val randomId = ids.random()
         return sudokuRepo.read(randomId)
     }
 

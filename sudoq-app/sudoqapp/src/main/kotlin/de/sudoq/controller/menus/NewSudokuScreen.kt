@@ -211,7 +211,7 @@ fun ComplexitySelector(
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Complexity.entries.forEach { complexity ->
+        Complexity.playableValues().forEach { complexity ->
             ComplexityCard(
                 complexity = complexity,
                 isSelected = complexity == selectedComplexity,
