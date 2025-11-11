@@ -408,13 +408,19 @@ class UserInteractionMediator(
      */
     fun updateKeyboard() {
         val currentField = sudokuView!!.currentCellView
+
+        if (currentField == null) {
+            virtualKeyboard.reset()
+            return
+        }
+        
+        // Normal keyboard update when a cell is selected
         for (i in game!!.sudoku!!.sudokuType!!.symbolIterator) {
             var state: CellViewStates
             state =
-                if (currentField != null && i == currentField.cell.currentValue && !noteMode) CellViewStates.SELECTED_INPUT_BORDER else if (currentField != null && currentField.cell.isNoteSet(
-                        i
-                    ) && noteMode
-                ) CellViewStates.SELECTED_NOTE_BORDER else CellViewStates.DEFAULT_BORDER
+                if (i == currentField.cell.currentValue && !noteMode) CellViewStates.SELECTED_INPUT_BORDER 
+                else if (currentField.cell.isNoteSet(i) && noteMode) CellViewStates.SELECTED_NOTE_BORDER 
+                else CellViewStates.DEFAULT_BORDER
             virtualKeyboard.markCell(i, state)
             
             // Check if the symbol is completed and show checkmark if the assistance is enabled
@@ -423,6 +429,7 @@ class UserInteractionMediator(
             virtualKeyboard.setButtonCheckmark(i, isCompleted)
         }
         virtualKeyboard.invalidate()
+        virtualKeyboard.requestLayout()
     }
 
     override fun notifyListener() {}

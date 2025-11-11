@@ -182,6 +182,20 @@ class VirtualKeyboardLayout(context: Context?, attrs: AttributeSet?) : LinearLay
         for (b in buttonIterator) b.isEnabled = false
     }
 
+    fun reset() {
+        for (b in buttonIterator) {
+            CellViewPainter.instance!!.setMarking(
+                b,
+                CellViewStates.DEFAULT_BORDER
+            )
+        }
+
+        this.enableAllButtons()
+        this.isActivated = true
+        this.invalidate()
+        this.requestLayout()
+    }
+
     /**
      * Deaktiviert den spezifizierten Button.
      *

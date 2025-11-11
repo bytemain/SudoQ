@@ -367,7 +367,39 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     override fun onTouchEvent(event: MotionEvent): Boolean {
         Log.d(LOG_TAG, "onTouchEvent ${MotionEvent.actionToString(event.actionMasked)} isMultiSelectionMode=${isMultiSelectionMode}")
         
-        // Only handle touch events in multi-selection mode
+        // Handle clicks on blank areas (not on cells) to clear selection
+        if (event.action == MotionEvent.ACTION_DOWN && !isMultiSelectionMode) {
+            val x = event.x
+            val y = event.y
+            
+            // Check if touch is on a cell
+            val cellView = findCellViewAt(x, y)
+            
+            if (cellView == null && currentCellView != null) {
+                // Clicked on blank area within sudoku layout - clear selection
+                Log.d(LOG_TAG, "Blank area within SudokuLayout touched - clearing cell selection")
+                val previousCell = currentCellView
+                previousCell?.deselect(true)
+                currentCellView = null
+                
+                // Trigger keyboard update by notifying context (SudokuActivity)
+                if (context is de.sudoq.controller.sudoku.SudokuActivity) {
+                    val activity = context as de.sudoq.controller.sudoku.SudokuActivity
+                    Log.d(LOG_TAG, "Calling mediator.updateKeyboard()")
+                    activity.mediator?.updateKeyboard()
+                    Log.d(LOG_TAG, "Keyboard update completed")
+                }
+                
+                return true
+            }
+            
+            // If clicked on empty area and no cell is selected, just let event propagate
+            if (cellView == null) {
+                return false
+            }
+        }
+        
+        // Only handle touch events in multi-selection mode for drag operations
         if (!isMultiSelectionMode) {
             return false
         }
