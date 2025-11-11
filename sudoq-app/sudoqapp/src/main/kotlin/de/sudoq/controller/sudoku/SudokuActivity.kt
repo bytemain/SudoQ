@@ -25,7 +25,10 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.compose.setContent
 import androidx.appcompat.widget.Toolbar
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.*
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import de.sudoq.R
@@ -751,26 +754,34 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
      * Gibt an, ob der Spieler aufgegeben hat
      */
     private fun showWinDialog(surrendered: Boolean) {
-        val deleteAlert = AlertDialog.Builder(this).create()
-        deleteAlert.setTitle(
-            if (surrendered)
-                getString(R.string.dialog_surrender_title)
-            else
-                getString(R.string.dialog_won_title)
-        )
-
-        deleteAlert.setMessage(
-            """
-            ${getString(R.string.dialog_won_text)}
-            
-            $statisticsString
-            """.trimIndent()
-        )
-        deleteAlert.setButton(getString(R.string.dialog_yes)) { dialog, which -> finish() }
-        deleteAlert.setButton2(getString(R.string.dialog_no)) { dialog, which ->
-            // Dummy: clicking no means staying in the game
+        // Create a dialog using Jetpack Compose
+        val dialogFragment = androidx.compose.ui.platform.ComposeView(this).apply {
+            setContent {
+                MaterialTheme {
+                    var showDialog by remember { mutableStateOf(true) }
+                    
+                    if (showDialog) {
+                        WinDialog(
+                            surrendered = surrendered,
+                            timeNeeded = gameTimeString,
+                            score = game!!.score,
+                            onDismiss = {
+                                showDialog = false
+                                // Stay in the game
+                            },
+                            onFinish = {
+                                showDialog = false
+                                finish()
+                            }
+                        )
+                    }
+                }
+            }
         }
-        deleteAlert.show()
+        
+        // Add the compose view to the window
+        val decorView = window.decorView as? FrameLayout
+        decorView?.addView(dialogFragment)
     }
 
     /**

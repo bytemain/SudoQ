@@ -14,9 +14,11 @@ import android.view.View
 import android.widget.Button
 import androidx.appcompat.widget.Toolbar
 import de.sudoq.R
+import de.sudoq.BuildConfig
 import de.sudoq.controller.SudoqCompatActivity
 import de.sudoq.controller.menus.preferences.PlayerPreferencesActivity
 import de.sudoq.controller.sudoku.SudokuActivity
+import de.sudoq.controller.test.ComposeTestActivity
 import de.sudoq.model.profile.ProfileManager
 import de.sudoq.persistence.profile.ProfileRepo
 import de.sudoq.persistence.profile.ProfilesListRepo
@@ -63,6 +65,12 @@ class MainActivity : SudoqCompatActivity() {
         val loadButton = findViewById<View>(R.id.button_mainmenu_load_sudoku) as Button
         //loadButton.setEnabled(!gm.getGameList().isEmpty());
         loadButton.isEnabled = true
+        
+        // Show Compose test button only in debug builds
+        val composeTestButton = findViewById<View>(R.id.button_mainmenu_compose_test) as Button
+        if (BuildConfig.DEBUG) {
+            composeTestButton.visibility = View.VISIBLE
+        }
     }
 
     /**
@@ -90,6 +98,10 @@ class MainActivity : SudoqCompatActivity() {
             R.id.button_mainmenu_profile -> {
                 val preferencesIntent = Intent(this, PlayerPreferencesActivity::class.java)
                 startActivity(preferencesIntent)
+            }
+            R.id.button_mainmenu_compose_test -> {
+                val testIntent = Intent(this, ComposeTestActivity::class.java)
+                startActivity(testIntent)
             }
         }
     }

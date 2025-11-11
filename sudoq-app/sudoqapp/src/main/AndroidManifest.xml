@@ -18,6 +18,7 @@
 
         <activity android:name=".controller.menus.GestureBuilder" android:label="@string/gesture_builder_title" />
         <activity android:name=".controller.sudoku.SudokuActivity" />
+        <activity android:name=".controller.test.ComposeTestActivity" android:label="Compose Test" android:exported="false" />
         <activity android:name=".controller.menus.preferences.PlayerPreferencesActivity" android:label="@string/profile_preference_title" android:windowSoftInputMode="stateHidden" />
         <activity android:name=".controller.menus.preferences.AdvancedPreferencesActivity" android:label="@string/sf_advancedpreferences_title" />
         <activity android:name=".controller.menus.preferences.RestrictTypesActivity" android:label="@string/sf_advancedpreferences_restricttypes_title" />

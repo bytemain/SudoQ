@@ -52,5 +52,13 @@
             android:onClick="switchActivity"
             android:text="@string/sf_mainmenu_profile" />
 
+        <!-- Debug only: Compose Test Button -->
+        <Button
+            android:id="@+id/button_mainmenu_compose_test"
+            style="@style/style_mainmenu_buttons"
+            android:onClick="switchActivity"
+            android:text="🧪 Compose Test"
+            android:visibility="gone" />
+
     </LinearLayout>
 </ScrollView>
