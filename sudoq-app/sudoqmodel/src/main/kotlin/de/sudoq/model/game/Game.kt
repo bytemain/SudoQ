@@ -99,6 +99,23 @@ class Game {
     /** Tracks positions auto-filled during the current batch (non-recursive). */
     private val autoFillBatchPositions: MutableList<Position> = mutableListOf()
 
+    /**
+     * Optional logger for debugging (provided by UI layer)
+     */
+    @Volatile
+    private var debugLogger: ((tag: String, message: String, isError: Boolean) -> Unit)? = null
+
+    /**
+     * Sets the debug logger for auto-fill operations
+     */
+    fun setDebugLogger(logger: (tag: String, message: String, isError: Boolean) -> Unit) {
+        debugLogger = logger
+    }
+
+    private fun logDebug(tag: String, message: String, isError: Boolean = false) {
+        debugLogger?.invoke(tag, message, isError)
+    }
+
     /** Optional listener invoked once when the game becomes finished (all cells solved). */
     @Volatile
     private var gameFinishedListener: (() -> Unit)? = null
@@ -602,9 +619,35 @@ class Game {
                     // Double-check cell state in case it was modified during iteration
                     if (cell.isNotSolved && cell.getNotesCount() == 1) {
                         val uniqueCandidate = cell.getSingleNote()
+                        val currentValue = cell.currentValue
+                        val maxValue = cell.maxValue
+                        
+                        // Debug logging
+                        logDebug("AutoFill", "Cell ${cell.id}: currentValue=$currentValue, uniqueCandidate=$uniqueCandidate, maxValue=$maxValue")
+                        
+                        // Validate the candidate is within valid range
+                        if (uniqueCandidate < 0 || uniqueCandidate > maxValue) {
+                            logDebug("AutoFill", "ERROR: Invalid uniqueCandidate=$uniqueCandidate for cell ${cell.id} with maxValue=$maxValue", isError = true)
+                            continue
+                        }
+                        
+                        // Calculate the diff: target value - current value
+                        // If cell is empty (currentValue = -1), diff = uniqueCandidate - (-1) = uniqueCandidate + 1
+                        // If cell has a value, diff = uniqueCandidate - currentValue
+                        val diff = uniqueCandidate - currentValue
+                        
+                        logDebug("AutoFill", "Calculated diff=$diff, will set cell to: ${currentValue + diff}")
+                        
+                        // Validate the final value will be within range
+                        val targetValue = currentValue + diff
+                        if (targetValue < 0 || targetValue > maxValue) {
+                            logDebug("AutoFill", "ERROR: Target value $targetValue out of range [0, $maxValue] for cell ${cell.id}", isError = true)
+                            continue
+                        }
+                        
                         // Fill the cell with the unique candidate using SolveActionWithNoteUpdate
                         val action = SolveActionWithNoteUpdate(
-                            uniqueCandidate - cell.currentValue, // diff, not absolute value
+                            diff,
                             cell,
                             sudoku!!,
                             isAssistanceAvailable(Assistances.autoAdjustNotes)

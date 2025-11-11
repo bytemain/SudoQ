@@ -1,5 +1,6 @@
 package de.sudoq.persistence.sudoku
 
+import android.util.Log
 import de.sudoq.model.persistence.IRepo
 import de.sudoq.model.sudoku.Cell
 import de.sudoq.model.sudoku.Position
@@ -121,8 +122,11 @@ class SudokuBE() : XmlableWithRepo<SudokuType> {
                     val noteIndices = notesAttr.split(',')
                         .mapNotNull { it.trim().toIntOrNull() }
                     for (noteIdx in noteIndices) {
+                        // Note: maxValue = numberOfSymbols - 1, so valid range is 0 to numberOfSymbols-1
                         if (noteIdx >= 0 && noteIdx < sudokuType!!.numberOfSymbols) {
                             cell.toggleNote(noteIdx)
+                        } else {
+                            Log.w("SudokuBE", "Skipping invalid note index $noteIdx (valid range: 0-${sudokuType!!.numberOfSymbols - 1})")
                         }
                     }
                 }

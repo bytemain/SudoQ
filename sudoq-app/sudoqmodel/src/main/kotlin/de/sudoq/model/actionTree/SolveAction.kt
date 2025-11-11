@@ -22,6 +22,25 @@ open class SolveAction(diff: Int, cell: Cell) : Action(diff, cell) {
      * {@inheritDoc}
      */
     override fun execute() {
+        val oldValue = cell.currentValue
+        val newValue = oldValue + diff
+        
+        // Add detailed logging for debugging
+        if (newValue < 0 || newValue > cell.maxValue) {
+            val stackTrace = Thread.currentThread().stackTrace.take(8).joinToString("\n  ") { it.toString() }
+            debugLogger?.invoke(
+                "SolveAction.execute",
+                "About to set invalid value\n" +
+                "  Cell ID: ${cell.id}\n" +
+                "  Old value: $oldValue\n" +
+                "  Diff: $diff\n" +
+                "  New value: $newValue\n" +
+                "  MaxValue: ${cell.maxValue}\n" +
+                "  Stack trace:\n  $stackTrace",
+                true
+            )
+        }
+        
         cell.currentValue += diff //todo execute is not idempotent... maybe pass target val instead of diff and save last value on execute?
     }
 

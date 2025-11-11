@@ -649,6 +649,22 @@ class UserInteractionMediator(
     }
 
     /**
+     * Toggles note mode on/off and updates the current cell view if one is selected
+     */
+    fun toggleNoteMode() {
+        noteMode = !noteMode
+        sudokuView?.currentCellView?.setNoteState(noteMode)
+        Log.d(LOG_TAG, "Note mode toggled to: $noteMode")
+    }
+
+    /**
+     * Gets the current note mode state
+     */
+    fun isNoteMode(): Boolean {
+        return noteMode
+    }
+
+    /**
      * Instanziiert einen neuen UserInteractionMediator.
      *
      * @param virtualKeyboard

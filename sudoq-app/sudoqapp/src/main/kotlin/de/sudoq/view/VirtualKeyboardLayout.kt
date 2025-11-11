@@ -10,6 +10,7 @@ package de.sudoq.view
 import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import de.sudoq.controller.sudoku.InputListener
@@ -31,10 +32,36 @@ import kotlin.math.sqrt
  */
 class VirtualKeyboardLayout(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs),
     ObservableInput, Iterable<View?> {
+    
+    /**
+     * Keyboard layout modes
+     */
+    enum class KeyboardLayoutMode {
+        GRID,       // Square grid layout (3x3 for 9 buttons)
+        HORIZONTAL  // Single horizontal row
+    }
+    
     /**
      * Die Buttons des VirtualKeyboard
      */
     private var buttons: Array<Array<VirtualKeyboardButtonView>>? = null
+    
+    /**
+     * Current keyboard layout mode
+     */
+    var layoutMode: KeyboardLayoutMode = KeyboardLayoutMode.GRID
+        set(value) {
+            if (field != value) {
+                field = value
+                // Re-inflate if we have buttons already created
+                buttons?.let {
+                    val numButtons = it.sumOf { row -> row.size }
+                    if (numButtons > 0) {
+                        inflate(numButtons)
+                    }
+                }
+            }
+        }
 
     private val buttonIterator: Iterable<VirtualKeyboardButtonView> =
         object : Iterable<VirtualKeyboardButtonView> {
@@ -84,30 +111,54 @@ class VirtualKeyboardLayout(context: Context?, attrs: AttributeSet?) : LinearLay
      */
     private fun inflate(numberOfButtons: Int) {
         removeAllViews()
-        val buttonsPerColumn = floor(sqrt(numberOfButtons.toDouble())).toInt()
-        val buttonsPerRow = ceil(sqrt(numberOfButtons.toDouble())).toInt()
+        
+        Log.d("VirtualKeyboardLayout", "inflate: numberOfButtons=$numberOfButtons, layoutMode=$layoutMode")
+        
+        val buttonsPerRow: Int
+        val buttonsPerColumn: Int
+        
+        when (layoutMode) {
+            KeyboardLayoutMode.GRID -> {
+                // Square grid layout (e.g., 3x3 for 9 buttons)
+                // buttonsPerColumn is number of rows, buttonsPerRow is number of columns
+                buttonsPerColumn = floor(sqrt(numberOfButtons.toDouble())).toInt()
+                buttonsPerRow = ceil(sqrt(numberOfButtons.toDouble())).toInt()
+            }
+            KeyboardLayoutMode.HORIZONTAL -> {
+                // Single horizontal row
+                buttonsPerRow = numberOfButtons
+                buttonsPerColumn = 1
+            }
+        }
+        
+        Log.d("VirtualKeyboardLayout", "Layout: ${buttonsPerRow}x${buttonsPerColumn} (columns x rows)")
 
-
+        // buttons[x][y] where x is column index, y is row index
         buttons = Array(buttonsPerRow) { r ->
             Array(buttonsPerColumn) { c ->
                 VirtualKeyboardButtonView(context, r + c * buttonsPerRow)
             }
         }
 
+        // Build layout: y iterates over rows, x iterates over columns
         for (y in 0 until buttonsPerColumn) {
             val la = LinearLayout(context)
             for (x in 0 until buttonsPerRow) {
-                buttons!![x][y].visibility = INVISIBLE
+                val button = buttons!![x][y]
+                button.visibility = INVISIBLE
+                Log.d("VirtualKeyboardLayout", "Creating button at [$x][$y] with symbol=${button.symbol}, visibility=INVISIBLE, isEnabled=${button.isEnabled}")
                 val params =
                     LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1.0f)
                 params.leftMargin = 2
                 params.bottomMargin = 2
                 params.topMargin = 2
                 params.rightMargin = 2
-                la.addView(buttons!![x][y], params)
+                la.addView(button, params)
             }
             addView(la, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1.0f))
         }
+        
+        Log.d("VirtualKeyboardLayout", "inflate completed: created ${buttonsPerRow * buttonsPerColumn} buttons")
     }
 
     /**
@@ -126,7 +177,14 @@ class VirtualKeyboardLayout(context: Context?, attrs: AttributeSet?) : LinearLay
      * soll
      */
     override fun setActivated(activated: Boolean) {
-        for (b in buttonIterator) b.visibility = if (activated) VISIBLE else INVISIBLE
+        Log.d("VirtualKeyboardLayout", "setActivated: $activated")
+        var count = 0
+        for (b in buttonIterator) {
+            b.visibility = if (activated) VISIBLE else INVISIBLE
+            Log.d("VirtualKeyboardLayout", "Button ${b.symbol}: visibility=${if (activated) "VISIBLE" else "INVISIBLE"}, isEnabled=${b.isEnabled}")
+            count++
+        }
+        Log.d("VirtualKeyboardLayout", "Total buttons activated/deactivated: $count")
     }
 
     /**
@@ -143,7 +201,13 @@ class VirtualKeyboardLayout(context: Context?, attrs: AttributeSet?) : LinearLay
      * {@inheritDoc}
      */
     override fun registerListener(listener: InputListener) {
-        for (b in buttonIterator) b.registerListener(listener)
+        Log.d("VirtualKeyboardLayout", "registerListener: ${listener::class.java.simpleName}")
+        var count = 0
+        for (b in buttonIterator) {
+            b.registerListener(listener)
+            count++
+        }
+        Log.d("VirtualKeyboardLayout", "Registered listener on $count buttons")
     }
 
     /**
@@ -175,10 +239,17 @@ class VirtualKeyboardLayout(context: Context?, attrs: AttributeSet?) : LinearLay
      * Enable all buttons of this keyboard.
      */
     fun enableAllButtons() {
-        for (b in buttonIterator) b.isEnabled = true
+        Log.d("VirtualKeyboardLayout", "enableAllButtons called")
+        var count = 0
+        for (b in buttonIterator) {
+            b.isEnabled = true
+            count++
+        }
+        Log.d("VirtualKeyboardLayout", "Enabled $count buttons")
     }
 
     fun disableAllButtons() {
+        Log.d("VirtualKeyboardLayout", "disableAllButtons called")
         for (b in buttonIterator) b.isEnabled = false
     }
 
@@ -254,5 +325,6 @@ class VirtualKeyboardLayout(context: Context?, attrs: AttributeSet?) : LinearLay
 
     init {
         setWillNotDraw(false)
+        orientation = VERTICAL
     }
 }

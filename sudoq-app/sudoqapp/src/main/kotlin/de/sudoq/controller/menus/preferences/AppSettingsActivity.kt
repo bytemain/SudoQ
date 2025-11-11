@@ -42,11 +42,13 @@ class AppSettingsActivity : SudoqCompatActivity() {
         pm.loadCurrentProfile()
         val initialRestrictedTypes = pm.assistances.wantedTypesList
         val initialDebugEnabled = pm.appSettings.isDebugSet
+        val initialKeyboardLayout = pm.appSettings.keyboardLayoutMode
         
         setContent {
             var themeColor by remember { mutableStateOf(ThemeManager.loadThemeColor(this)) }
             var isDarkMode by remember { mutableStateOf(ThemeManager.loadDarkMode(this)) }
             var currentLanguage by remember { mutableStateOf(LanguageUtility.loadLanguageCodeFromPreferences(this)) }
+            var keyboardLayoutMode by remember { mutableStateOf(initialKeyboardLayout) }
             var showRestrictDialog by remember { mutableStateOf(false) }
             var restrictedTypes by remember { mutableStateOf(initialRestrictedTypes) }
             var debugClickCount by remember { mutableStateOf(0) }
@@ -61,6 +63,7 @@ class AppSettingsActivity : SudoqCompatActivity() {
                     themeColor = themeColor,
                     isDarkMode = isDarkMode,
                     currentLanguage = currentLanguage,
+                    keyboardLayoutMode = keyboardLayoutMode,
                     showDebugOption = showDebugOption,
                     isDebugEnabled = isDebugEnabled,
                     onThemeColorChange = { color ->
@@ -70,6 +73,14 @@ class AppSettingsActivity : SudoqCompatActivity() {
                     onDarkModeChange = { enabled ->
                         isDarkMode = enabled
                         ThemeManager.saveDarkMode(this, enabled)
+                    },
+                    onKeyboardLayoutChange = { mode ->
+                        keyboardLayoutMode = mode
+                        // Save to profile
+                        val pm2 = ProfileManager(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
+                        pm2.loadCurrentProfile()
+                        pm2.appSettings.keyboardLayoutMode = mode
+                        pm2.saveChanges()
                     },
                     onDebugChange = { enabled ->
                         isDebugEnabled = enabled
@@ -125,10 +136,12 @@ fun AppSettingsScreen(
     themeColor: ThemeColor,
     isDarkMode: Boolean,
     currentLanguage: LanguageCode,
+    keyboardLayoutMode: String,
     showDebugOption: Boolean,
     isDebugEnabled: Boolean,
     onThemeColorChange: (ThemeColor) -> Unit,
     onDarkModeChange: (Boolean) -> Unit,
+    onKeyboardLayoutChange: (String) -> Unit,
     onDebugChange: (Boolean) -> Unit,
     onLanguageChange: (LanguageCode) -> Unit,
     onRestrictTypesClick: () -> Unit,
@@ -193,6 +206,17 @@ fun AppSettingsScreen(
             item {
                 Spacer(modifier = Modifier.height(16.dp))
                 SettingsSectionHeader(stringResource(R.string.settings_game))
+            }
+            
+            item {
+                KeyboardLayoutDropdown(
+                    currentMode = keyboardLayoutMode,
+                    onModeChange = onKeyboardLayoutChange
+                )
+            }
+            
+            item {
+                Divider(modifier = Modifier.padding(horizontal = 16.dp))
             }
             
             item {
@@ -603,4 +627,63 @@ fun RestrictTypesDialog(
             }
         }
     )
+}
+
+@Composable
+private fun KeyboardLayoutDropdown(
+    currentMode: String,
+    onModeChange: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val modes = listOf("grid", "horizontal")
+    
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = true }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.settings_keyboard_layout),
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = when (currentMode) {
+                    "horizontal" -> stringResource(R.string.keyboard_layout_horizontal)
+                    else -> stringResource(R.string.keyboard_layout_grid)
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            modes.forEach { mode ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            when (mode) {
+                                "horizontal" -> stringResource(R.string.keyboard_layout_horizontal)
+                                else -> stringResource(R.string.keyboard_layout_grid)
+                            }
+                        )
+                    },
+                    onClick = {
+                        onModeChange(mode)
+                        expanded = false
+                    },
+                    leadingIcon = if (mode == currentMode) {
+                        { Icon(Icons.Default.Check, contentDescription = null) }
+                    } else null
+                )
+            }
+        }
+    }
 }

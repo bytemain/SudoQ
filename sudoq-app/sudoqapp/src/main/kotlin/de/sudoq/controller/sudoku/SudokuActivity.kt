@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
+import kotlinx.coroutines.delay
 import de.sudoq.R
 import de.sudoq.controller.SudoqCompatActivity
 import de.sudoq.controller.menus.Utility
@@ -229,21 +230,122 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
 
             /* Determine how many numbers are needed. 1-9 or 1-16 ? */
             initializeSymbolSet()
-            setContentView(if (game!!.isLefthandedModeActive) R.layout.sudoku_for_lefties else R.layout.sudoku)
-            val toolbar =
-                findViewById<Toolbar>(R.id.toolbar) //TODO subclass and put time, ... in it
-            setSupportActionBar(toolbar)
+            
+            // Initialize controllers
             sudokuController = SudokuController(game!!, this)
-            actionTreeController = ActionTreeController(this)
+            // TODO: ActionTreeController needs to be reimplemented for Compose
+            // actionTreeController = ActionTreeController(this)
+            actionTreeController = null
             Log.d(LOG_TAG, "Initialized")
-            inflateViewAndButtons()
-            Log.d(LOG_TAG, "Inflated view and control_panel")
+            
+            // Initialize views with proper styling
+            sudokuLayout = SudokuLayout(this).apply {
+                gravity = Gravity.CENTER
+            }
+            // Apply CellViewPainter marking to sudokuLayout
+            instance!!.setMarking(sudokuLayout!!, CellViewStates.SUDOKU)
+            
+            val keyboardView = VirtualKeyboardLayout(this, null).apply {
+                // Apply keyboard layout mode from profile settings
+                layoutMode = when (pm.appSettings.keyboardLayoutMode) {
+                    "horizontal" -> VirtualKeyboardLayout.KeyboardLayoutMode.HORIZONTAL
+                    else -> VirtualKeyboardLayout.KeyboardLayoutMode.GRID
+                }
+                Log.d(LOG_TAG, "Keyboard layout mode: $layoutMode")
+                Log.d(LOG_TAG, "Refreshing keyboard with ${game!!.sudoku!!.sudokuType!!.numberOfSymbols} symbols")
+                refresh(game!!.sudoku!!.sudokuType!!.numberOfSymbols)
+                // Activate keyboard to make buttons visible
+                Log.d(LOG_TAG, "Activating keyboard buttons")
+                setActivated(true)
+                Log.d(LOG_TAG, "Keyboard setup completed")
+            }
+            // Apply CellViewPainter marking to keyboard
+            instance!!.setMarking(keyboardView, CellViewStates.KEYBOARD)
+            
             inflateGestures(savedInstanceState == null)
             Log.d(LOG_TAG, "Inflated gestures")
-            // Scale SudokuView to LayoutSize, when inflating view is finished
-            val vto = sudokuLayout!!.viewTreeObserver
-            vto.addOnGlobalLayoutListener(MyGlobalLayoutListener(this, savedInstanceState))
-            val keyboardView = findViewById<VirtualKeyboardLayout>(R.id.virtual_keyboard)
+            
+            // Use Compose for UI
+            setContent {
+                MaterialTheme {
+                    val gameState = remember {
+                        mutableStateOf(
+                            SudokuGameState(
+                                game = game!!,
+                                isActionTreeShown = isActionTreeShown,
+                                isFinished = finished,
+                                elapsedTime = game!!.time.toLong() * 1000
+                            )
+                        )
+                    }
+                    
+                    LaunchedEffect(Unit) {
+                        while (true) {
+                            kotlinx.coroutines.delay(1000)
+                            if (!finished) {
+                                gameState.value = gameState.value.copy(
+                                    elapsedTime = game!!.time.toLong() * 1000
+                                )
+                            }
+                        }
+                    }
+                    
+                    SudokuScreen(
+                        state = gameState.value,
+                        sudokuLayout = sudokuLayout!!,
+                        keyboardLayout = keyboardView,
+                        onBackClick = {
+                            onBackPressed()
+                        },
+                        onMenuClick = { menuItem ->
+                            when (menuItem) {
+                                SudokuMenuItem.Settings -> {
+                                    startActivity(Intent(this@SudokuActivity, PlayerPreferencesActivity::class.java))
+                                }
+                                SudokuMenuItem.NewGame -> {
+                                    // Go back to main menu for new game
+                                    finish()
+                                }
+                                SudokuMenuItem.Gestures -> {
+                                    // Show gesture management
+                                    Toast.makeText(this@SudokuActivity, "Gesture management coming soon", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        },
+                        onActionTreeToggle = {
+                            toogleActionTree()
+                            gameState.value = gameState.value.copy(isActionTreeShown = isActionTreeShown)
+                        },
+                        onUndoClick = {
+                            sudokuController!!.onUndo()
+                            mediator?.updateKeyboard()
+                            updateButtons()
+                        },
+                        onRedoClick = {
+                            sudokuController!!.onRedo()
+                            mediator?.updateKeyboard()
+                            updateButtons()
+                        },
+                        onHintClick = {
+                            showAssistancesDialog()
+                        },
+                        onSolveClick = {
+                            // Fill all candidates
+                            sudokuController!!.fillAllCandidates()
+                            mediator?.updateKeyboard()
+                            updateButtons()
+                            Toast.makeText(this@SudokuActivity, R.string.sf_sudoku_fill_candidates_success, Toast.LENGTH_SHORT).show()
+                        },
+                        onNoteToggle = {
+                            mediator?.toggleNoteMode()
+                        }
+                    )
+                }
+            }
+            
+            Log.d(LOG_TAG, "Set up Compose UI")
+            
+            // Continue with mediator setup
             mediator = UserInteractionMediator(
                 keyboardView,
                 sudokuLayout,
@@ -253,6 +355,20 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
             )
             mediator!!.registerListener(sudokuController!!)
             mediator!!.registerListener(this)
+            
+            // Set up debug logger for auto-fill and model classes
+            val debugLoggerFn: (String, String, Boolean) -> Unit = { tag, message, isError ->
+                if (isError) {
+                    Log.e(tag, message)
+                } else {
+                    Log.d(tag, message)
+                }
+            }
+            
+            game!!.setDebugLogger(debugLoggerFn)
+            de.sudoq.model.sudoku.Cell.debugLogger = debugLoggerFn
+            de.sudoq.model.actionTree.Action.debugLogger = debugLoggerFn
+            
             // Configure animated auto-fill of unique candidates: schedule steps and highlight cells
             game!!.setAutoFillScheduler { delayMs, action ->
                 // Use the view to post on UI thread with delay
@@ -385,11 +501,7 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                 }
 
             }
-            setTypeText()
             updateButtons()
-            val p = ProfileSingleton.getInstance(profilesFile, ProfileRepo(profilesFile),
-                                                 ProfilesListRepo(profilesFile))
-            panel!!.gestureButton!!.isSelected = p.isGestureActive
         }
     }
 
@@ -434,15 +546,8 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
      */
     public override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putFloat(SAVE_ZOOM_FACTOR.toString(), sudokuScrollView!!.zoomFactor)
-        outState.putFloat(
-            SAVE_SCROLL_X.toString(),
-            sudokuScrollView!!.getScrollValueX() - sudokuLayout!!.currentLeftMargin
-        )
-        outState.putFloat(
-            SAVE_SCROLL_Y.toString(),
-            sudokuScrollView!!.getScrollValueY() - sudokuLayout!!.currentTopMargin
-        )
+        // Note: In Compose UI, we don't use sudokuScrollView anymore
+        // Zoom and scroll state management needs to be reimplemented for Compose if needed
         outState.putBoolean(SAVE_ACTION_TREE_SHOWN.toString(), isActionTreeShown)
         outState.putInt(SAVE_GAME_ID.toString(), game!!.id)
         outState.putBoolean(
@@ -492,21 +597,11 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
             mediator!!.onCellSelected(sudokuLayout!!.currentCellView!!, SelectEvent.Short)
         }
         if (mode == Mode.HintMode) {
-            findViewById<View>(R.id.controlPanel).visibility = View.GONE
-            findViewById<View>(R.id.hintPanel).visibility = View.VISIBLE
+            // Note: In Compose UI, these views don't exist
+            findViewById<View>(R.id.controlPanel)?.visibility = View.GONE
+            findViewById<View>(R.id.hintPanel)?.visibility = View.VISIBLE
         }
         Log.d(LOG_TAG, "Restored state")
-    }
-
-    /**
-     * Setzt den Text für Typ und Schwierigkeit des aktuellen Sudokus.
-     */
-    private fun setTypeText() {
-        val type = Utility.type2string(this, game!!.sudoku!!.sudokuType!!.enumType!!)
-        val comp = Utility.complexity2string(this, game!!.sudoku!!.complexity!!)
-        val ab = supportActionBar
-        ab!!.title = type
-        ab.subtitle = comp
     }
 
     /**
@@ -547,9 +642,11 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                 ).show()
             }
         }
+        // TODO: Gesture overlay needs to be integrated with Compose
         gestureOverlay = GestureInputOverlay(this)
-        val frameLayout = findViewById<FrameLayout>(R.id.sudoku_frame_layout)
-        frameLayout.addView(gestureOverlay)
+        // Can't add to frame layout since we're using Compose
+        // val frameLayout = findViewById<FrameLayout>(R.id.sudoku_frame_layout)
+        // frameLayout.addView(gestureOverlay)
     }
 
     /**
@@ -580,16 +677,22 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
      * Schaltet den ActionTree an bzw. aus.
      */
     fun toogleActionTree() {
+        // TODO: ActionTree needs Compose implementation
+        if (actionTreeController == null) {
+            Toast.makeText(this, "Action Tree not available in Compose UI yet", Toast.LENGTH_SHORT).show()
+            return
+        }
         isActionTreeShown = !isActionTreeShown //toggle value
-        actionTreeController!!.setVisibility(isActionTreeShown) //update AT-Controller
+        actionTreeController?.setVisibility(isActionTreeShown) //update AT-Controller
         updateButtons()
     }
 
     /**
      * Behandelt die Klicks auf Buttons dieser Activity
+     * Note: In Compose UI, button clicks are handled through lambda callbacks
      */
     override fun onClick(v: View) {
-        panel!!.onClick(v) //TODO make directly
+        // panel!!.onClick(v) - No longer used in Compose UI
         updateButtons()
     }
 
@@ -631,11 +734,10 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
         //gameid = 1
         gameManager.save(game!!)
         //gameid = -1
-        val prevZoomFactor = sudokuScrollView!!.zoomFactor
+        
+        // Create thumbnail for game list
         sudokuLayout!!.isDrawingCacheEnabled = true
-        sudokuScrollView!!.resetZoom()
-
-        // Restoring measurements after zomming out.
+        // Restoring measurements for thumbnail capture
         sudokuLayout!!.measure(
             MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
             MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
@@ -654,7 +756,7 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
         } catch (e: FileNotFoundException) {
             Log.w(LOG_TAG, getString(R.string.error_thumbnail_saved))
         }
-        sudokuScrollView!!.zoomFactor = prevZoomFactor
+        
         if (finished) {
             p.currentGame = ProfileManager.NO_GAME
             p.saveChanges()
@@ -687,14 +789,15 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
     }
 
     fun setModeHint() {
-        panel!!.hide()
-        findViewById<View>(R.id.hintPanel).visibility = View.VISIBLE
+        // Note: In Compose UI, panel doesn't exist
+        // TODO: Implement hint mode UI in Compose
+        findViewById<View>(R.id.hintPanel)?.visibility = View.VISIBLE
         mode = Mode.HintMode
     }
 
     fun setModeRegular() {
-        findViewById<View>(R.id.hintPanel).visibility = View.GONE
-        panel!!.show()
+        findViewById<View>(R.id.hintPanel)?.visibility = View.GONE
+        // Note: In Compose UI, panel doesn't exist
         mode = Mode.Regular
     }
 
@@ -811,36 +914,15 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
 
     /**
      * Das Update-Runnable für die Zeit
+     * Note: In Compose UI, time updates are handled by LaunchedEffect in SudokuScreen
      */
     private val timeUpdate: Runnable = object : Runnable {
         private val offset = StringBuilder()
         override fun run() {
             game!!.addTime(1)
 
-            //getSupportActionBar().
-            val timeView = findViewById<TextView>(R.id.time)
-            timeView.setTextColor(resources.getColor(R.color.text1))
-
-
-            /* for easy formatting, we display both: time and penalty on one element separated by \n
-			 * this is not  perfect since we padd with whitespace and the font is not 'mono-style'(=not all letters same width)
-			 * solution would be: create custom xml for action bar, but as of now I see no way how to make this easy.
-			 * to save computing time we cache the offset*/
-            var time = gameTimeString
-            var penealty = " (+ $assistancesTimeString)"
-            val d = time.length - penealty.length
-            while (offset.length > abs(d)) {
-                offset.setLength(offset.length - 1)
-            }
-            while (offset.length < abs(d)) {
-                offset.append(' ')
-            }
-            if (d > 0) penealty = offset.toString() + penealty
-            if (d < 0) time = offset.toString() + time
-            timeView.text = """
-                $time
-                $penealty
-                """.trimIndent()
+            // No longer needed in Compose - time display is managed by Compose state
+            // Time updates are handled in SudokuScreen's LaunchedEffect
             timeHandler.postDelayed(this, 1000)
         }
     }
@@ -907,7 +989,8 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
     }
 
     private fun updateButtons() {
-        panel!!.updateButtons()
+        // No longer needed in Compose - button states are managed by Compose state
+        // panel!!.updateButtons()
     }
 
     /** saves the whole game, purpose: save the action tree so a spontaneous crash doesn't lose us actions record  */

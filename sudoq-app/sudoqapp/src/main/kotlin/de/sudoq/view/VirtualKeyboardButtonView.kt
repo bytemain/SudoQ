@@ -9,6 +9,7 @@ package de.sudoq.view
 
 import android.content.Context
 import android.graphics.Canvas
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TableLayout
@@ -25,7 +26,7 @@ import java.util.*
  *
  * @property symbol The symbol associated with this VirtualKeyboardButtonView.
  */
-class VirtualKeyboardButtonView(context: Context?, private val symbol: Int) : View(context),
+class VirtualKeyboardButtonView(context: Context?, val symbol: Int) : View(context),
     ObservableInput {
 
     /**
@@ -55,7 +56,13 @@ class VirtualKeyboardButtonView(context: Context?, private val symbol: Int) : Vi
      * Wird geworfen, falls das übergebene MotionEvent null ist
      */
     override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
-        if (this.isEnabled) notifyListeners()
+        Log.d("VirtualKeyboardButton", "onTouchEvent: symbol=$symbol, action=${motionEvent.action}, isEnabled=$isEnabled, visibility=$visibility")
+        if (this.isEnabled) {
+            Log.d("VirtualKeyboardButton", "Button $symbol is enabled, notifying ${inputListener.size} listeners")
+            notifyListeners()
+        } else {
+            Log.w("VirtualKeyboardButton", "Button $symbol is NOT enabled, ignoring touch")
+        }
         return false
     }
 

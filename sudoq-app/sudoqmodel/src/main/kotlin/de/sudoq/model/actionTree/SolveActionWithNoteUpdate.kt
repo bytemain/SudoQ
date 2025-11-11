@@ -73,6 +73,17 @@ class SolveActionWithNoteUpdate(
             // Remove notes from related cells
             removedNotes.clear()
             
+            // Validate the value is within range before removing notes
+            if (value < 0 || value > cell.maxValue) {
+                // Invalid value, don't try to update notes in other cells
+                debugLogger?.invoke(
+                    "SolveActionWithNoteUpdate",
+                    "Invalid cell value=$value (maxValue=${cell.maxValue}) in cell ${cell.id}",
+                    true
+                )
+                return
+            }
+            
             for (constraint in sudoku.sudokuType!!) {
                 if (constraint.includes(editedPos)) {
                     for (constraintPos in constraint) {
@@ -81,7 +92,7 @@ class SolveActionWithNoteUpdate(
                         if (affectedCell.isNoteSet(value)) {
                             // Record that we're removing this note
                             removedNotes.getOrPut(affectedCell.id) { mutableSetOf() }.add(value)
-                            // Remove the note
+                            // Remove the note - this calls toggleNote which now has validation
                             affectedCell.toggleNote(value)
                         }
                     }

@@ -97,6 +97,15 @@
     <!-- SudokuActivity -->
     <string name="sf_sudoku_button_bookmark">书签</string>
     <string name="sf_sudoku_button_close">关闭</string>
+    <string name="sf_sudoku_button_undo">撤销</string>
+    <string name="sf_sudoku_button_redo">重做</string>
+    <string name="sf_sudoku_button_note">笔记</string>
+    <string name="sf_sudoku_button_hint">提示</string>
+    <string name="sf_sudoku_button_solve">求解</string>
+    <string name="sf_sudoku_button_autofill">自动填充唯一候选数</string>
+    <string name="sf_sudoku_autofill_success">填充了 %d 个单元格</string>
+    <string name="sf_sudoku_autofill_no_candidates">未找到唯一候选数</string>
+    <string name="sf_sudoku_new_game">新游戏</string>
     <string name="sf_sudoku_assistances_title">辅助功能</string>
     <string name="sf_sudoku_assistances_check">检查解法</string>
     <string name="sf_sudoku_assistances_solve_specific">求解选中单元格</string>
@@ -115,6 +124,7 @@
     <!-- Fill Candidates Button -->
     <string name="sf_sudoku_button_fill_candidates">填充候选数字</string>
     <string name="sf_sudoku_fill_candidates_progress">正在填充候选数字…</string>
+    <string name="sf_sudoku_fill_candidates_success">候选数字填充成功</string>
 
     <!-- Titles -->
     <string name="title_mainmenu">SudoQ</string>
@@ -166,6 +176,12 @@
     <string name="language_settings">语言</string>
     <string name="language_settings_desc">更改应用语言</string>
     <string name="profile_preference_button_settings">设置</string>
+    
+    <!-- Keyboard Layout Settings -->
+    <string name="settings_keyboard_layout">键盘布局</string>
+    <string name="settings_keyboard_layout_desc">选择数字键盘布局样式</string>
+    <string name="keyboard_layout_grid">九宫格 (3×3)</string>
+    <string name="keyboard_layout_horizontal">横排</string>
     
         
     <!-- Game states -->    

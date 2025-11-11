@@ -35,7 +35,7 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
     private var noticeFlags: BitSet
 
     /** The highest value this cell can take */
-    private val maxValue: Int
+    val maxValue: Int
 
     /**
      * Intantiates a new editable cell object.
@@ -148,10 +148,22 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
      * the note to toggle
      */
     fun toggleNote(value: Int) {
-        if (value >= 0) {
-            noticeFlags.flip(value)
-            notifyListeners(this)
+        if (value < 0) {
+            // Negative values are ignored
+            return
         }
+        if (value > maxValue) {
+            // Invalid note value - log this error
+            val stackTrace = Thread.currentThread().stackTrace.take(5).joinToString("\n  ") { it.toString() }
+            debugLogger?.invoke(
+                "Cell.toggleNote",
+                "Attempt to set invalid note value=$value on cell $id with maxValue=$maxValue\n  Stack trace:\n  $stackTrace",
+                true
+            )
+            return
+        }
+        noticeFlags.flip(value)
+        notifyListeners(this)
     }
 
     /**
@@ -160,20 +172,51 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
      * @return the count of set notes
      */
     fun getNotesCount(): Int {
+        // Clean up invalid bits first
+        cleanupInvalidNotes()
         return noticeFlags.cardinality()
     }
 
     /**
-     * Returns the single note value if exactly one note is set.
+     * Returns the single note if exactly one note is set, -1 otherwise.
      * Returns -1 if zero or multiple notes are set.
      *
      * @return the single note value or -1
      */
     fun getSingleNote(): Int {
+        // First, clean up any invalid bits
+        cleanupInvalidNotes()
+        
         if (noticeFlags.cardinality() == 1) {
             return noticeFlags.nextSetBit(0)
         }
         return -1
+    }
+    
+    /**
+     * Removes any invalid note bits that exceed maxValue.
+     * This is a safety measure to clean up corrupted data.
+     */
+    private fun cleanupInvalidNotes() {
+        var hasInvalidBits = false
+        var i = maxValue + 1
+        // Check all bits above maxValue
+        while (i < noticeFlags.size()) {
+            if (noticeFlags[i]) {
+                hasInvalidBits = true
+                noticeFlags.clear(i)
+            }
+            i++
+        }
+        
+        if (hasInvalidBits) {
+            val stackTrace = Thread.currentThread().stackTrace.take(5).joinToString("\n  ") { it.toString() }
+            debugLogger?.invoke(
+                "Cell.cleanupInvalidNotes",
+                "WARNING: Cell $id had invalid note bits above maxValue=$maxValue. Cleaned up.\n  Stack trace:\n  $stackTrace",
+                true
+            )
+        }
     }
 
     /**
@@ -182,6 +225,9 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
      * @return list of note indices (0-based)
      */
     fun getAllNotes(): List<Int> {
+        // Clean up invalid bits first
+        cleanupInvalidNotes()
+        
         val notes = mutableListOf<Int>()
         var i = noticeFlags.nextSetBit(0)
         while (i >= 0) {
@@ -247,6 +293,13 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
     companion object {
         /** The value representing an empty cell */
         const val EMPTYVAL = -1
+        
+        /**
+         * Optional logger for debugging (provided by UI layer)
+         */
+        @Volatile
+        @JvmStatic
+        var debugLogger: ((tag: String, message: String, isError: Boolean) -> Unit)? = null
     }
 
     init {

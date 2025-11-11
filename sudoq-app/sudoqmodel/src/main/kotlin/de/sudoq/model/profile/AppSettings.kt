@@ -11,6 +11,7 @@ package de.sudoq.model.profile
  * This class represents general settings:
  * - whether debug mode is on
  * - the language
+ * - keyboard layout mode
  */
 class AppSettings {
 
@@ -19,6 +20,9 @@ class AppSettings {
 
     /* language */
     var language: String = "system"
+    
+    /* keyboard layout mode: "grid" or "horizontal" */
+    var keyboardLayoutMode: String = "grid"
 
     /* additional settings */
     fun setDebug(value: Boolean) {

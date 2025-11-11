@@ -114,7 +114,8 @@ class AssistancesDialogFragment : DialogFragment() {
             } else if (items[item] === getString(R.string.sf_sudoku_assistances_crash)) {
                 throw RuntimeException("This is a crash the user requested")
             }
-            activity.panel!!.updateButtons()
+            // Note: In Compose UI, button updates are handled automatically through state management
+            // activity.panel!!.updateButtons() - No longer needed
         }
         return builder.create()
     }

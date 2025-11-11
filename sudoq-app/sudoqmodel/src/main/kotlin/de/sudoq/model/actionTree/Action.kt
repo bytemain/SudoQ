@@ -62,4 +62,12 @@ abstract class Action internal constructor(@JvmField var diff: Int, @JvmField va
      */
     abstract fun inverse(a: Action): Boolean
 
+    companion object {
+        /**
+         * Optional logger for debugging (provided by UI layer)
+         */
+        @Volatile
+        @JvmStatic
+        var debugLogger: ((tag: String, message: String, isError: Boolean) -> Unit)? = null
+    }
 }
