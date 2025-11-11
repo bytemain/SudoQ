@@ -124,11 +124,13 @@
     <string name="complexity_medium">Mittel</string>
     <string name="complexity_difficult">Schwer</string>
     <string name="complexity_infernal">Infernal</string>
+    <string name="complexity_arbitrary">Beliebig</string>
     
     <string name="complexity_easy_desc">Perfekt für Anfänger</string>
     <string name="complexity_medium_desc">Eine gute Herausforderung</string>
     <string name="complexity_difficult_desc">Für erfahrene Spieler</string>
     <string name="complexity_infernal_desc">Ultimative Herausforderung</string>
+    <string name="complexity_arbitrary_desc">Keine bestimmte Schwierigkeitsanforderung</string>
     
     <string name="select_sudoku_type">Sudoku-Typ auswählen</string>
     <string name="loading">Laden...</string>

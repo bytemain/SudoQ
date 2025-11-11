@@ -135,11 +135,13 @@
     <string name="complexity_medium">Medium</string>
     <string name="complexity_difficult">Difficult</string>
     <string name="complexity_infernal">Infernal</string>
+    <string name="complexity_arbitrary">Arbitrary</string>
     
     <string name="complexity_easy_desc">Perfect for beginners</string>
     <string name="complexity_medium_desc">A good challenge</string>
     <string name="complexity_difficult_desc">For experienced players</string>
     <string name="complexity_infernal_desc">Ultimate challenge</string>
+    <string name="complexity_arbitrary_desc">No specific difficulty requirement</string>
     
     <string name="select_sudoku_type">Select Sudoku Type</string>
     <string name="loading">Loading...</string>

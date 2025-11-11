@@ -128,11 +128,13 @@
     <string name="complexity_medium">中等</string>
     <string name="complexity_difficult">困难</string>
     <string name="complexity_infernal">地狱</string>
+    <string name="complexity_arbitrary">任意</string>
     
     <string name="complexity_easy_desc">适合初学者</string>
     <string name="complexity_medium_desc">适度挑战</string>
     <string name="complexity_difficult_desc">适合有经验的玩家</string>
     <string name="complexity_infernal_desc">终极挑战</string>
+    <string name="complexity_arbitrary_desc">无特定难度要求</string>
     
     <string name="select_sudoku_type">选择数独类型</string>
     <string name="loading">加载中...</string>

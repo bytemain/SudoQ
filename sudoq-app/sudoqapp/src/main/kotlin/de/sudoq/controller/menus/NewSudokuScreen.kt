@@ -290,7 +290,7 @@ private fun getComplexityString(complexity: Complexity): String {
             Complexity.medium -> R.string.complexity_medium
             Complexity.difficult -> R.string.complexity_difficult
             Complexity.infernal -> R.string.complexity_infernal
-            Complexity.arbitrary -> R.string.complexity_medium // fallback
+            Complexity.arbitrary -> R.string.complexity_arbitrary
         }
     )
 }
@@ -303,7 +303,7 @@ private fun getComplexityDescription(complexity: Complexity): String {
             Complexity.medium -> R.string.complexity_medium_desc
             Complexity.difficult -> R.string.complexity_difficult_desc
             Complexity.infernal -> R.string.complexity_infernal_desc
-            Complexity.arbitrary -> R.string.complexity_medium_desc // fallback
+            Complexity.arbitrary -> R.string.complexity_arbitrary_desc
         }
     )
 }
