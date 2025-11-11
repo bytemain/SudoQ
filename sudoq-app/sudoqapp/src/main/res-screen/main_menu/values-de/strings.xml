@@ -11,5 +11,15 @@
     <string name="sf_mainmenu_load_sudoku">Sudoku Laden</string>
     <string name="sf_mainmenu_profile">Profil</string>
     <string name="sf_mainmenu_preferences">Einstellungen</string>
+    <string name="sf_mainmenu_statistic">Statistiken</string>
+    
+    <!-- Main Screen -->
+    <string name="game_in_progress">Spiel läuft</string>
+    <string name="completed">abgeschlossen</string>
+    <string name="quick_actions">Schnellaktionen</string>
+    <string name="games_played">Gespielt</string>
+    <string name="games_won">Gewonnen</string>
+    <string name="score">Punktzahl</string>
+    <string name="more_options">Weitere Optionen</string>
 
 </resources>

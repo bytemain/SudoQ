@@ -87,7 +87,9 @@
     <string name="subtitle_sudokupreferences_sudokucomplexity">Schwierigkeit:</string>
     <string name="sf_sudokupreferences_start">Start</string>
     <string name="sf_sudokupreferences_sudokutype">Sudokutyp auswählen</string>
+    <string name="sf_sudokupreferences_type">Sudoku-Typ</string>
     <string name="sf_sudokupreferences_sudokucomplexity">Schwierigkeitsgrad auswählen</string>
+    <string name="sf_sudokupreferences_complexity">Schwierigkeitsgrad</string>
     <string name="sf_sudokupreferences_assistances">Hilfestellungen konfigurieren</string>
     <string name="sf_sudokupreferences_copying">Vorlagen werden gerade kopiert. Bitte warten Sie einen Moment.</string>
 
@@ -115,13 +117,22 @@
     <string name="title_gametypeselection">Neues Sudoku</string>
     
     <!-- Subtitles -->
-	<string name="subtitle_gametypeselection_mp">Multiplayer</string>  
+    <string name="subtitle_gametypeselection_mp">Multiplayer</string>  
 	
 	<!-- Complexity -->
     <string name="complexity_easy">Einfach</string>
     <string name="complexity_medium">Mittel</string>
     <string name="complexity_difficult">Schwer</string>
     <string name="complexity_infernal">Infernal</string>
+    
+    <string name="complexity_easy_desc">Perfekt für Anfänger</string>
+    <string name="complexity_medium_desc">Eine gute Herausforderung</string>
+    <string name="complexity_difficult_desc">Für erfahrene Spieler</string>
+    <string name="complexity_infernal_desc">Ultimative Herausforderung</string>
+    
+    <string name="select_sudoku_type">Sudoku-Typ auswählen</string>
+    <string name="loading">Laden...</string>
+    <string name="back">Zurück</string>
     
     <!-- Sudoku Types -->
     <string name="sudoku_type_standard_9x9"  >Standard-Sudoku 9x9</string>

@@ -22,6 +22,8 @@
     <string name="profile_preference_button_advanced_preferences">paramètres avancés</string>
     <string name="profile_preference_button_provide_restricted_set_of_types">Sélectionnez les types sont proposés</string>
     <string name="profile_preference_new_profile">nouveau profil</string>
+    <string name="profile_preference_title_crash_trigger">crasher l\'application</string>
+    <string name="profile_preference_title_debug">debug</string>
 
     <!-- restrict types -->
     <string name="advanced_settings_restrict_types_empty_warning">Vous devez laisser au moins un type. Sinon, vous ne pourrez pas commencer un nouveau sudoku.</string>
@@ -38,7 +40,6 @@
     <string name="advanced_settings_restrict_item_xsudoku"       >X-Sudoku</string>
 
 
-    <string name="profile_preference_title_crash_trigger">crasher l\'application</string>
     <string name="profile_preference_title_intelligent_assistant">Activer les indices &amp; l\'assistance</string>
     <string name="language_system">Langue de système</string>
     <string name="language_german">Allemand</string>

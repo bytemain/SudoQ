@@ -88,7 +88,9 @@
     <string name="subtitle_sudokupreferences_sudokucomplexity">难度：</string>
     <string name="sf_sudokupreferences_start">开始</string>
     <string name="sf_sudokupreferences_sudokutype">选择数独类型</string>
+    <string name="sf_sudokupreferences_type">数独类型</string>
     <string name="sf_sudokupreferences_sudokucomplexity">选择难度</string>
+    <string name="sf_sudokupreferences_complexity">难度</string>
     <string name="sf_sudokupreferences_assistances">调整辅助功能</string>
     <string name="sf_sudokupreferences_copying">模板正在复制中，请稍候。</string>
 
@@ -126,6 +128,15 @@
     <string name="complexity_medium">中等</string>
     <string name="complexity_difficult">困难</string>
     <string name="complexity_infernal">地狱</string>
+    
+    <string name="complexity_easy_desc">适合初学者</string>
+    <string name="complexity_medium_desc">适度挑战</string>
+    <string name="complexity_difficult_desc">适合有经验的玩家</string>
+    <string name="complexity_infernal_desc">终极挑战</string>
+    
+    <string name="select_sudoku_type">选择数独类型</string>
+    <string name="loading">加载中...</string>
+    <string name="back">返回</string>
     
     <!-- Sudoku Types -->
     <string name="sudoku_type_standard_9x9"  >标准数独 9x9</string>

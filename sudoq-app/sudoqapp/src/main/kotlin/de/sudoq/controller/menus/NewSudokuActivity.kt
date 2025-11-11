@@ -1,23 +1,12 @@
-/*
- * SudoQ is a Sudoku-App for Adroid Devices with Version 2.2 at least.
- * Copyright (C) 2012  Heiko Klare, Julian Geppert, Jan-Bernhard Kordaß, Jonathan Kieling, Tim Zeitz, Timo Abele
- * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. 
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
- * You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses/>.
- */
 package de.sudoq.controller.menus
 
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.AdapterView
-import android.widget.AdapterView.OnItemSelectedListener
-import android.widget.ArrayAdapter
-import android.widget.Spinner
 import android.widget.Toast
-import androidx.appcompat.widget.Toolbar
+import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.*
 import de.sudoq.R
 import de.sudoq.controller.SudoqCompatActivity
 import de.sudoq.controller.menus.preferences.PlayerPreferencesActivity
@@ -28,7 +17,6 @@ import de.sudoq.model.profile.ProfileManager
 import de.sudoq.model.persistence.xml.game.IGamesListRepo
 import de.sudoq.model.sudoku.complexity.Complexity
 import de.sudoq.model.sudoku.sudokuTypes.SudokuTypes
-import de.sudoq.persistence.sudoku.sudokuTypes.SudokuTypesListBE
 import de.sudoq.persistence.game.GameRepo
 import de.sudoq.persistence.game.GameSettingsBE
 import de.sudoq.persistence.game.GameSettingsMapper
@@ -36,309 +24,174 @@ import de.sudoq.persistence.game.GamesListRepo
 import de.sudoq.persistence.profile.ProfileRepo
 import de.sudoq.persistence.profile.ProfilesListRepo
 import de.sudoq.persistence.sudoku.SudokuRepoProvider
+import de.sudoq.persistence.sudoku.sudokuTypes.SudokuTypesListBE
 import de.sudoq.persistence.sudokuType.SudokuTypeRepo
 import java.io.File
-import java.util.*
-import kotlin.collections.ArrayList
 
 /**
- * SudokuPreferences ermöglicht das Verwalten von Einstellungen eines zu
- * startenden Sudokus.
- *
- * Hauptmenü -> "neues Sudoku" führt hierher
+ * Activity for creating a new Sudoku game with selected type and complexity
  */
 class NewSudokuActivity : SudoqCompatActivity() {
 
-    private var sudokuType: SudokuTypes? = null
-    private var complexity: Complexity? = null
     private val prefsName = "new_sudoku_prefs"
     private val keyLastType = "last_sudoku_type"
     private val keyLastComplexity = "last_complexity"
+    
+    private lateinit var gameSettings: GameSettings
 
-    /**
-     * Wird beim ersten Aufruf der SudokuPreferences aufgerufen. Die Methode
-     * inflated das Layout der Preferences.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        this.setContentView(R.layout.sudokupreferences)
-        val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
-        setSupportActionBar(toolbar)
-        val ab = supportActionBar
-        ab!!.setHomeAsUpIndicator(R.drawable.launcher)
-        ab.setDisplayHomeAsUpEnabled(true)
-        ab.setDisplayShowTitleEnabled(true)
-        //set title explicitly so localization kicks in when language is changed
-        ab.setTitle(R.string.sf_sudokupreferences_title)
-
-        //for initial settings-values from Profile
+        
+        // Load game settings from profile
         val profileDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
         val pm = ProfileManager(profileDir, ProfileRepo(profileDir), ProfilesListRepo(profileDir))
-        check(!pm.noProfiles()) { "there are no profiles. this is  unexpected. they should be initialized in splashActivity" }
+        check(!pm.noProfiles()) { 
+            "there are no profiles. this is unexpected. they should be initialized in splashActivity" 
+        }
         pm.loadCurrentProfile()
+        
         val xt = GameSettingsMapper.toBE(pm.assistances).toXmlTree()
         val gameSettingsBE = GameSettingsBE()
         gameSettingsBE.fillFromXml(xt)
         gameSettings = GameSettingsMapper.fromBE(gameSettingsBE)
-
-        /** complexity spinner  */
-        val complexitySpinner = findViewById<View>(R.id.spinner_sudokucomplexity) as Spinner
-        val complexityAdapter = ArrayAdapter.createFromResource(
-            this,
-            R.array.sudokucomplexity_values,
-            android.R.layout.simple_spinner_item
-        )
-        complexityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        complexitySpinner.adapter = complexityAdapter
-
-        // nested Listener for complexitySpinner
-        complexitySpinner.onItemSelectedListener = object : OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
-                setSudokuDifficulty(Complexity.values()[pos])
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // do nothing
-            }
-        }
-        Log.d(
-            "gameSettings",
-            "NewSudokuActivity onCreate end is gameSettings null?" + (gameSettings == null)
-        )
-    }
-
-    /**
-     * Wird aufgerufen, wenn die Activity in den Vordergrund gelangt. Die
-     * Preferences werden hier neu geladen.
-     */
-    public override fun onResume() {
-        super.onResume()
-        /** type spinner  */
-        val possibleTypes = gameSettings!!.wantedTypesList
-        check(possibleTypes.isNotEmpty()) {  //TODO shouldn't happen in the first place!
-            "list shouldn't be empty"
-        }
-        initTypeSpinner(possibleTypes)
-
-        // Load and apply previously selected values
-        applyPersistedSelections()
-
-
-//		SudokuTypesList wtl = Profile.Companion.getInstance().getAssistances().getWantedTypesList();
-//		fillTypeSpinner(wtl);
-//		/* this is a hack: for some reason when returning from settings, the typeSpinner selects the first position
-//		 *                 probably because it gets a new adapter. At the time I'm unable to debug this properly
-//		 *                 (judging from the LOG.d's it happens after this method) but it seems to work */
-//		if(wtl.contains(sudokuType))
-//			((Spinner) findViewById(R.id.spinner_sudokutype)).setSelection(wtl.indexOf(sudokuType));
-        Log.d(LOG_TAG, "Resume_ende: $sudokuType")
-        var noop = 0
-        //set language
-        //LanguageUtility.setLocaleFromMemory(this);
-    }
-
-    private fun initTypeSpinner(stl: ArrayList<SudokuTypes>) {
-        val typeSpinner = findViewById<Spinner>(R.id.spinner_sudokutype)
-        //List<String> translatedSudokuTypes = Arrays.asList(getResources().getStringArray(R.array.sudokutype_values));
-        val wantedSudokuTypes: MutableList<StringAndEnum<SudokuTypes>> =
-            ArrayList() //user can choose to only have selected types offered, so here we filter
-        check(stl.isNotEmpty()) { "list shouldn't be empty" }
-
-        /* convert */
-        for (st in stl) {
-            val sae = StringAndEnum(Utility.type2string(this, st)!!, st)
-            wantedSudokuTypes.add(sae)
-        }
-        wantedSudokuTypes.sortWith { o1, o2 ->
-            SudokuTypeOrder.getKey(o1.enum) - SudokuTypeOrder.getKey(
-                o2.enum
-            )
-        }
-        Log.d(LOG_TAG, "Sudokutype_1: $sudokuType")
-        val typeAdapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, wantedSudokuTypes)
-        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        typeSpinner.adapter = typeAdapter
-        Log.d(LOG_TAG, "Sudokutype_4: $sudokuType")
-
-        /* add onItemSelectListener */
-        typeSpinner.onItemSelectedListener = MyListener(this)
-    }
-
-    private fun applyPersistedSelections() {
-        val prefs = getSharedPreferences(prefsName, MODE_PRIVATE)
-
-        // Apply complexity selection
-        val savedComplexityName = prefs.getString(keyLastComplexity, null)
-        val complexitySpinner = findViewById<Spinner>(R.id.spinner_sudokucomplexity)
-        if (savedComplexityName != null) {
-            try {
-                val savedComplexity = Complexity.valueOf(savedComplexityName)
-                // Set field and spinner
-                complexity = savedComplexity
-                val index = savedComplexity.ordinal
-                if (index in 0 until (complexitySpinner.adapter?.count ?: 0)) {
-                    complexitySpinner.setSelection(index)
-                }
-            } catch (_: IllegalArgumentException) {
-                // ignore invalid persisted value
-            }
-        }
-
-        // Apply sudoku type selection
-        val savedTypeName = prefs.getString(keyLastType, null)
-        val typeSpinner = findViewById<Spinner>(R.id.spinner_sudokutype)
-        if (savedTypeName != null && typeSpinner.adapter != null) {
-            try {
-                val savedType = SudokuTypes.valueOf(savedTypeName)
-                // Find position in current adapter list
-                for (i in 0 until typeSpinner.adapter.count) {
-                    val item = typeSpinner.adapter.getItem(i)
-                    if (item is StringAndEnum<*>) {
-                        val enumVal = item.enum
-                        if (enumVal is SudokuTypes && enumVal == savedType) {
-                            sudokuType = savedType
-                            typeSpinner.setSelection(i)
-                            break
-                        }
+        
+        setContent {
+            MaterialTheme {
+                val state = remember { mutableStateOf(createInitialState()) }
+                
+                NewSudokuScreen(
+                    state = state.value,
+                    onTypeSelected = { type ->
+                        state.value = state.value.copy(selectedType = type)
+                        persistType(type)
+                    },
+                    onComplexitySelected = { complexity ->
+                        state.value = state.value.copy(selectedComplexity = complexity)
+                        persistComplexity(complexity)
+                    },
+                    onStartGame = {
+                        startGame(state.value.selectedType, state.value.selectedComplexity)
+                    },
+                    onNavigateToSettings = {
+                        startActivity(Intent(this, PlayerPreferencesActivity::class.java))
+                    },
+                    onBackClick = {
+                        finish()
                     }
-                }
-            } catch (_: IllegalArgumentException) {
-                // ignore invalid persisted value
+                )
             }
         }
     }
-
-    //custom class for better debugging
-    class MyListener(private val parentActivity : NewSudokuActivity): OnItemSelectedListener {
-
-        override fun onItemSelected(
-            parent: AdapterView<*>,
-            view: View?,
-            pos: Int,
-            id: Long
-        ) {
-            val item = parent.getItemAtPosition(pos) as StringAndEnum<SudokuTypes>
-            parentActivity.setSudokuType(item.enum)
+    
+    private fun createInitialState(): NewSudokuState {
+        val availableTypes = gameSettings.wantedTypesList.sortedBy { type ->
+            SudokuTypeOrder.getKey(type)
         }
-
-        override fun onNothingSelected(parent: AdapterView<*>?) {
-            // do nothing
-        }
-
-    }
-
-    /**
-     * Die Methode startet per Intent ein Sudokus mit den eingegebenen
-     * Einstellungen.
-     *
-     * @param view
-     * von android xml übergebene View
-     */
-    fun startGame(view: View?) {
-        if (sudokuType != null && complexity != null && gameSettings != null) {
+        
+        // Load persisted selections
+        val prefs = getSharedPreferences(prefsName, MODE_PRIVATE)
+        
+        val savedType = prefs.getString(keyLastType, null)?.let { typeName ->
             try {
-                val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
-                val pm = ProfileManager(profilesDir, ProfileRepo(profilesDir),
-                                        ProfilesListRepo(profilesDir))
-                val sudokuDir = getDir(getString(R.string.path_rel_sudokus), MODE_PRIVATE)
-
-                ///init params for game*repos
-                pm.loadCurrentProfile()
-                val sudokuTypeRepo = SudokuTypeRepo(sudokuDir)
-                val gameRepo = GameRepo(
-                    pm.profilesDir!!,
-                    pm.currentProfileID,
-                    sudokuTypeRepo)
-                val gamesFile = File(pm.currentProfileDir, "games.xml")
-
-                val gamesDir = File(pm.currentProfileDir, "games")
-                val gamesListRepo : IGamesListRepo = GamesListRepo(gamesDir, gamesFile)
-
-                ///
-                val gm = GameManager(pm, gameRepo, gamesListRepo, sudokuTypeRepo)
-                val SudokuRepoProvider = SudokuRepoProvider(sudokuDir, sudokuTypeRepo)
-                val game = gm.newGame(sudokuType!!,
-                                      complexity!!,
-                                      gameSettings!!,
-                                      sudokuDir,
-                                      SudokuRepoProvider)
-                check(!pm.noProfiles()) { "there are no profiles. this is  unexpected. they should be initialized in splashActivity" }
-                pm.loadCurrentProfile()
-                pm.currentGame = game.id
-                pm.saveChanges()
-                startActivity(Intent(this, SudokuActivity::class.java))
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                SudokuTypes.valueOf(typeName).takeIf { it in availableTypes }
             } catch (e: IllegalArgumentException) {
-                Log.e(LOG_TAG, "exception: $e")
-                Toast.makeText(
-                    this,
-                    getString(R.string.sf_sudokupreferences_copying),
-                    Toast.LENGTH_SHORT
-                ).show()
-                Log.d(LOG_TAG, "no template found- 'wait please'")
+                null
             }
-        } else {
+        }
+        
+        val savedComplexity = prefs.getString(keyLastComplexity, null)?.let { complexityName ->
+            try {
+                Complexity.valueOf(complexityName)
+            } catch (e: IllegalArgumentException) {
+                null
+            }
+        }
+        
+        return NewSudokuState(
+            selectedType = savedType,
+            selectedComplexity = savedComplexity,
+            availableTypes = availableTypes
+        )
+    }
+    
+    private fun persistType(type: SudokuTypes) {
+        getSharedPreferences(prefsName, MODE_PRIVATE)
+            .edit()
+            .putString(keyLastType, type.name)
+            .apply()
+    }
+    
+    private fun persistComplexity(complexity: Complexity) {
+        getSharedPreferences(prefsName, MODE_PRIVATE)
+            .edit()
+            .putString(keyLastComplexity, complexity.name)
+            .apply()
+    }
+    
+    private fun startGame(type: SudokuTypes?, complexity: Complexity?) {
+        if (type == null || complexity == null) {
             Toast.makeText(
                 this,
                 getString(R.string.error_sudoku_preference_incomplete),
                 Toast.LENGTH_SHORT
             ).show()
-            if (sudokuType == null) Toast.makeText(this, "sudokuType", Toast.LENGTH_SHORT).show()
-            if (complexity == null) Toast.makeText(this, "complexity", Toast.LENGTH_SHORT).show()
-            if (gameSettings == null) Toast.makeText(this, "gameSetting", Toast.LENGTH_SHORT).show()
-            Log.d(LOG_TAG, "else- 'wait please'")
+            return
         }
-    }
+        
+        try {
+            val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
+            val pm = ProfileManager(
+                profilesDir,
+                ProfileRepo(profilesDir),
+                ProfilesListRepo(profilesDir)
+            )
+            val sudokuDir = getDir(getString(R.string.path_rel_sudokus), MODE_PRIVATE)
 
-    /**
-     * Setzt den Sudokutyp des zu startenden Sudokus. Ist dieser null oder
-     * ungültig, so wird nichts getan
-     *
-     * @param type
-     * Typ des zu startenden Sudokus
-     */
-    fun setSudokuType(type: SudokuTypes?) {
-        sudokuType = type
-        Log.d(LOG_TAG, "type changed to:" + (type?.toString() ?: "null"))
-        // persist
-        type?.let {
-            getSharedPreferences(prefsName, MODE_PRIVATE)
-                .edit()
-                .putString(keyLastType, it.name)
-                .apply()
+            // Initialize parameters for game repos
+            pm.loadCurrentProfile()
+            val sudokuTypeRepo = SudokuTypeRepo(sudokuDir)
+            val gameRepo = GameRepo(
+                pm.profilesDir!!,
+                pm.currentProfileID,
+                sudokuTypeRepo
+            )
+            val gamesFile = File(pm.currentProfileDir, "games.xml")
+            val gamesDir = File(pm.currentProfileDir, "games")
+            val gamesListRepo: IGamesListRepo = GamesListRepo(gamesDir, gamesFile)
+
+            // Create game
+            val gm = GameManager(pm, gameRepo, gamesListRepo, sudokuTypeRepo)
+            val sudokuRepoProvider = SudokuRepoProvider(sudokuDir, sudokuTypeRepo)
+            val game = gm.newGame(
+                type,
+                complexity,
+                gameSettings,
+                sudokuDir,
+                sudokuRepoProvider
+            )
+            
+            check(!pm.noProfiles()) { 
+                "there are no profiles. this is unexpected. they should be initialized in splashActivity" 
+            }
+            pm.loadCurrentProfile()
+            pm.currentGame = game.id
+            pm.saveChanges()
+            
+            startActivity(Intent(this, SudokuActivity::class.java))
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+            finish()
+        } catch (e: IllegalArgumentException) {
+            Log.e(LOG_TAG, "exception: $e")
+            Toast.makeText(
+                this,
+                getString(R.string.sf_sudokupreferences_copying),
+                Toast.LENGTH_SHORT
+            ).show()
+            Log.d(LOG_TAG, "no template found - 'wait please'")
         }
-    }
-
-    /**
-     * Setzt die Schwierigkeit des zu startenden Sudokus. Ist diese null, so
-     * wird nichts getan.
-     *
-     * @param difficulty
-     * Schwierigkeit des zu startenden Sudokus
-     */
-    fun setSudokuDifficulty(difficulty: Complexity) {
-        complexity = difficulty
-        Log.d(LOG_TAG, "complexity changed to:$difficulty")
-        // persist
-        getSharedPreferences(prefsName, MODE_PRIVATE)
-            .edit()
-            .putString(keyLastComplexity, difficulty.name)
-            .apply()
-    }
-
-    fun switchToAssistances(view: View?) {
-        val assistancesIntent = Intent(this, PlayerPreferencesActivity::class.java)
-        startActivity(assistancesIntent)
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
     }
 
     companion object {
-        /** Attributes  */
         private val LOG_TAG = NewSudokuActivity::class.java.simpleName
-        var gameSettings: GameSettings? = null
     }
 }

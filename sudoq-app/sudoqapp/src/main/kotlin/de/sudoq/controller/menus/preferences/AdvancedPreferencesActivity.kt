@@ -57,11 +57,14 @@ class AdvancedPreferencesActivity : PreferencesActivity() {
         restricttypes = findViewById<View>(R.id.button_provide_restricted_set_of_types) as Button
         debug = findViewById<View>(R.id.checkbox_debug) as CheckBox
         //exporter      = (CheckBox) findViewById(R.id.checkbox_exportcrash_trigger);
-        gameSettings = NewSudokuActivity.gameSettings
+        
         val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
         val pm = ProfileManager(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
         check(!pm.noProfiles()) { "there are no profiles. this is  unexpected. they should be initialized in splashActivity" }
         pm.loadCurrentProfile()
+        
+        // Load game settings from profile
+        gameSettings = pm.assistances
         val profileGameSettings = pm.assistances
         when (parentActivity) {
             ParentActivity.NEW_SUDOKU -> {

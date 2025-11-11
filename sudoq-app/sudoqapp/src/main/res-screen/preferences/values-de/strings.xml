@@ -23,6 +23,8 @@
     <string name="profile_preference_button_provide_restricted_set_of_types">Auswahl der Typen beschränken</string>
 
     <string name="profile_preference_new_profile">unbennant</string>
+    <string name="profile_preference_title_crash_trigger">App abstürzen lassen</string>
+    <string name="profile_preference_title_debug">debug</string>
 
     <!-- restrict types -->
     <string name="advanced_settings_restrict_types_empty_warning">Du musst einen Typ übriglassen. Sonst kannst du nicht spielen.</string>
@@ -38,7 +40,6 @@
     <string name="advanced_settings_restrict_item_hyper"         >Hyper-Sudoku</string>
     <string name="advanced_settings_restrict_item_xsudoku"       >X-Sudoku</string>
 
-    <string name="profile_preference_title_crash_trigger">App abstürzen lassen</string>
     <string name="profile_preference_title_intelligent_assistant">Hinweise &amp; Hilfen aktivieren</string>
     <string name="language_english">Englisch</string>
     <string name="language_french">Französisch</string>

@@ -95,7 +95,9 @@
     <string name="subtitle_sudokupreferences_sudokucomplexity">Difficulty:</string>
     <string name="sf_sudokupreferences_start">Start</string>
     <string name="sf_sudokupreferences_sudokutype">Choose Sudoku Type</string>
+    <string name="sf_sudokupreferences_type">Sudoku Type</string>
     <string name="sf_sudokupreferences_sudokucomplexity">Choose Difficulty</string>
+    <string name="sf_sudokupreferences_complexity">Difficulty</string>
     <string name="sf_sudokupreferences_assistances">Adjust Assistances</string>
     <string name="sf_sudokupreferences_copying">Templates are currently being copied. Please wait a moment.</string>
 
@@ -133,6 +135,15 @@
     <string name="complexity_medium">Medium</string>
     <string name="complexity_difficult">Difficult</string>
     <string name="complexity_infernal">Infernal</string>
+    
+    <string name="complexity_easy_desc">Perfect for beginners</string>
+    <string name="complexity_medium_desc">A good challenge</string>
+    <string name="complexity_difficult_desc">For experienced players</string>
+    <string name="complexity_infernal_desc">Ultimate challenge</string>
+    
+    <string name="select_sudoku_type">Select Sudoku Type</string>
+    <string name="loading">Loading...</string>
+    <string name="back">Back</string>
     
     <!-- Sudoku Types -->
     <string name="sudoku_type_standard_9x9"  >Standard-Sudoku 9x9</string>
