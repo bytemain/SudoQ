@@ -83,7 +83,19 @@ class ProfilesListRepo(private val profilesDir: File) : IProfilesListRepo {
 
     //todo make property
     override fun getCurrentProfileId(): Int {
-        return profilesXml.getAttributeValue(name = CURRENT)!!.toInt()
+        val currentId = profilesXml.getAttributeValue(name = CURRENT)?.toIntOrNull() ?: -1
+        if (currentId == -1) {
+            // If current profile is not set, try to get the first available profile
+            val profilesIterator = profilesXml.getChildren()
+            if (profilesIterator.hasNext()) {
+                val firstProfileId = profilesIterator.next().getAttributeValue(ID)?.toIntOrNull() ?: -1
+                if (firstProfileId != -1) {
+                    setCurrentProfileId(firstProfileId)
+                    return firstProfileId
+                }
+            }
+        }
+        return currentId
     }
 
     override fun setCurrentProfileId(id: Int) {
