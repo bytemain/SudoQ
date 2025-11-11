@@ -200,12 +200,12 @@
     <string name="hint_nakedsingle_note">{note}是高亮显示单元格中唯一剩下的笔记。</string>
     <string name="hint_nakedsingle_remove">可以在那里设置它，并从此{shape}中的所有其他单元格中删除。</string>
 
-    <string name="hint_nakedset">看，这里有一个显性数组！{symbols}将以某种方式分布在高亮显示的单元格中。可以从该组中的所有其他单元格中删除它们。</string>
+    <string name="hint_nakedset">看，这里有一个显性数组 (naked set)！数字 {symbols} 只会分布在高亮显示的单元格中。因此可以从该组的其他单元格中删除这些数字。</string>
 
     
-    <string name="hint_hiddensingle">看，这里有一个隐性唯一数！在高亮显示形状的所有单元格中，"{note}"仅出现在高亮显示的单元格中。可以在那里设置它。</string>
+    <string name="hint_hiddensingle">看，这里有一个隐性唯一数 (hidden single)！在高亮显示形状的所有单元格中，"{note}"仅出现在高亮显示的单元格中。可以在那里设置它。</string>
 
-    <string name="hint_hiddenset">看，这里有一个隐性数组！{symbols}将以某种方式分布在高亮显示的单元格中。因此，可以删除这些单元格中的任何其他候选数字。</string>
+    <string name="hint_hiddenset">看，这里有一个隐性数组 (hidden set)！数字 {symbols} 只能分布在高亮显示的单元格中。因此可以删除这些单元格中的其他候选数字。</string>
 
     
     <string name="hint_lockedcandidates">这里有一个锁定候选数：{note}在蓝色组中只出现一次。因此可以在绿色组的所有其他单元格中删除它。</string>

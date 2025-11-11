@@ -129,7 +129,7 @@ object HintFormulator {
         }
 
         val symbolsString = symbols
-            .map { +1 } //add one for user representation
+            .map { it + 1 } // Add one for user representation (convert 0-based to 1-based)
             .joinToString(", ", "{", "}", transform = { it.toString() })
 
         return context.getString(R.string.hint_nakedset).replace("{symbols}", symbolsString)
@@ -147,7 +147,7 @@ object HintFormulator {
     private fun hiddenMultiple(context: Context, sd: SolveDerivation): String {
         val bs = (sd as HiddenSetDerivation).subsetCandidates
         val hiddenMultiples = bs!!.setBits
-            .map { +1 }
+            .map { it + 1 } // Add one for user representation (convert 0-based to 1-based)
             .joinToString(", ", "{", "}", transform = { it.toString() })
 
         return context.getString(R.string.hint_hiddenset).replace("{symbols}", hiddenMultiples)
