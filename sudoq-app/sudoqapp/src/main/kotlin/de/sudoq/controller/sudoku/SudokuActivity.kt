@@ -346,6 +346,11 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
             game!!.setGameFinishedListener {
                 runOnUiThread {
                     if (!finished) {
+                        Log.d(LOG_TAG, "Game finished via GameFinishedListener, updating statistics")
+                        
+                        // Update statistics before showing dialog
+                        sudokuController!!.updateStatisticsAndSave()
+                        
                         finished = true
                         updateButtons()
                         // Keep current selection highlight consistent
@@ -723,15 +728,13 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
         updateButtons()
         sudokuLayout!!.currentCellView?.select(game!!.isAssistanceAvailable(Assistances.markRowColumn))
 
+        // Disable keyboard input when game is finished
         val keyView = findViewById<VirtualKeyboardLayout>(R.id.virtual_keyboard)
+        keyView.isEnabled = false
         for (i in 0 until keyView.childCount) {
-            keyView.getChildAt(i).layoutParams = LinearLayout.LayoutParams(1, 1)
+            keyView.getChildAt(i).isEnabled = false
         }
-        keyView.setPadding(10, 10, 10, 10)
-        val text = TextView(this)
-        text.text = statisticsString
-        text.gravity = Gravity.CENTER
-        keyView.addView(text)
+        
         if (showWinDialog) showWinDialog(surrendered)
         timeHandler.removeCallbacks(timeUpdate)
     }
@@ -783,19 +786,6 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
         val decorView = window.decorView as? FrameLayout
         decorView?.addView(dialogFragment)
     }
-
-    /**
-     * Gibt einen String mit der Spielstatistik zurück.
-     *
-     * @return Die Spielstatistik als String
-     */
-    private val statisticsString: String
-        private get() = """
-             ${getString(R.string.dialog_won_statistics)}:
-             
-             ${getString(R.string.dialog_won_timeneeded)}: $gameTimeString
-             ${getString(R.string.dialog_won_score)}: ${game!!.score}
-             """.trimIndent()
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater

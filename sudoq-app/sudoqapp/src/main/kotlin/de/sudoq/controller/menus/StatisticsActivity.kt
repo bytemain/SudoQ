@@ -8,12 +8,14 @@
 package de.sudoq.controller.menus
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import de.sudoq.R
 import de.sudoq.controller.SudoqCompatActivity
 import de.sudoq.controller.sudoku.SudokuActivity.Companion.getTimeString
 import de.sudoq.model.profile.ProfileManager
+import de.sudoq.model.profile.ProfileSingleton
 import de.sudoq.model.profile.Statistics
 import de.sudoq.persistence.profile.ProfileRepo
 import de.sudoq.persistence.profile.ProfilesListRepo
@@ -37,14 +39,28 @@ class StatisticsActivity : SudoqCompatActivity() {
      * Get statistics data
      */
     private fun getStatisticsData(): StatisticsData {
-        val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
-        val pm = ProfileManager(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
-        check(!pm.noProfiles()) { 
-            "there are no profiles. this is unexpected. they should be initialized in splashActivity" 
-        }
-        pm.loadCurrentProfile()
+        Log.d("StatisticsActivity", "Getting statistics data...")
         
+        val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
+        Log.d("StatisticsActivity", "Profiles dir: ${profilesDir.absolutePath}")
+        
+        // Use ProfileSingleton to get the current active profile instance
+        val pm = ProfileSingleton.getInstance(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
+        
+        Log.d("StatisticsActivity", "ProfileSingleton instance obtained")
+        Log.d("StatisticsActivity", "Current profile: ${pm.currentProfile?.name}")
+        
+        Log.d("StatisticsActivity", "Getting statistics from ProfileManager...")
+        val playedSudokus = pm.getStatistic(Statistics.playedSudokus)
+        val playedEasy = pm.getStatistic(Statistics.playedEasySudokus)
+        val playedMedium = pm.getStatistic(Statistics.playedMediumSudokus)
+        val playedDifficult = pm.getStatistic(Statistics.playedDifficultSudokus)
+        val playedInfernal = pm.getStatistic(Statistics.playedInfernalSudokus)
+        val score = pm.getStatistic(Statistics.maximumPoints)
         val timeRecordInSecs = pm.getStatistic(Statistics.fastestSolvingTime)
+        
+        Log.d("StatisticsActivity", "Statistics: played=$playedSudokus, easy=$playedEasy, score=$score, time=$timeRecordInSecs")
+        
         val timeString = if (timeRecordInSecs != ProfileManager.INITIAL_TIME_RECORD) {
             getTimeString(timeRecordInSecs)
         } else {
@@ -52,12 +68,12 @@ class StatisticsActivity : SudoqCompatActivity() {
         }
         
         return StatisticsData(
-            playedSudokus = pm.getStatistic(Statistics.playedSudokus).toString(),
-            playedEasySudokus = pm.getStatistic(Statistics.playedEasySudokus).toString(),
-            playedMediumSudokus = pm.getStatistic(Statistics.playedMediumSudokus).toString(),
-            playedDifficultSudokus = pm.getStatistic(Statistics.playedDifficultSudokus).toString(),
-            playedInfernalSudokus = pm.getStatistic(Statistics.playedInfernalSudokus).toString(),
-            score = pm.getStatistic(Statistics.maximumPoints).toString(),
+            playedSudokus = playedSudokus.toString(),
+            playedEasySudokus = playedEasy.toString(),
+            playedMediumSudokus = playedMedium.toString(),
+            playedDifficultSudokus = playedDifficult.toString(),
+            playedInfernalSudokus = playedInfernal.toString(),
+            score = score.toString(),
             fastestSolvingTime = timeString
         )
     }
@@ -77,14 +93,12 @@ class StatisticsActivity : SudoqCompatActivity() {
         // Set content using Compose
         setContent {
             MaterialTheme {
-                StatisticsScreen(data = getStatisticsData())
+                StatisticsScreen(
+                    data = getStatisticsData(),
+                    onBackClick = { finish() }
+                )
             }
         }
-        
-        // Note: We still need to set the ActionBar as it's an Activity-level feature
-        // For a fully Compose solution, we could use Scaffold and TopAppBar
-        // But to maintain compatibility with existing code, we keep the XML toolbar for now
-        // TODO: Consider using Compose's Scaffold + TopAppBar to fully replace this in the future
     }
     
     /**

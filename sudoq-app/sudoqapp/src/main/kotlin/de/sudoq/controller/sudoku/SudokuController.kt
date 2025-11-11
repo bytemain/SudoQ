@@ -85,6 +85,7 @@ class SudokuController(
      * {@inheritDoc}
      */
     override fun onAddEntry(cell: Cell, value: Int) {
+        android.util.Log.d("SudokuController", "onAddEntry called: cell=${cell.id}, value=$value")
         // Use SolveActionWithNoteUpdate to handle automatic note adjustments
         val action = de.sudoq.model.actionTree.SolveActionWithNoteUpdate(
             value - cell.currentValue, // diff, not absolute value
@@ -94,14 +95,17 @@ class SudokuController(
         )
         game.addAndExecute(action)
         if (game.isFinished()) {
+            android.util.Log.d("SudokuController", "Game finished after onAddEntry, calling updateStatistics")
             updateStatistics()
             handleFinish(false)
         }
     }
 
     fun onHintAction(a: Action) {
+        android.util.Log.d("SudokuController", "onHintAction called")
         game.addAndExecute(a)
         if (game.isFinished()) {
+            android.util.Log.d("SudokuController", "Game finished after hint action, calling updateStatistics")
             updateStatistics()
             handleFinish(false)
         }
@@ -205,6 +209,11 @@ class SudokuController(
     /**
      * Updatet die Spielerstatistik des aktuellen Profils in der App.
      */
+    fun updateStatisticsAndSave() {
+        android.util.Log.d("SudokuController", "updateStatisticsAndSave called")
+        updateStatistics()
+    }
+    
     private fun updateStatistics() {
         when (game.sudoku!!.complexity) {
             Complexity.infernal -> incrementStatistic(Statistics.playedInfernalSudokus)
@@ -226,6 +235,10 @@ class SudokuController(
         if (p.getStatistic(Statistics.maximumPoints) < game.score) {
             p.setStatistic(Statistics.maximumPoints, game.score)
         }
+        
+        // Save the updated statistics to disk immediately
+        p.saveChanges()
+        android.util.Log.d("SudokuController", "Statistics updated and saved: played=${p.getStatistic(Statistics.playedSudokus)}, score=${p.getStatistic(Statistics.maximumPoints)}")
     }
 
     private fun incrementStatistic(s: Statistics) { //TODO this should probably be in model...

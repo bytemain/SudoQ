@@ -15,8 +15,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,59 +49,82 @@ data class StatisticsData(
  * Main statistics screen composable
  * Reimplements the original statistics.xml layout using Jetpack Compose
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StatisticsScreen(data: StatisticsData) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .background(Color.White)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Counters section
-        SectionTitle(text = stringResource(R.string.statistics_counters))
-        
-        StatisticItem(
-            label = stringResource(R.string.statistics_played_sudokus),
-            value = data.playedSudokus
-        )
-        
-        StatisticItem(
-            label = stringResource(R.string.statistics_played_easy_sudokus),
-            value = data.playedEasySudokus
-        )
-        
-        StatisticItem(
-            label = stringResource(R.string.statistics_played_medium_sudokus),
-            value = data.playedMediumSudokus
-        )
-        
-        StatisticItem(
-            label = stringResource(R.string.statistics_played_difficult_sudokus),
-            value = data.playedDifficultSudokus
-        )
-        
-        StatisticItem(
-            label = stringResource(R.string.statistics_played_infernal_sudokus),
-            value = data.playedInfernalSudokus
-        )
-        
-        // Records section
-        SectionTitle(
-            text = stringResource(R.string.statistics_records),
-            modifier = Modifier.padding(top = 8.dp)
-        )
-        
-        StatisticItem(
-            label = stringResource(R.string.statistics_score),
-            value = data.score
-        )
-        
-        StatisticItem(
-            label = stringResource(R.string.statistics_fastest_solving_time),
-            value = data.fastestSolvingTime
-        )
+fun StatisticsScreen(
+    data: StatisticsData,
+    onBackClick: (() -> Unit)? = null
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.statistics_title)) },
+                navigationIcon = {
+                    if (onBackClick != null) {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .background(Color.White)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Counters section
+            SectionTitle(text = stringResource(R.string.statistics_counters))
+            
+            StatisticItem(
+                label = stringResource(R.string.statistics_played_sudokus),
+                value = data.playedSudokus
+            )
+            
+            StatisticItem(
+                label = stringResource(R.string.statistics_played_easy_sudokus),
+                value = data.playedEasySudokus
+            )
+            
+            StatisticItem(
+                label = stringResource(R.string.statistics_played_medium_sudokus),
+                value = data.playedMediumSudokus
+            )
+            
+            StatisticItem(
+                label = stringResource(R.string.statistics_played_difficult_sudokus),
+                value = data.playedDifficultSudokus
+            )
+            
+            StatisticItem(
+                label = stringResource(R.string.statistics_played_infernal_sudokus),
+                value = data.playedInfernalSudokus
+            )
+            
+            // Records section
+            SectionTitle(
+                text = stringResource(R.string.statistics_records),
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            
+            StatisticItem(
+                label = stringResource(R.string.statistics_score),
+                value = data.score
+            )
+            
+            StatisticItem(
+                label = stringResource(R.string.statistics_fastest_solving_time),
+                value = data.fastestSolvingTime
+            )
+        }
     }
 }
 
