@@ -13,8 +13,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import de.sudoq.R
-import de.sudoq.controller.menus.ProfileListActivity
 import de.sudoq.model.game.Assistances
+import de.sudoq.model.profile.ProfileManager
 import de.sudoq.model.profile.ProfileSingleton.Companion.getInstance
 import de.sudoq.persistence.profile.ProfileRepo
 import de.sudoq.persistence.profile.ProfilesListRepo
@@ -42,6 +42,7 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         setContent {
             val themeColor = ThemeManager.loadThemeColor(this)
             val darkMode = ThemeManager.loadDarkMode(this)
+            var showProfileDialog by remember { mutableStateOf(false) }
             
             SudoQTheme(
                 themeColor = themeColor,
@@ -100,16 +101,31 @@ class PlayerPreferencesActivity : PreferencesActivity() {
                         preferencesData = loadPreferencesData()
                     },
                     onSwitchProfileClick = {
-                        switchToProfileList()
+                        showProfileDialog = true
                     },
                     onSettingsClick = {
                         startActivity(Intent(this, AppSettingsActivity::class.java))
                     }
                 )
+                
+                // Profile selection dialog
+                if (showProfileDialog) {
+                    val profiles = loadProfilesList()
+                    val currentProfileId = profile.currentProfileID
+                    
+                    de.sudoq.controller.menus.ProfileSelectionDialog(
+                        profiles = profiles,
+                        currentProfileId = currentProfileId,
+                        onProfileSelected = { profileId ->
+                            profile.changeProfile(profileId)
+                            preferencesData = loadPreferencesData()
+                        },
+                        onDismiss = { showProfileDialog = false }
+                    )
+                }
             }
         }
     }
-    
     /**
      * Load current preferences data from profile
      */
@@ -130,6 +146,22 @@ class PlayerPreferencesActivity : PreferencesActivity() {
             canDeleteProfile = profile.numberOfAvailableProfiles > 1,
             canSwitchProfile = profile.numberOfAvailableProfiles > 1
         )
+    }
+    
+    /**
+     * Load list of all profiles
+     */
+    private fun loadProfilesList(): List<de.sudoq.controller.menus.ProfileInfo> {
+        val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
+        val pm = ProfileManager(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
+        pm.loadCurrentProfile()
+        
+        val ids = pm.profilesIdList
+        val names = pm.profilesNameList
+        
+        return ids.zip(names).map { (id, name) ->
+            de.sudoq.controller.menus.ProfileInfo(id, name)
+        }
     }
     
     override fun refreshValues() {
@@ -175,15 +207,6 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         p.name = newProfileName
         p.saveChanges()
     }
-
-    /**
-     * wechselt zur Profil Liste
-     */
-    private fun switchToProfileList() {
-        val profileListIntent = Intent(this, ProfileListActivity::class.java)
-        startActivity(profileListIntent)
-    }
-
     /**
      * Löscht das ausgewählte Profil
      */
