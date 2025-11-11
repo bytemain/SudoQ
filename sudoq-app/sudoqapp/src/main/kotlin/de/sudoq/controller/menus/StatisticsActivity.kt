@@ -18,6 +18,8 @@ import de.sudoq.model.profile.ProfileManager
 import de.sudoq.model.profile.ProfileSingleton
 import de.sudoq.model.profile.Statistics
 import de.sudoq.persistence.profile.ProfileRepo
+import de.sudoq.view.theme.SudoQTheme
+import de.sudoq.view.theme.ThemeManager
 import de.sudoq.persistence.profile.ProfilesListRepo
 
 /**
@@ -92,7 +94,13 @@ class StatisticsActivity : SudoqCompatActivity() {
         
         // Set content using Compose
         setContent {
-            MaterialTheme {
+            val themeColor = ThemeManager.loadThemeColor(this)
+            val darkMode = ThemeManager.loadDarkMode(this)
+            
+            SudoQTheme(
+                themeColor = themeColor,
+                darkTheme = darkMode
+            ) {
                 StatisticsScreen(
                     data = getStatisticsData(),
                     onBackClick = { finish() }

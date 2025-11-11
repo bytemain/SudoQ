@@ -3,7 +3,6 @@ package de.sudoq.controller.menus
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
 import de.sudoq.R
 import de.sudoq.controller.SudoqCompatActivity
 import de.sudoq.controller.menus.preferences.PlayerPreferencesActivity
@@ -11,6 +10,8 @@ import de.sudoq.controller.sudoku.SudokuActivity
 import de.sudoq.model.profile.ProfileManager
 import de.sudoq.persistence.profile.ProfileRepo
 import de.sudoq.persistence.profile.ProfilesListRepo
+import de.sudoq.view.theme.SudoQTheme
+import de.sudoq.view.theme.ThemeManager
 import java.io.File
 
 /**
@@ -24,7 +25,13 @@ class MainActivity : SudoqCompatActivity() {
         profilesFile = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
         
         setContent {
-            MaterialTheme {
+            val themeColor = ThemeManager.loadThemeColor(this)
+            val darkMode = ThemeManager.loadDarkMode(this)
+            
+            SudoQTheme(
+                themeColor = themeColor,
+                darkTheme = darkMode
+            ) {
                 MainScreen(
                     state = getMainScreenState(),
                     onNewGameClick = {
@@ -52,7 +59,13 @@ class MainActivity : SudoqCompatActivity() {
         super.onResume()
         // Refresh the screen when returning
         setContent {
-            MaterialTheme {
+            val themeColor = ThemeManager.loadThemeColor(this)
+            val darkMode = ThemeManager.loadDarkMode(this)
+            
+            SudoQTheme(
+                themeColor = themeColor,
+                darkTheme = darkMode
+            ) {
                 MainScreen(
                     state = getMainScreenState(),
                     onNewGameClick = {

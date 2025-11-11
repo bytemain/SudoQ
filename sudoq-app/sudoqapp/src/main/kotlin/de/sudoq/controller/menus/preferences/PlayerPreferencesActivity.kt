@@ -20,6 +20,8 @@ import de.sudoq.model.game.Assistances
 import de.sudoq.model.profile.ProfileSingleton.Companion.getInstance
 import de.sudoq.persistence.profile.ProfileRepo
 import de.sudoq.persistence.profile.ProfilesListRepo
+import de.sudoq.view.theme.SudoQTheme
+import de.sudoq.view.theme.ThemeManager
 
 /**
  * Activity um Profile zu bearbeiten und zu verwalten
@@ -40,7 +42,13 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         profile.registerListener(this)
         
         setContent {
-            MaterialTheme {
+            val themeColor = ThemeManager.loadThemeColor(this)
+            val darkMode = ThemeManager.loadDarkMode(this)
+            
+            SudoQTheme(
+                themeColor = themeColor,
+                darkTheme = darkMode
+            ) {
                 var preferencesData by remember { mutableStateOf(loadPreferencesData()) }
                 
                 PlayerPreferencesScreen(
@@ -101,6 +109,9 @@ class PlayerPreferencesActivity : PreferencesActivity() {
                     },
                     onAdvancedClick = {
                         switchToAdvancedPreferences()
+                    },
+                    onThemeClick = {
+                        startActivity(Intent(this, ThemePreferencesActivity::class.java))
                     }
                 )
             }

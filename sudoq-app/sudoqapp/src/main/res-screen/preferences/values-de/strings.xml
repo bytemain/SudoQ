@@ -21,10 +21,23 @@
     <string name="profile_preference_button_save">Speichern</string>
     <string name="profile_preference_button_advanced_preferences">Erweiterte Einstellungen</string>
     <string name="profile_preference_button_provide_restricted_set_of_types">Auswahl der Typen beschränken</string>
+    <string name="profile_preference_button_theme">Design</string>
 
     <string name="profile_preference_new_profile">unbennant</string>
     <string name="profile_preference_title_crash_trigger">App abstürzen lassen</string>
     <string name="profile_preference_title_debug">debug</string>
+    
+    <!-- Theme Settings -->
+    <string name="theme_settings">Design-Einstellungen</string>
+    <string name="dark_mode">Dunkelmodus</string>
+    <string name="dark_mode_desc">Dunkles Theme aktivieren</string>
+    <string name="theme_color">Themenfarbe</string>
+    <string name="theme_color_desc">Wählen Sie Ihr bevorzugtes Farbschema</string>
+    <string name="color_green">Grün</string>
+    <string name="color_blue">Blau</string>
+    <string name="color_purple">Lila</string>
+    <string name="color_red">Rot</string>
+    <string name="color_orange">Orange</string>
 
     <!-- restrict types -->
     <string name="advanced_settings_restrict_types_empty_warning">Du musst einen Typ übriglassen. Sonst kannst du nicht spielen.</string>

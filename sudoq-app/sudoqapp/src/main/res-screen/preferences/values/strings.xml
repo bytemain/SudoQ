@@ -22,9 +22,22 @@
     <string name="profile_preference_button_save">Save</string>
     <string name="profile_preference_button_advanced_preferences">Advanced Settings</string>
     <string name="profile_preference_button_provide_restricted_set_of_types">Select which types are offered</string>
+    <string name="profile_preference_button_theme">Theme</string>
     <string name="profile_preference_new_profile">unnamed</string>
     <string name="profile_preference_title_crash_trigger">crash app</string>
     <string name="profile_preference_title_debug">debug</string>
+    
+    <!-- Theme Settings -->
+    <string name="theme_settings">Theme Settings</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="dark_mode_desc">Enable dark theme</string>
+    <string name="theme_color">Theme Color</string>
+    <string name="theme_color_desc">Choose your preferred color scheme</string>
+    <string name="color_green">Green</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_purple">Purple</string>
+    <string name="color_red">Red</string>
+    <string name="color_orange">Orange</string>
 
     <!-- restrict types -->
     <string name="advanced_settings_restrict_types_empty_warning">You have to leave at least one type. Otherwise you won\'t be able to start any new sudoku.</string>

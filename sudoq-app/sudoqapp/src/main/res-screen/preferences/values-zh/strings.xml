@@ -22,9 +22,22 @@
     <string name="profile_preference_button_save">保存</string>
     <string name="profile_preference_button_advanced_preferences">高级设置</string>
     <string name="profile_preference_button_provide_restricted_set_of_types">选择提供的类型</string>
+    <string name="profile_preference_button_theme">主题</string>
     <string name="profile_preference_new_profile">未命名</string>
     <string name="profile_preference_title_crash_trigger">崩溃应用</string>
     <string name="profile_preference_title_debug">调试</string>
+    
+    <!-- Theme Settings -->
+    <string name="theme_settings">主题设置</string>
+    <string name="dark_mode">深色模式</string>
+    <string name="dark_mode_desc">启用深色主题</string>
+    <string name="theme_color">主题颜色</string>
+    <string name="theme_color_desc">选择您偏好的配色方案</string>
+    <string name="color_green">绿色</string>
+    <string name="color_blue">蓝色</string>
+    <string name="color_purple">紫色</string>
+    <string name="color_red">红色</string>
+    <string name="color_orange">橙色</string>
 
     <!-- restrict types -->
     <string name="advanced_settings_restrict_types_empty_warning">您必须至少保留一种类型，否则将无法开始新的数独游戏。</string>

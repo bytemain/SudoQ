@@ -26,6 +26,8 @@ import de.sudoq.persistence.profile.ProfilesListRepo
 import de.sudoq.persistence.sudoku.SudokuRepoProvider
 import de.sudoq.persistence.sudoku.sudokuTypes.SudokuTypesListBE
 import de.sudoq.persistence.sudokuType.SudokuTypeRepo
+import de.sudoq.view.theme.SudoQTheme
+import de.sudoq.view.theme.ThemeManager
 import java.io.File
 
 /**
@@ -56,7 +58,13 @@ class NewSudokuActivity : SudoqCompatActivity() {
         gameSettings = GameSettingsMapper.fromBE(gameSettingsBE)
         
         setContent {
-            MaterialTheme {
+            val themeColor = ThemeManager.loadThemeColor(this)
+            val darkMode = ThemeManager.loadDarkMode(this)
+            
+            SudoQTheme(
+                themeColor = themeColor,
+                darkTheme = darkMode
+            ) {
                 val state = remember { mutableStateOf(createInitialState()) }
                 
                 NewSudokuScreen(

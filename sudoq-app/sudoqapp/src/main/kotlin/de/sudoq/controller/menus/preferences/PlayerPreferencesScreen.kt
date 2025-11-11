@@ -62,7 +62,8 @@ fun PlayerPreferencesScreen(
     onDeleteProfileClick: () -> Unit,
     onSwitchProfileClick: () -> Unit,
     onStatisticsClick: () -> Unit,
-    onAdvancedClick: () -> Unit
+    onAdvancedClick: () -> Unit,
+    onThemeClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -195,6 +196,13 @@ fun PlayerPreferencesScreen(
             }
             
             Button(
+                onClick = onThemeClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.profile_preference_button_theme))
+            }
+            
+            Button(
                 onClick = onAdvancedClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -268,7 +276,8 @@ private fun PlayerPreferencesScreenPreview() {
             onDeleteProfileClick = {},
             onSwitchProfileClick = {},
             onStatisticsClick = {},
-            onAdvancedClick = {}
+            onAdvancedClick = {},
+            onThemeClick = {}
         )
     }
 }
