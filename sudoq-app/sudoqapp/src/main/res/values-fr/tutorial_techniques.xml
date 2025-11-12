@@ -18,6 +18,8 @@
     <string name="sf_tutorial_intersections_category">Intersections (Candidats verrouillés)</string>
     <string name="sf_tutorial_hidden_subsets_category">Sous-ensembles cachés</string>
     <string name="sf_tutorial_naked_subsets_category">Sous-ensembles nus</string>
+    <string name="sf_tutorial_fish_category">Techniques de poisson</string>
+    <string name="sf_tutorial_wings_category">Techniques d\'aile</string>
     
     <!-- Singles Section -->
     <string name="sf_tutorial_singles_title">Singles</string>
@@ -91,6 +93,28 @@
     <string name="sf_tutorial_naked_quadruple_title">Quadruple nu</string>
     <string name="sf_tutorial_naked_quadruple_short">Quatre cases avec quatre candidats partagés créent une élimination niveau expert.</string>
     <string name="sf_tutorial_naked_quadruple_description">Lorsque quatre cases dans une maison ne contiennent que quatre chiffres candidats entre elles, ces quatre chiffres sont verrouillés sur ces cases. Éliminez ces candidats de toutes les autres cases de la maison. Note : Cela ne se produit que dans une seule maison (ligne, colonne ou bloc).</string>
+    
+    <!-- Fish Techniques Section -->
+    <string name="sf_tutorial_fish_title">Techniques de poisson</string>
+    <string name="sf_tutorial_fish_short_description">Reconnaissance de motifs avancée utilisant des lignes et colonnes qui se croisent.</string>
+    <string name="sf_tutorial_fish_intro">Les techniques de poisson identifient des motifs où les candidats sont verrouillés sur plusieurs lignes ou colonnes parallèles. Ces stratégies puissantes peuvent résoudre des puzzles difficiles en éliminant les candidats des contraintes qui se croisent.</string>
+    
+    <string name="sf_tutorial_xwing_title">X-Wing</string>
+    <string name="sf_tutorial_xwing_short">Un candidat verrouillé dans deux lignes et deux colonnes crée des opportunités d\'élimination.</string>
+    <string name="sf_tutorial_xwing_description">Lorsqu\'un candidat apparaît dans exactement deux positions dans chacune de deux lignes, et que ces positions s\'alignent dans les deux mêmes colonnes, ce candidat peut être éliminé de toutes les autres cases de ces deux colonnes (et vice versa). Imaginez un rectangle avec le candidat aux quatre coins - les autres occurrences dans ces colonnes/lignes peuvent être supprimées.</string>
+    
+    <string name="sf_tutorial_swordfish_title">Swordfish (Espadon)</string>
+    <string name="sf_tutorial_swordfish_short">Extension de X-Wing utilisant trois lignes et trois colonnes.</string>
+    <string name="sf_tutorial_swordfish_description">Similaire à X-Wing mais impliquant trois lignes et trois colonnes au lieu de deux. Lorsqu\'un candidat apparaît 2-3 fois dans chacune des trois lignes, et que toutes ces positions s\'alignent dans les trois mêmes colonnes, ce candidat peut être éliminé des autres cases de ces colonnes. C\'est un motif de poisson plus complexe mais plus puissant.</string>
+    
+    <!-- Wing Techniques Section -->
+    <string name="sf_tutorial_wings_title">Techniques d\'aile</string>
+    <string name="sf_tutorial_wings_short_description">Utilisez des chaînes de cases bi-valeurs pour des éliminations puissantes.</string>
+    <string name="sf_tutorial_wings_intro">Les techniques d\'aile exploitent les relations entre les cases qui ont exactement deux candidats. En suivant des chaînes logiques, vous pouvez éliminer des candidats des cases qui "voient" les extrémités de ces ailes.</string>
+    
+    <string name="sf_tutorial_ywing_title">Y-Wing</string>
+    <string name="sf_tutorial_ywing_short">Trois cases bi-valeurs liées créent un motif d\'élimination puissant.</string>
+    <string name="sf_tutorial_ywing_description">Un Y-Wing se compose d\'une case pivot avec les candidats AB, et de deux cases pinces avec les candidats AC et BC. Le pivot "voit" les deux pinces. Toute case qui peut voir les deux pinces (mais pas nécessairement le pivot) ne peut pas être C. Logique : Soit le pivot est A (forçant une pince à être C) soit le pivot est B (forçant l\'autre pince à être C), donc toute case voyant les deux pinces doit exclure C.</string>
     
     <!-- Difficulty Labels -->
     <string name="sf_tutorial_difficulty_basic">Base</string>
