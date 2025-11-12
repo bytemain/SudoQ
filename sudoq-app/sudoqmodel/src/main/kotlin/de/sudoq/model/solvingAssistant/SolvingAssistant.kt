@@ -27,6 +27,8 @@ object SolvingAssistant {
         helpers.add(HiddenHelper(s, 5, 0))
         helpers.add(LockedCandandidatesHelper(s, 0))
         helpers.add(XWingHelper(s, 0))
+        helpers.add(YWingHelper(s, 0))
+        helpers.add(SwordfishHelper(s, 0))
         helpers.add(NoNotesHelper(s, 0))
         for (sh in helpers) if (sh.update(true)) {
             //System.out.println("SolvingAssistant finds: " + sh.getClass());

@@ -37,6 +37,8 @@ enum class HintTypes {
 
     LockedCandidatesExternal,
     XWing,
+    Swordfish,
+    YWing,
 
     NoNotes, //this is for when the user doesn't fill out the notes - DON'T USE IN GENERATOR!
     Backtracking

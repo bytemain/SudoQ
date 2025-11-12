@@ -275,6 +275,10 @@
 
     <string name="hint_xWing">If you look at the intersections of green and blue groups some notes appear nowhere else in the blue groups. They can therefore be deleted in the green ones.</string>
 
+    <string name="hint_swordfish">Similar to X-Wing but with three groups: If you look at the intersections of green and blue groups, some notes appear nowhere else in the blue groups. They can therefore be deleted in the green ones.</string>
+
+    <string name="hint_yWing">Look at the highlighted cells! The blue cell (pivot) and yellow cells (pincers) form a Y-Wing pattern. Any cell that can see both yellow cells can have the common candidate removed.</string>
+
     
     <string name="hint_backtracking">As said, I\'m still in development. So I\'m out of ideas and my best advice is to set a bookmark and guess a cell.</string>
     <string name="hint_fill_out_notes"> By the way, there\'s a cell that has no notes in it. If I don\'t see a note in a cell I assume that you\'ve ruled it out. I work best if all numbers that are still considered possible are set as notes in a cell. If you want I can enter the notes for you. </string>

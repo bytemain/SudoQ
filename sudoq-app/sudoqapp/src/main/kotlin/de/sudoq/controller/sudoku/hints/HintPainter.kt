@@ -43,6 +43,8 @@ class HintPainter(private val sl: SudokuLayout) {
                 (sd as LockedCandidatesDerivation)
             )
             HintTypes.XWing -> XWingView(context, sl, (sd as XWingDerivation))
+            HintTypes.Swordfish -> SwordfishView(context, sl, (sd as SwordfishDerivation))
+            HintTypes.YWing -> YWingView(context, sl, (sd as YWingDerivation))
             HintTypes.NoNotes -> NoNotesView(context, sl, (sd as NoNotesDerivation))
             else -> null
         }
