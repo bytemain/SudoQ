@@ -18,6 +18,8 @@
     <string name="sf_tutorial_intersections_category">交叉消除（行列消除法）</string>
     <string name="sf_tutorial_hidden_subsets_category">隐性数组</string>
     <string name="sf_tutorial_naked_subsets_category">显性数组</string>
+    <string name="sf_tutorial_fish_category">鱼类技巧</string>
+    <string name="sf_tutorial_wings_category">翼类技巧</string>
     
     <!-- Singles Section -->
     <string name="sf_tutorial_singles_title">唯一解</string>
@@ -78,6 +80,28 @@
     
     <string name="sf_tutorial_naked_quadruple_title">显性四数组</string>
     <string name="sf_tutorial_naked_quadruple_description">当某个区域中的四个格子之间只包含四个候选数字时，这四个数字被锁定在这些格子中。从该区域的所有其他格子中排除这些候选数。注意：这只发生在单个区域（行、列或宫）内。</string>
+    
+    <!-- Fish Techniques Section -->
+    <string name="sf_tutorial_fish_title">鱼类技巧</string>
+    <string name="sf_tutorial_fish_short_description">使用交叉行列的高级模式识别。</string>
+    <string name="sf_tutorial_fish_intro">鱼类技巧识别候选数在多个平行行或列中被锁定的模式。这些强大的策略通过从交叉约束中排除候选数来破解困难的谜题。</string>
+    
+    <string name="sf_tutorial_xwing_title">X-Wing（X翼）</string>
+    <string name="sf_tutorial_xwing_short">候选数在两行两列中被锁定，创造消除机会。</string>
+    <string name="sf_tutorial_xwing_description">当某个候选数在两行中各恰好出现两次，且这些位置在同两列上对齐时，该候选数可以从这两列的所有其他格子中排除（反之亦然）。想象一个矩形，候选数在四个角上 - 这些行/列中的其他出现可以被删除。</string>
+    
+    <string name="sf_tutorial_swordfish_title">Swordfish（剑鱼）</string>
+    <string name="sf_tutorial_swordfish_short">X-Wing的扩展，使用三行三列。</string>
+    <string name="sf_tutorial_swordfish_description">类似X-Wing，但涉及三行三列而不是两行两列。当某个候选数在三行中各出现2-3次，且所有这些位置都在同三列内对齐时，该候选数可以从这些列的其他格子中排除。这是一个更复杂但更强大的鱼类模式。</string>
+    
+    <!-- Wing Techniques Section -->
+    <string name="sf_tutorial_wings_title">翼类技巧</string>
+    <string name="sf_tutorial_wings_short_description">使用双候选格子链进行强大的消除。</string>
+    <string name="sf_tutorial_wings_intro">翼类技巧利用恰好有两个候选数的格子之间的关系。通过遵循逻辑链，您可以从"看到"这些翼端点的格子中排除候选数。</string>
+    
+    <string name="sf_tutorial_ywing_title">Y-Wing（Y翼）</string>
+    <string name="sf_tutorial_ywing_short">三个相连的双候选格子创建强大的消除模式。</string>
+    <string name="sf_tutorial_ywing_description">Y-Wing由一个枢纽格子（候选数AB）和两个翼格子（候选数AC和BC）组成。枢纽"看到"两个翼。任何能看到两个翼（但不一定看到枢纽）的格子都不能是C。逻辑：要么枢纽是A（强制一个翼为C），要么枢纽是B（强制另一个翼为C），所以任何看到两个翼的格子必须排除C。</string>
     
     <!-- Difficulty Labels -->
     <string name="sf_tutorial_difficulty_basic">基础</string>

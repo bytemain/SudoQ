@@ -18,6 +18,8 @@
     <string name="sf_tutorial_intersections_category">Intersections (Locked Candidates)</string>
     <string name="sf_tutorial_hidden_subsets_category">Hidden Subsets</string>
     <string name="sf_tutorial_naked_subsets_category">Naked Subsets</string>
+    <string name="sf_tutorial_fish_category">Fish Techniques</string>
+    <string name="sf_tutorial_wings_category">Wing Techniques</string>
     
     <!-- Singles Section -->
     <string name="sf_tutorial_singles_title">Singles</string>
@@ -91,6 +93,28 @@
     <string name="sf_tutorial_naked_quadruple_title">Naked Quadruple</string>
     <string name="sf_tutorial_naked_quadruple_short">Four cells with four shared candidates create an expert-level elimination.</string>
     <string name="sf_tutorial_naked_quadruple_description">When four cells in a house contain only four candidate digits between them, those four digits are locked to those cells. Eliminate those candidates from all other cells in the house. Note: This only occurs within a single house (row, column, or box).</string>
+    
+    <!-- Fish Techniques Section -->
+    <string name="sf_tutorial_fish_title">Fish Techniques</string>
+    <string name="sf_tutorial_fish_short_description">Advanced pattern recognition using intersecting rows and columns.</string>
+    <string name="sf_tutorial_fish_intro">Fish techniques identify patterns where candidates are locked across multiple parallel rows or columns. These powerful strategies can crack difficult puzzles by eliminating candidates from intersecting constraints.</string>
+    
+    <string name="sf_tutorial_xwing_title">X-Wing</string>
+    <string name="sf_tutorial_xwing_short">A candidate locked in two rows and two columns creates elimination opportunities.</string>
+    <string name="sf_tutorial_xwing_description">When a candidate appears in exactly two positions in each of two rows, and these positions align in the same two columns, that candidate can be eliminated from all other cells in those two columns (and vice versa). Imagine a rectangle with the candidate at all four corners - other occurrences in those columns/rows can be removed.</string>
+    
+    <string name="sf_tutorial_swordfish_title">Swordfish</string>
+    <string name="sf_tutorial_swordfish_short">Extension of X-Wing using three rows and three columns.</string>
+    <string name="sf_tutorial_swordfish_description">Similar to X-Wing but involving three rows and three columns instead of two. When a candidate appears 2-3 times in each of three rows, and all these positions align within the same three columns, that candidate can be eliminated from other cells in those columns. This is a more complex but powerful fish pattern.</string>
+    
+    <!-- Wing Techniques Section -->
+    <string name="sf_tutorial_wings_title">Wing Techniques</string>
+    <string name="sf_tutorial_wings_short_description">Use chains of bi-value cells to make powerful eliminations.</string>
+    <string name="sf_tutorial_wings_intro">Wing techniques exploit relationships between cells that have exactly two candidates. By following logical chains, you can eliminate candidates from cells that "see" the endpoints of these wings.</string>
+    
+    <string name="sf_tutorial_ywing_title">Y-Wing</string>
+    <string name="sf_tutorial_ywing_short">Three linked bi-value cells create a powerful elimination pattern.</string>
+    <string name="sf_tutorial_ywing_description">A Y-Wing consists of a pivot cell with candidates AB, and two pincer cells with candidates AC and BC. The pivot "sees" both pincers. Any cell that can see both pincers (but not necessarily the pivot) cannot be C. Logic: Either the pivot is A (forcing one pincer to be C) or the pivot is B (forcing the other pincer to be C), so any cell seeing both pincers must exclude C.</string>
     
     <!-- Difficulty Labels -->
     <string name="sf_tutorial_difficulty_basic">Basic</string>

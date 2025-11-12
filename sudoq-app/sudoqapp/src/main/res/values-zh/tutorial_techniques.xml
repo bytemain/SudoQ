@@ -18,6 +18,8 @@
     <string name="sf_tutorial_intersections_category">交叉消除（行列消除法）</string>
     <string name="sf_tutorial_hidden_subsets_category">隐性数组</string>
     <string name="sf_tutorial_naked_subsets_category">显性数组</string>
+    <string name="sf_tutorial_fish_category">鱼類技巧</string>
+    <string name="sf_tutorial_wings_category">翼類技巧</string>
     
     <!-- Singles Section -->
     <string name="sf_tutorial_singles_title">唯一解</string>
@@ -91,6 +93,28 @@
     <string name="sf_tutorial_naked_quadruple_title">显性四数组</string>
     <string name="sf_tutorial_naked_quadruple_short">四个格子有四个共享候选数创建专家级消除。</string>
     <string name="sf_tutorial_naked_quadruple_description">当某个区域中的四个格子之间只包含四个候选数字时，这四个数字被锁定在这些格子中。从该区域的所有其他格子中排除这些候选数。注意：这只发生在单个区域（行、列或宫）内。</string>
+    
+    <!-- Fish Techniques Section -->
+    <string name="sf_tutorial_fish_title">鱼類技巧</string>
+    <string name="sf_tutorial_fish_short_description">使用交叉行列的高級模式識別。</string>
+    <string name="sf_tutorial_fish_intro">鱼類技巧識別候選數在多個平行行或列中被鎖定的模式。這些強大的策略通過從交叉約束中排除候選數來破解困難的謎題。</string>
+    
+    <string name="sf_tutorial_xwing_title">X-Wing（X翼）</string>
+    <string name="sf_tutorial_xwing_short">候選數在兩行兩列中被鎖定，創造消除機會。</string>
+    <string name="sf_tutorial_xwing_description">當某個候選數在兩行中各恰好出現兩次，且這些位置在同兩列上對齊時，該候選數可以從這兩列的所有其他格子中排除（反之亦然）。想像一個矩形，候選數在四個角上 - 這些行/列中的其他出現可以被刪除。</string>
+    
+    <string name="sf_tutorial_swordfish_title">Swordfish（劍魚）</string>
+    <string name="sf_tutorial_swordfish_short">X-Wing的擴展，使用三行三列。</string>
+    <string name="sf_tutorial_swordfish_description">類似X-Wing，但涉及三行三列而不是兩行兩列。當某個候選數在三行中各出現2-3次，且所有這些位置都在同三列內對齊時，該候選數可以從這些列的其他格子中排除。這是一個更複雜但更強大的魚類模式。</string>
+    
+    <!-- Wing Techniques Section -->
+    <string name="sf_tutorial_wings_title">翼類技巧</string>
+    <string name="sf_tutorial_wings_short_description">使用雙候選格子鏈進行強大的消除。</string>
+    <string name="sf_tutorial_wings_intro">翼類技巧利用恰好有兩個候選數的格子之間的關係。通過遵循邏輯鏈，您可以從"看到"這些翼端點的格子中排除候選數。</string>
+    
+    <string name="sf_tutorial_ywing_title">Y-Wing（Y翼）</string>
+    <string name="sf_tutorial_ywing_short">三個相連的雙候選格子創建強大的消除模式。</string>
+    <string name="sf_tutorial_ywing_description">Y-Wing由一個樞紐格子（候選數AB）和兩個翼格子（候選數AC和BC）組成。樞紐"看到"兩個翼。任何能看到兩個翼（但不一定看到樞紐）的格子都不能是C。邏輯：要麼樞紐是A（強制一個翼為C），要麼樞紐是B（強制另一個翼為C），所以任何看到兩個翼的格子必須排除C。</string>
     
     <!-- Difficulty Labels -->
     <string name="sf_tutorial_difficulty_basic">基础</string>

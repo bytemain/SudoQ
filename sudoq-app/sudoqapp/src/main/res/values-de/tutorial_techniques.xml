@@ -18,6 +18,8 @@
     <string name="sf_tutorial_intersections_category">Intersections (Locked Candidates)</string>
     <string name="sf_tutorial_hidden_subsets_category">Hidden Subsets</string>
     <string name="sf_tutorial_naked_subsets_category">Naked Subsets</string>
+    <string name="sf_tutorial_fish_category">Fish-Techniken</string>
+    <string name="sf_tutorial_wings_category">Wing-Techniken</string>
     
     <!-- Singles Section -->
     <string name="sf_tutorial_singles_title">Singles</string>
@@ -91,6 +93,28 @@
     <string name="sf_tutorial_naked_quadruple_title">Naked Quadruple</string>
     <string name="sf_tutorial_naked_quadruple_short">Vier Zellen mit vier geteilten Kandidaten erzeugen eine Experten-Eliminierung.</string>
     <string name="sf_tutorial_naked_quadruple_description">Wenn vier Zellen in einem House nur vier Kandidatenziffern zwischen sich enthalten, sind diese vier Ziffern auf diese Zellen festgelegt. Eliminieren Sie diese Kandidaten aus allen anderen Zellen im House. Hinweis: Dies tritt nur innerhalb eines einzelnen Houses (Zeile, Spalte oder Block) auf.</string>
+    
+    <!-- Fish Techniques Section -->
+    <string name="sf_tutorial_fish_title">Fish-Techniken</string>
+    <string name="sf_tutorial_fish_short_description">Fortgeschrittene Mustererkennung mit sich kreuzenden Zeilen und Spalten.</string>
+    <string name="sf_tutorial_fish_intro">Fish-Techniken identifizieren Muster, bei denen Kandidaten über mehrere parallele Zeilen oder Spalten gesperrt sind. Diese leistungsstarken Strategien können schwierige Rätsel lösen, indem Kandidaten aus sich kreuzenden Constraints eliminiert werden.</string>
+    
+    <string name="sf_tutorial_xwing_title">X-Wing</string>
+    <string name="sf_tutorial_xwing_short">Ein Kandidat, der in zwei Zeilen und zwei Spalten gesperrt ist, schafft Eliminierungsmöglichkeiten.</string>
+    <string name="sf_tutorial_xwing_description">Wenn ein Kandidat in genau zwei Positionen in jeder von zwei Zeilen erscheint und diese Positionen in denselben zwei Spalten ausgerichtet sind, kann dieser Kandidat aus allen anderen Zellen in diesen zwei Spalten eliminiert werden (und umgekehrt). Stellen Sie sich ein Rechteck vor, bei dem der Kandidat an allen vier Ecken steht - andere Vorkommen in diesen Spalten/Zeilen können entfernt werden.</string>
+    
+    <string name="sf_tutorial_swordfish_title">Swordfish</string>
+    <string name="sf_tutorial_swordfish_short">Erweiterung des X-Wing mit drei Zeilen und drei Spalten.</string>
+    <string name="sf_tutorial_swordfish_description">Ähnlich wie X-Wing, aber mit drei Zeilen und drei Spalten statt zwei. Wenn ein Kandidat 2-3 Mal in jeder von drei Zeilen erscheint und alle diese Positionen innerhalb derselben drei Spalten ausgerichtet sind, kann dieser Kandidat aus anderen Zellen in diesen Spalten eliminiert werden. Dies ist ein komplexeres, aber leistungsstärkeres Fish-Muster.</string>
+    
+    <!-- Wing Techniques Section -->
+    <string name="sf_tutorial_wings_title">Wing-Techniken</string>
+    <string name="sf_tutorial_wings_short_description">Verwenden Sie Ketten von Bi-Value-Zellen für mächtige Eliminierungen.</string>
+    <string name="sf_tutorial_wings_intro">Wing-Techniken nutzen Beziehungen zwischen Zellen aus, die genau zwei Kandidaten haben. Durch Verfolgen logischer Ketten können Sie Kandidaten aus Zellen eliminieren, die die Endpunkte dieser Wings "sehen".</string>
+    
+    <string name="sf_tutorial_ywing_title">Y-Wing</string>
+    <string name="sf_tutorial_ywing_short">Drei verknüpfte Bi-Value-Zellen erzeugen ein mächtiges Eliminierungsmuster.</string>
+    <string name="sf_tutorial_ywing_description">Ein Y-Wing besteht aus einer Pivot-Zelle mit Kandidaten AB und zwei Pincer-Zellen mit Kandidaten AC und BC. Der Pivot "sieht" beide Pincers. Jede Zelle, die beide Pincers sehen kann (aber nicht unbedingt den Pivot), kann nicht C sein. Logik: Entweder ist der Pivot A (was einen Pincer zu C zwingt) oder der Pivot ist B (was den anderen Pincer zu C zwingt), sodass jede Zelle, die beide Pincers sieht, C ausschließen muss.</string>
     
     <!-- Difficulty Labels -->
     <string name="sf_tutorial_difficulty_basic">Grundlegend</string>

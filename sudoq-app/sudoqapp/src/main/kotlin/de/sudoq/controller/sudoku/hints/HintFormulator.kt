@@ -38,6 +38,8 @@ object HintFormulator {
             HintTypes.HiddenQuintuple -> hiddenMultiple(context, sd)
             HintTypes.LockedCandidatesExternal -> lockedCandidates(context, sd)
             HintTypes.XWing -> xWing(context, sd)
+            HintTypes.Swordfish -> swordfish(context, sd)
+            HintTypes.YWing -> yWing(context, sd)
             HintTypes.NoNotes -> {
                 context.getString(R.string.hint_backtracking) +
                         context.getString(R.string.hint_fill_out_notes)
@@ -161,5 +163,13 @@ object HintFormulator {
     private fun xWing(context: Context, sd: SolveDerivation): String {
         //int note = ((XWingDerivation) sd).getNote();
         return context.getString(R.string.hint_xWing)
+    }
+
+    private fun swordfish(context: Context, sd: SolveDerivation): String {
+        return context.getString(R.string.hint_swordfish)
+    }
+
+    private fun yWing(context: Context, sd: SolveDerivation): String {
+        return context.getString(R.string.hint_yWing)
     }
 }
