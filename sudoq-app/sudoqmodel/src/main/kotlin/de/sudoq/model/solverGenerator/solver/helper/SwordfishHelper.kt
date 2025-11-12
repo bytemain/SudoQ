@@ -79,7 +79,7 @@ class SwordfishHelper(sudoku: SolverSudoku, complexity: Int) : SolveHelper(sudok
                     if (hasOverlap(locked)) continue
                     
                     // For each candidate number, check if it forms a swordfish
-                    for (note in 0 until sudoku.sudokuType!!.symbolCount) {
+                    for (note in 0 until sudoku.sudokuType!!.numberOfSymbols) {
                         if (checkSwordfishForNote(locked, reducibleConstraints, note, buildDerivation)) {
                             return true
                         }
