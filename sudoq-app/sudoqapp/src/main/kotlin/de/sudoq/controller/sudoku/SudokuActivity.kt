@@ -143,6 +143,18 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
         Mode.Regular //TODO see that this gets saved in oninstancesaved and restored so hint persitst orientation change
 
     /**
+     * Hint state for Compose UI
+     */
+    data class HintState(
+        val text: String,
+        val hasExecute: Boolean,
+        val onContinue: () -> Unit,
+        val onExecute: () -> Unit
+    )
+    
+    private var currentHintState: HintState? = null
+
+    /**
      * Der Handler für die Zeit
      */
     private val timeHandler = Handler()
@@ -268,14 +280,35 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
             // Use Compose for UI
             setContent {
                 MaterialTheme {
+                    var hintState by remember { mutableStateOf<HintState?>(null) }
+                    
+                    // Update hint state when currentHintState changes
+                    LaunchedEffect(currentHintState) {
+                        hintState = currentHintState
+                    }
+                    
                     val gameState = remember {
                         mutableStateOf(
                             SudokuGameState(
                                 game = game!!,
                                 isActionTreeShown = isActionTreeShown,
                                 isFinished = finished,
-                                elapsedTime = game!!.time.toLong() * 1000
+                                elapsedTime = game!!.time.toLong() * 1000,
+                                hintText = hintState?.text,
+                                hintHasExecute = hintState?.hasExecute ?: false,
+                                onHintContinue = hintState?.onContinue,
+                                onHintExecute = hintState?.onExecute
                             )
+                        )
+                    }
+                    
+                    // Update game state when hint state changes
+                    LaunchedEffect(hintState) {
+                        gameState.value = gameState.value.copy(
+                            hintText = hintState?.text,
+                            hintHasExecute = hintState?.hasExecute ?: false,
+                            onHintContinue = hintState?.onContinue,
+                            onHintExecute = hintState?.onExecute
                         )
                     }
                     
@@ -789,16 +822,27 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
     }
 
     fun setModeHint() {
-        // Note: In Compose UI, panel doesn't exist
-        // TODO: Implement hint mode UI in Compose
-        findViewById<View>(R.id.hintPanel)?.visibility = View.VISIBLE
         mode = Mode.HintMode
     }
 
     fun setModeRegular() {
-        findViewById<View>(R.id.hintPanel)?.visibility = View.GONE
-        // Note: In Compose UI, panel doesn't exist
         mode = Mode.Regular
+        currentHintState = null
+    }
+    
+    /**
+     * Shows hint in the keyboard area
+     */
+    fun showHint(text: String, hasExecute: Boolean, onContinue: () -> Unit, onExecute: () -> Unit) {
+        currentHintState = HintState(text, hasExecute, onContinue, onExecute)
+        setModeHint()
+    }
+    
+    /**
+     * Hides the hint panel
+     */
+    fun hideHint() {
+        setModeRegular()
     }
 
     private var fm: FragmentManager = supportFragmentManager

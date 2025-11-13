@@ -122,50 +122,27 @@ class AssistancesDialogFragment : DialogFragment() {
 
     private fun hint(activity: SudokuActivity) {
         val sd = giveAHint(game!!.sudoku!!)
-        activity.setModeHint()
         sl!!.hintPainter.realizeHint(sd)
         sl!!.hintPainter.invalidateAll()
 
-        // Resolve ComposeView safely; fall back to creating one under hintPanel when ID is unavailable
-        val composeViewId = activity.resources.getIdentifier("hintComposeView", "id", activity.packageName)
-        val composeView = if (composeViewId != 0)
-            activity.findViewById<ComposeView>(composeViewId)
-        else null
-        val safeComposeView = composeView ?: run {
-            val panelId = activity.resources.getIdentifier("hintPanel", "id", activity.packageName)
-            val parent = if (panelId != 0) activity.findViewById<View>(panelId) as? android.widget.LinearLayout else null
-            val cv = ComposeView(activity)
-            cv.layoutParams = android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT
-            )
-            parent?.addView(cv)
-            cv
-        }
-        safeComposeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                MaterialTheme {
-                    HintPanelContent(
-                        text = getText(activity, sd).toString(),
-                        showExecute = sd.hasActionListCapability(),
-                        onContinue = {
-                            activity.setModeRegular()
-                            sl!!.hintPainter.deleteAll()
-                            sl!!.invalidate()
-                            sl!!.hintPainter.invalidateAll()
-                        },
-                        onExecute = {
-                            activity.setModeRegular()
-                            sl!!.hintPainter.deleteAll()
-                            sl!!.invalidate()
-                            sl!!.hintPainter.invalidateAll()
-                            previewAndExecuteHintActions(activity, sd)
-                        }
-                    )
-                }
+        // Show hint in the keyboard area using Compose UI
+        activity.showHint(
+            text = getText(activity, sd).toString(),
+            hasExecute = sd.hasActionListCapability(),
+            onContinue = {
+                activity.hideHint()
+                sl!!.hintPainter.deleteAll()
+                sl!!.invalidate()
+                sl!!.hintPainter.invalidateAll()
+            },
+            onExecute = {
+                activity.hideHint()
+                sl!!.hintPainter.deleteAll()
+                sl!!.invalidate()
+                sl!!.hintPainter.invalidateAll()
+                previewAndExecuteHintActions(activity, sd)
             }
-        }
+        )
     }
 
     /**
@@ -224,83 +201,6 @@ class AssistancesDialogFragment : DialogFragment() {
             }
         }
         layout.postDelayed(execRunnable, delayPerAction)
-    }
-
-    @Composable
-    private fun HintPanelContent(
-        text: String,
-        showExecute: Boolean,
-        onContinue: () -> Unit,
-        onExecute: () -> Unit
-    ) {
-        val scrollState = rememberScrollState()
-        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-        if (isLandscape) {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF282828))
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(scrollState)
-                        .padding(4.dp)
-                ) {
-                    Text(text = text, color = Color.White)
-                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(0.35f)
-                ) {
-                    Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
-                        Text(text = stringResource(id = R.string.hint_panel_continue))
-                    }
-                    if (showExecute) {
-                        Spacer(modifier = Modifier.size(12.dp))
-                        Button(onClick = onExecute, modifier = Modifier.fillMaxWidth()) {
-                            Text(text = stringResource(id = R.string.hint_panel_execute))
-                        }
-                    }
-                }
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF282828))
-                    .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(scrollState)
-                            .padding(4.dp)
-                    ) {
-                        Text(text = text, color = Color.White)
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Button(onClick = onContinue, modifier = Modifier.weight(1f)) {
-                        Text(text = stringResource(id = R.string.hint_panel_continue))
-                    }
-                    if (showExecute) {
-                        Button(onClick = onExecute, modifier = Modifier.weight(1f)) {
-                            Text(text = stringResource(id = R.string.hint_panel_execute))
-                        }
-                    }
-                }
-            }
-        }
     }
 
     override fun onDestroyView() {

@@ -1,6 +1,8 @@
 package de.sudoq.controller.sudoku
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -28,7 +30,11 @@ data class SudokuGameState(
     val isFinished: Boolean = false,
     val elapsedTime: Long = 0,
     val isPaused: Boolean = false,
-    val showMenu: Boolean = false
+    val showMenu: Boolean = false,
+    val hintText: String? = null,
+    val hintHasExecute: Boolean = false,
+    val onHintContinue: (() -> Unit)? = null,
+    val onHintExecute: (() -> Unit)? = null
 )
 
 /**
@@ -185,19 +191,34 @@ fun SudokuScreen(
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             )
             
-            // Virtual Keyboard
-            AndroidView(
-                factory = { context ->
-                    android.util.Log.d("SudokuScreen", "AndroidView factory: returning existing keyboard view")
-                    // Don't refresh here! The keyboard is already initialized in SudokuActivity
-                    // Refreshing would recreate buttons and lose the registered listeners
-                    keyboardLayout
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            )
+            // Virtual Keyboard or Hint Panel
+            if (state.hintText != null) {
+                // Show hint panel in keyboard area
+                HintPanel(
+                    text = state.hintText,
+                    showExecute = state.hintHasExecute,
+                    onContinue = state.onHintContinue ?: {},
+                    onExecute = state.onHintExecute ?: {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            } else {
+                // Show virtual keyboard
+                AndroidView(
+                    factory = { context ->
+                        android.util.Log.d("SudokuScreen", "AndroidView factory: returning existing keyboard view")
+                        // Don't refresh here! The keyboard is already initialized in SudokuActivity
+                        // Refreshing would recreate buttons and lose the registered listeners
+                        keyboardLayout
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
         }
     }
 }
@@ -284,6 +305,70 @@ fun SudokuControlPanel(
                     contentDescription = stringResource(R.string.sf_sudoku_button_fill_candidates),
                     modifier = Modifier.size(24.dp)
                 )
+            }
+        }
+    }
+}
+
+/**
+ * Hint panel that appears in the keyboard area
+ */
+@Composable
+fun HintPanel(
+    text: String,
+    showExecute: Boolean,
+    onContinue: () -> Unit,
+    onExecute: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        tonalElevation = 2.dp,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Scrollable text area
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Buttons row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onContinue,
+                    modifier = if (showExecute) Modifier.weight(1f) else Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(id = R.string.hint_panel_continue))
+                }
+                if (showExecute) {
+                    Button(
+                        onClick = onExecute,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(text = stringResource(id = R.string.hint_panel_execute))
+                    }
+                }
             }
         }
     }
