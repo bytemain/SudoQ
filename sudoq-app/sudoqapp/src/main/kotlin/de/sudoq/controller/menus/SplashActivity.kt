@@ -16,6 +16,21 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import de.sudoq.R
 import de.sudoq.controller.SudoqCompatActivity
 import de.sudoq.controller.menus.preferences.LanguageCode
@@ -25,7 +40,8 @@ import de.sudoq.model.sudoku.complexity.Complexity.Companion.playableValues
 import de.sudoq.model.sudoku.sudokuTypes.SudokuTypes
 import de.sudoq.persistence.profile.ProfileRepo
 import de.sudoq.persistence.profile.ProfilesListRepo
-//import org.apache.commons.lang3.StringUtils
+import de.sudoq.view.theme.SudoQTheme
+import de.sudoq.view.theme.ThemeManager
 import java.io.*
 import java.util.regex.Pattern
 
@@ -63,11 +79,19 @@ class SplashActivity : SudoqCompatActivity() {
         if (languageCode != LanguageCode.system && languageCode != LanguageUtility.resolveSystemLanguage()) {
             LanguageUtility.setResourceLocale(this, languageCode)
         }
-        // This should be applied app wide until manual preference changes.
-        // If something else changes the locale for reasons, it will be noticed.
-
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.splash)
+        
+        // Set up Compose UI
+        setContent {
+            val themeColor = ThemeManager.loadThemeColor(this)
+            val darkMode = ThemeManager.loadDarkMode(this)
+            
+            SudoQTheme(
+                themeColor = themeColor,
+                darkTheme = darkMode
+            ) {
+                SplashScreen()
+            }
+        }
 
         // If there is no profile initialize one
         val profilesDir = getDir(getString(R.string.path_rel_profiles), MODE_PRIVATE)
@@ -358,6 +382,28 @@ class SplashActivity : SudoqCompatActivity() {
             Log.d(LOG_TAG, "Starting to copy templates")
             copyAssets()
             return null
+        }
+    }
+
+    @Composable
+    private fun SplashScreen() {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.rootkuh),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(30.dp),
+                    contentScale = ContentScale.Fit
+                )
+            }
         }
     }
 

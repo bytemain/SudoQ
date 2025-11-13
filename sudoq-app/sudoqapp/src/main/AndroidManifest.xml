@@ -22,7 +22,6 @@
         <activity android:name=".controller.menus.preferences.PlayerPreferencesActivity" android:label="@string/profile_preference_title" android:windowSoftInputMode="stateHidden" />
         <activity android:name=".controller.menus.preferences.AppSettingsActivity" android:label="@string/app_settings" />
         <activity android:name=".controller.menus.StatisticsActivity" android:label="@string/statistics_title" />
-        <activity android:name=".controller.menus.ProfileListActivity" android:theme="@style/Theme.DesignDemo.Dialog" />
 
         <activity android:name=".controller.tutorial.TutorialActivity" android:label="@string/sf_tutorial_sudoku_title" />
 
