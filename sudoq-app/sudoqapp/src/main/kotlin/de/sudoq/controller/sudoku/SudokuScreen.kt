@@ -10,15 +10,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import de.sudoq.R
 import de.sudoq.model.game.Game
 import de.sudoq.view.SudokuLayout
-import de.sudoq.view.VirtualKeyboardLayout
 import android.view.Gravity
 
 /**
@@ -34,7 +35,18 @@ data class SudokuGameState(
     val hintText: String? = null,
     val hintHasExecute: Boolean = false,
     val onHintContinue: (() -> Unit)? = null,
-    val onHintExecute: (() -> Unit)? = null
+    val onHintExecute: (() -> Unit)? = null,
+    val keyboardButtons: List<KeyboardButtonState> = emptyList()
+)
+
+/**
+ * State for a keyboard button
+ */
+data class KeyboardButtonState(
+    val symbol: Int,
+    val displayText: String,
+    val isEnabled: Boolean = true,
+    val showCheckmark: Boolean = false
 )
 
 /**
@@ -45,7 +57,6 @@ data class SudokuGameState(
 fun SudokuScreen(
     state: SudokuGameState,
     sudokuLayout: SudokuLayout,
-    keyboardLayout: VirtualKeyboardLayout,
     onBackClick: () -> Unit,
     onMenuClick: (SudokuMenuItem) -> Unit,
     onActionTreeToggle: () -> Unit,
@@ -54,6 +65,7 @@ fun SudokuScreen(
     onHintClick: () -> Unit,
     onSolveClick: () -> Unit,
     onNoteToggle: () -> Unit,
+    onKeyboardInput: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -205,14 +217,10 @@ fun SudokuScreen(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             } else {
-                // Show virtual keyboard
-                AndroidView(
-                    factory = { context ->
-                        android.util.Log.d("SudokuScreen", "AndroidView factory: returning existing keyboard view")
-                        // Don't refresh here! The keyboard is already initialized in SudokuActivity
-                        // Refreshing would recreate buttons and lose the registered listeners
-                        keyboardLayout
-                    },
+                // Show virtual keyboard (Material Design Compose version)
+                ComposeKeyboard(
+                    buttons = state.keyboardButtons,
+                    onButtonClick = onKeyboardInput,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
@@ -395,5 +403,88 @@ private fun formatTime(milliseconds: Long): String {
         String.format("%02d:%02d:%02d", hours, minutes, seconds)
     } else {
         String.format("%02d:%02d", minutes, seconds)
+    }
+}
+
+/**
+ * Material Design Compose keyboard for Sudoku input
+ */
+@Composable
+fun ComposeKeyboard(
+    buttons: List<KeyboardButtonState>,
+    onButtonClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (buttons.isEmpty()) return
+    
+    // Calculate grid dimensions (3x3 for 9 buttons, 4x4 for 16, etc.)
+    val totalSymbols = buttons.size
+    val gridSize = kotlin.math.ceil(kotlin.math.sqrt(totalSymbols.toDouble())).toInt()
+    
+    Surface(
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Create rows
+            for (row in 0 until gridSize) {
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Create columns
+                    for (col in 0 until gridSize) {
+                        val index = row * gridSize + col
+                        if (index < buttons.size) {
+                            val button = buttons[index]
+                            FilledTonalButton(
+                                onClick = { 
+                                    if (button.isEnabled) {
+                                        onButtonClick(button.symbol)
+                                    }
+                                },
+                                enabled = button.isEnabled,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    .alpha(if (button.isEnabled) 1f else 0.3f),  // Fade out disabled buttons
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = if (button.showCheckmark) {
+                                        MaterialTheme.colorScheme.tertiaryContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.secondaryContainer
+                                    },
+                                    contentColor = if (button.showCheckmark) {
+                                        MaterialTheme.colorScheme.onTertiaryContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.onSecondaryContainer
+                                    },
+                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                ),
+                                shape = MaterialTheme.shapes.medium
+                            ) {
+                                Text(
+                                    text = if (button.showCheckmark) "✓" else button.displayText,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontSize = 24.sp
+                                )
+                            }
+                        } else {
+                            // Empty spacer for incomplete grid
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+        }
     }
 }

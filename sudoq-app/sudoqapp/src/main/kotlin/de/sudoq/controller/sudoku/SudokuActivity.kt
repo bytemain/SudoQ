@@ -153,6 +153,18 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
     )
     
     private var currentHintState: HintState? = null
+    
+    /**
+     * Trigger to force keyboard update in Compose
+     */
+    private var keyboardUpdateTrigger = mutableStateOf(0)
+    
+    /**
+     * Request keyboard update (call this when cell selection changes)
+     */
+    fun requestKeyboardUpdate() {
+        keyboardUpdateTrigger.value++
+    }
 
     /**
      * Der Handler für die Zeit
@@ -281,10 +293,24 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
             setContent {
                 MaterialTheme {
                     var hintState by remember { mutableStateOf<HintState?>(null) }
+                    var keyboardButtons by remember { mutableStateOf<List<KeyboardButtonState>>(emptyList()) }
+                    val keyboardTrigger by keyboardUpdateTrigger
                     
                     // Update hint state when currentHintState changes
                     LaunchedEffect(currentHintState) {
                         hintState = currentHintState
+                    }
+                    
+                    // Initialize keyboard buttons
+                    LaunchedEffect(Unit) {
+                        keyboardButtons = getKeyboardButtonStates()
+                    }
+                    
+                    // Update keyboard when trigger changes
+                    LaunchedEffect(keyboardTrigger) {
+                        if (keyboardTrigger > 0) {
+                            keyboardButtons = getKeyboardButtonStates()
+                        }
                     }
                     
                     val gameState = remember {
@@ -297,7 +323,8 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                                 hintText = hintState?.text,
                                 hintHasExecute = hintState?.hasExecute ?: false,
                                 onHintContinue = hintState?.onContinue,
-                                onHintExecute = hintState?.onExecute
+                                onHintExecute = hintState?.onExecute,
+                                keyboardButtons = keyboardButtons
                             )
                         )
                     }
@@ -309,6 +336,13 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                             hintHasExecute = hintState?.hasExecute ?: false,
                             onHintContinue = hintState?.onContinue,
                             onHintExecute = hintState?.onExecute
+                        )
+                    }
+                    
+                    // Update game state when keyboard buttons change
+                    LaunchedEffect(keyboardButtons) {
+                        gameState.value = gameState.value.copy(
+                            keyboardButtons = keyboardButtons
                         )
                     }
                     
@@ -326,7 +360,6 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                     SudokuScreen(
                         state = gameState.value,
                         sudokuLayout = sudokuLayout!!,
-                        keyboardLayout = keyboardView,
                         onBackClick = {
                             onBackPressed()
                         },
@@ -351,12 +384,12 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                         },
                         onUndoClick = {
                             sudokuController!!.onUndo()
-                            mediator?.updateKeyboard()
+                            keyboardButtons = getKeyboardButtonStates()
                             updateButtons()
                         },
                         onRedoClick = {
                             sudokuController!!.onRedo()
-                            mediator?.updateKeyboard()
+                            keyboardButtons = getKeyboardButtonStates()
                             updateButtons()
                         },
                         onHintClick = {
@@ -365,12 +398,18 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                         onSolveClick = {
                             // Fill all candidates
                             sudokuController!!.fillAllCandidates()
-                            mediator?.updateKeyboard()
+                            keyboardButtons = getKeyboardButtonStates()
                             updateButtons()
                             Toast.makeText(this@SudokuActivity, R.string.sf_sudoku_fill_candidates_success, Toast.LENGTH_SHORT).show()
                         },
                         onNoteToggle = {
                             mediator?.toggleNoteMode()
+                            keyboardButtons = getKeyboardButtonStates()
+                        },
+                        onKeyboardInput = { symbol ->
+                            mediator?.onInput(symbol)
+                            keyboardButtons = getKeyboardButtonStates()
+                            updateButtons()
                         }
                     )
                 }
@@ -388,6 +427,11 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
             )
             mediator!!.registerListener(sudokuController!!)
             mediator!!.registerListener(this)
+            
+            // Set up callback for keyboard updates in Compose
+            mediator!!.onKeyboardUpdateNeeded = {
+                requestKeyboardUpdate()
+            }
             
             // Set up debug logger for auto-fill and model classes
             val debugLoggerFn: (String, String, Boolean) -> Unit = { tag, message, isError ->
@@ -828,6 +872,62 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
     fun setModeRegular() {
         mode = Mode.Regular
         currentHintState = null
+    }
+    
+    /**
+     * Get keyboard button states for Compose UI
+     */
+    private fun getKeyboardButtonStates(): List<KeyboardButtonState> {
+        val buttons = mutableListOf<KeyboardButtonState>()
+        val currentField = sudokuLayout!!.currentCellView
+        val noteMode = mediator?.isNoteMode() ?: false
+        
+        if (game == null || game!!.sudoku == null) {
+            return buttons
+        }
+        
+        // Get restricted symbol set if input assistance is enabled
+        val restrictedSymbols = if (currentField != null && game!!.isAssistanceAvailable(Assistances.restrictCandidates)) {
+            mediator?.getRestrictedSymbolSet(game!!.sudoku, currentField.cell, noteMode) ?: emptySet()
+        } else {
+            null  // null means no restriction, all symbols available
+        }
+        
+        for (i in game!!.sudoku!!.sudokuType!!.symbolIterator) {
+            // Check if button should be enabled based on restrictCandidates
+            val isRestricted = if (restrictedSymbols != null) {
+                !restrictedSymbols.contains(i)
+            } else {
+                false  // No restriction when assistance is disabled
+            }
+            
+            val isSelected = if (currentField != null) {
+                if (noteMode) {
+                    currentField.cell.isNoteSet(i)
+                } else {
+                    i == currentField.cell.currentValue
+                }
+            } else {
+                false
+            }
+            
+            // Check if the symbol is completed and show checkmark if the assistance is enabled
+            val showCheckmarksEnabled = game!!.isAssistanceAvailable(Assistances.showCompletedDigits)
+            val isCompleted = showCheckmarksEnabled && game!!.sudoku!!.isSymbolCompleted(i)
+            
+            val displayText = Symbol.getInstance().getMapping(i)
+            
+            buttons.add(
+                KeyboardButtonState(
+                    symbol = i,
+                    displayText = displayText,
+                    isEnabled = !finished && !isRestricted,  // Disable if game finished or restricted
+                    showCheckmark = isCompleted
+                )
+            )
+        }
+        
+        return buttons
     }
     
     /**

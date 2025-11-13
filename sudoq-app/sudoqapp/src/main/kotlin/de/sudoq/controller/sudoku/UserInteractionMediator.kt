@@ -50,6 +50,18 @@ class UserInteractionMediator(
      * Flag für den Notizmodus.
      */
     private var noteMode = false
+    
+    /**
+     * Callback to notify when keyboard needs to be updated (for Compose UI)
+     */
+    var onKeyboardUpdateNeeded: (() -> Unit)? = null
+    
+    /**
+     * Returns whether note mode is currently active
+     */
+    fun isNoteMode(): Boolean {
+        return noteMode
+    }
 
     /**
      * Die SudokuView, die die Anzeige eines Sudokus mit seinen Feldern
@@ -411,6 +423,7 @@ class UserInteractionMediator(
 
         if (currentField == null) {
             virtualKeyboard.reset()
+            onKeyboardUpdateNeeded?.invoke()
             return
         }
         
@@ -430,6 +443,9 @@ class UserInteractionMediator(
         }
         virtualKeyboard.invalidate()
         virtualKeyboard.requestLayout()
+        
+        // Notify Compose UI to update keyboard
+        onKeyboardUpdateNeeded?.invoke()
     }
 
     override fun notifyListener() {}
@@ -606,7 +622,7 @@ class UserInteractionMediator(
        caution
           */
     @Synchronized
-    private fun getRestrictedSymbolSet(
+    fun getRestrictedSymbolSet(
         s: Sudoku?, currentCell: Cell,
         noteMode: Boolean
     ): Set<Int> {
@@ -655,13 +671,6 @@ class UserInteractionMediator(
         noteMode = !noteMode
         sudokuView?.currentCellView?.setNoteState(noteMode)
         Log.d(LOG_TAG, "Note mode toggled to: $noteMode")
-    }
-
-    /**
-     * Gets the current note mode state
-     */
-    fun isNoteMode(): Boolean {
-        return noteMode
     }
 
     /**
