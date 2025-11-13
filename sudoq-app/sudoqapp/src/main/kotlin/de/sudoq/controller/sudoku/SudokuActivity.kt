@@ -57,6 +57,8 @@ import de.sudoq.persistence.profile.ProfileRepo
 import de.sudoq.persistence.profile.ProfilesListRepo
 import de.sudoq.persistence.sudokuType.SudokuTypeRepo
 import de.sudoq.view.*
+import de.sudoq.view.theme.SudoQTheme
+import de.sudoq.view.theme.ThemeManager
 import java.io.*
 import kotlin.math.abs
 
@@ -291,7 +293,13 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
             
             // Use Compose for UI
             setContent {
-                MaterialTheme {
+                val themeColor = ThemeManager.loadThemeColor(this)
+                val darkMode = ThemeManager.loadDarkMode(this)
+                
+                SudoQTheme(
+                    themeColor = themeColor,
+                    darkTheme = darkMode
+                ) {
                     var hintState by remember { mutableStateOf<HintState?>(null) }
                     var keyboardButtons by remember { mutableStateOf<List<KeyboardButtonState>>(emptyList()) }
                     val keyboardTrigger by keyboardUpdateTrigger
@@ -1007,7 +1015,13 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
         // Create a dialog using Jetpack Compose
         val dialogFragment = androidx.compose.ui.platform.ComposeView(this).apply {
             setContent {
-                MaterialTheme {
+                val themeColor = ThemeManager.loadThemeColor(context)
+                val darkMode = ThemeManager.loadDarkMode(context)
+                
+                SudoQTheme(
+                    themeColor = themeColor,
+                    darkTheme = darkMode
+                ) {
                     var showDialog by remember { mutableStateOf(true) }
                     
                     if (showDialog) {
