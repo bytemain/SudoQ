@@ -2,7 +2,6 @@
 <resources>
     <string name="profile_preference_title">User Preferences</string>
     <string name="profile_preference_title_name">Name</string>
-    <string name="profile_preference_title_gesture">Gesture Input</string>
     <string name="profile_preference_title_intelligent_assistant">Enable Hints &amp; Assistance</string>
     <string name="profile_preference_title_left_hand_mode">Left-handed mode</string>
     <string name="profile_preference_title_cat_profile">Profile-Settings</string>
@@ -18,7 +17,6 @@
     <string name="profile_preference_title_assistance_showCompletedDigits">Show Checkmark for Completed Digits</string>
     <string name="profile_preference_title_profile">Profile</string>
     <string name="profile_preference_button_statistics">Statistics</string>
-    <string name="profile_preference_button_gesture_builder">Gesture Builder</string>
     <string name="profile_preference_button_save">Save</string>
     <string name="profile_preference_button_advanced_preferences">Advanced Settings</string>
     <string name="profile_preference_button_provide_restricted_set_of_types">Select which types are offered</string>

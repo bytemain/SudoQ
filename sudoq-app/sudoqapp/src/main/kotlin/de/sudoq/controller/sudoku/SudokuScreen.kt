@@ -135,16 +135,6 @@ fun SudokuScreen(
                                 Icon(Icons.Default.Add, contentDescription = null)
                             }
                         )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.gesture_builder_title)) },
-                            onClick = {
-                                showMenu = false
-                                onMenuClick(SudokuMenuItem.Gestures)
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Default.TouchApp, contentDescription = null)
-                            }
-                        )
                     }
                 }
             )
@@ -387,8 +377,7 @@ fun HintPanel(
  */
 enum class SudokuMenuItem {
     Settings,
-    NewGame,
-    Gestures
+    NewGame
 }
 
 /**

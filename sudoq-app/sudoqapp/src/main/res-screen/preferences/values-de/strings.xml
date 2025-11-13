@@ -2,7 +2,6 @@
 <resources>
     <string name="profile_preference_title">Benutzereinstellungen</string>
     <string name="profile_preference_title_name">Name</string>
-    <string name="profile_preference_title_gesture">Gesteneingabe</string>
     <string name="profile_preference_title_left_hand_mode">Linkshänder-Modus</string>
     <string name="profile_preference_title_cat_profile">Profileinstellungen</string>
     <string name="profile_preference_title_cat_assistances">Hilfestellungen</string>
@@ -17,7 +16,6 @@
     <string name="profile_preference_title_assistance_showCompletedDigits">Häkchen für vollständige Ziffern anzeigen</string>
     <string name="profile_preference_title_profile">Profil</string>
     <string name="profile_preference_button_statistics">Statistik</string>
-    <string name="profile_preference_button_gesture_builder">Gesten definieren</string>
     <string name="profile_preference_button_save">Speichern</string>
     <string name="profile_preference_button_advanced_preferences">Erweiterte Einstellungen</string>
     <string name="profile_preference_button_provide_restricted_set_of_types">Auswahl der Typen beschränken</string>
