@@ -29,7 +29,6 @@ import de.sudoq.R
  */
 data class PlayerPreferencesData(
     val profileName: String,
-    val gestureActive: Boolean,
     val autoAdjustNotes: Boolean,
     val markRowColumn: Boolean,
     val markWrongSymbol: Boolean,
@@ -49,7 +48,6 @@ data class PlayerPreferencesData(
 fun PlayerPreferencesScreen(
     data: PlayerPreferencesData,
     onProfileNameChange: (String) -> Unit,
-    onGestureChange: (Boolean) -> Unit,
     onAutoAdjustNotesChange: (Boolean) -> Unit,
     onMarkRowColumnChange: (Boolean) -> Unit,
     onMarkWrongSymbolChange: (Boolean) -> Unit,
@@ -133,12 +131,6 @@ fun PlayerPreferencesScreen(
                 text = stringResource(R.string.profile_preference_title_cat_assistances),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
-            )
-            
-            PreferenceCheckbox(
-                label = stringResource(R.string.profile_preference_title_gesture),
-                checked = data.gestureActive,
-                onCheckedChange = onGestureChange
             )
             
             PreferenceCheckbox(
@@ -235,7 +227,6 @@ private fun PlayerPreferencesScreenPreview() {
         PlayerPreferencesScreen(
             data = PlayerPreferencesData(
                 profileName = "Profile 1",
-                gestureActive = true,
                 autoAdjustNotes = true,
                 markRowColumn = false,
                 markWrongSymbol = true,
@@ -247,7 +238,6 @@ private fun PlayerPreferencesScreenPreview() {
                 canSwitchProfile = true
             ),
             onProfileNameChange = {},
-            onGestureChange = {},
             onAutoAdjustNotesChange = {},
             onMarkRowColumnChange = {},
             onMarkWrongSymbolChange = {},

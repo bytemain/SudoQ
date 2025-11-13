@@ -56,10 +56,6 @@ class PlayerPreferencesActivity : PreferencesActivity() {
                         profile.name = newName
                         preferencesData = preferencesData.copy(profileName = newName)
                     },
-                    onGestureChange = { value ->
-                        profile.isGestureActive = value
-                        preferencesData = preferencesData.copy(gestureActive = value)
-                    },
                     onAutoAdjustNotesChange = { value ->
                         profile.setAssistance(Assistances.autoAdjustNotes, value)
                         preferencesData = preferencesData.copy(autoAdjustNotes = value)
@@ -135,7 +131,6 @@ class PlayerPreferencesActivity : PreferencesActivity() {
         
         return PlayerPreferencesData(
             profileName = profile.name ?: "",
-            gestureActive = profile.isGestureActive,
             autoAdjustNotes = profile.getAssistance(Assistances.autoAdjustNotes),
             markRowColumn = profile.getAssistance(Assistances.markRowColumn),
             markWrongSymbol = profile.getAssistance(Assistances.markWrongSymbol),
