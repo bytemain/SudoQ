@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -12,9 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.content.res.Configuration
 import de.sudoq.R
 
 data class MainScreenState(
@@ -37,6 +41,9 @@ fun MainScreen(
     onStatisticsClick: () -> Unit,
     onTutorialClick: () -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -72,40 +79,84 @@ fun MainScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Continue Game Card
-            if (state.hasCurrentGame) {
-                item {
-                    ContinueGameCard(
-                        progress = state.currentGameProgress,
-                        onClick = onContinueGameClick
+        if (isLandscape) {
+            // Landscape: Two columns
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (state.hasCurrentGame) {
+                        ContinueGameCard(
+                            progress = state.currentGameProgress,
+                            onClick = onContinueGameClick
+                        )
+                    }
+                    QuickActionsSection(
+                        onLoadGameClick = onLoadGameClick,
+                        onStatisticsClick = onStatisticsClick,
+                        onTutorialClick = onTutorialClick
+                    )
+                }
+                
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                ) {
+                    StatisticsOverviewCard(
+                        gamesPlayed = state.gamesPlayed,
+                        gamesWon = state.gamesWon,
+                        currentScore = state.currentScore,
+                        onClick = onStatisticsClick
                     )
                 }
             }
+        } else {
+            // Portrait: Single column
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Continue Game Card
+                if (state.hasCurrentGame) {
+                    item {
+                        ContinueGameCard(
+                            progress = state.currentGameProgress,
+                            onClick = onContinueGameClick
+                        )
+                    }
+                }
 
-            // Quick Actions
-            item {
-                QuickActionsSection(
-                    onLoadGameClick = onLoadGameClick,
-                    onStatisticsClick = onStatisticsClick,
-                    onTutorialClick = onTutorialClick
-                )
-            }
+                // Quick Actions
+                item {
+                    QuickActionsSection(
+                        onLoadGameClick = onLoadGameClick,
+                        onStatisticsClick = onStatisticsClick,
+                        onTutorialClick = onTutorialClick
+                    )
+                }
 
-            // Statistics Overview
-            item {
-                StatisticsOverviewCard(
-                    gamesPlayed = state.gamesPlayed,
-                    gamesWon = state.gamesWon,
-                    currentScore = state.currentScore,
-                    onClick = onStatisticsClick
-                )
+                // Statistics Overview
+                item {
+                    StatisticsOverviewCard(
+                        gamesPlayed = state.gamesPlayed,
+                        gamesWon = state.gamesWon,
+                        currentScore = state.currentScore,
+                        onClick = onStatisticsClick
+                    )
+                }
             }
         }
     }

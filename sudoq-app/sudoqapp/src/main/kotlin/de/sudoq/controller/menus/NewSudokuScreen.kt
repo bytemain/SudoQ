@@ -10,10 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.content.res.Configuration
 import de.sudoq.R
 import de.sudoq.model.sudoku.complexity.Complexity
 import de.sudoq.model.sudoku.sudokuTypes.SudokuTypes
@@ -35,6 +37,9 @@ fun NewSudokuScreen(
     onNavigateToSettings: () -> Unit,
     onBackClick: () -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -60,47 +65,107 @@ fun NewSudokuScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            // Sudoku Type Selection
-            SudokuTypeSection(
-                availableTypes = state.availableTypes,
-                selectedType = state.selectedType,
-                onTypeSelected = onTypeSelected
-            )
-            
-            // Complexity Selection
-            ComplexitySection(
-                selectedComplexity = state.selectedComplexity,
-                onComplexitySelected = onComplexitySelected
-            )
-            
-            Spacer(modifier = Modifier.weight(1f))
-            
-            // Start Game Button
-            Button(
-                onClick = onStartGame,
+        if (isLandscape) {
+            // Landscape: Side by side layout
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                enabled = state.selectedType != null && state.selectedComplexity != null && !state.isLoading
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    SudokuTypeSection(
+                        availableTypes = state.availableTypes,
+                        selectedType = state.selectedType,
+                        onTypeSelected = onTypeSelected
                     )
-                } else {
-                    Text(
-                        text = stringResource(R.string.sf_sudokupreferences_start),
-                        style = MaterialTheme.typography.labelLarge
+                }
+                
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    ComplexitySection(
+                        selectedComplexity = state.selectedComplexity,
+                        onComplexitySelected = onComplexitySelected
                     )
+                    
+                    Spacer(modifier = Modifier.weight(1f))
+                    
+                    Button(
+                        onClick = onStartGame,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        enabled = state.selectedType != null && state.selectedComplexity != null && !state.isLoading
+                    ) {
+                        if (state.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.sf_sudokupreferences_start),
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            // Portrait: Single column
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                // Sudoku Type Selection
+                SudokuTypeSection(
+                    availableTypes = state.availableTypes,
+                    selectedType = state.selectedType,
+                    onTypeSelected = onTypeSelected
+                )
+                
+                // Complexity Selection
+                ComplexitySection(
+                    selectedComplexity = state.selectedComplexity,
+                    onComplexitySelected = onComplexitySelected
+                )
+                
+                Spacer(modifier = Modifier.weight(1f))
+                
+                // Start Game Button
+                Button(
+                    onClick = onStartGame,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    enabled = state.selectedType != null && state.selectedComplexity != null && !state.isLoading
+                ) {
+                    if (state.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.sf_sudokupreferences_start),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
                 }
             }
         }

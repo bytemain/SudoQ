@@ -12,11 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import android.content.res.Configuration
 import de.sudoq.R
 import de.sudoq.model.game.Game
 import de.sudoq.model.sudoku.complexity.Complexity
@@ -85,6 +87,8 @@ fun SudokuScreen(
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     
     Scaffold(
         topBar = {
@@ -157,81 +161,169 @@ fun SudokuScreen(
         },
         modifier = modifier
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            // Sudoku Board - takes most of the space
-            var boardWidth by remember { mutableStateOf(0) }
-            var boardHeight by remember { mutableStateOf(0) }
-            
-            Box(
+        if (isLandscape) {
+            // Landscape layout: Board on left, controls and keyboard on right
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .onGloballyPositioned { coordinates ->
-                        val newWidth = coordinates.size.width
-                        val newHeight = coordinates.size.height
-                        if (newWidth > 0 && newHeight > 0 && (newWidth != boardWidth || newHeight != boardHeight)) {
-                            boardWidth = newWidth
-                            boardHeight = newHeight
-                            android.util.Log.d("SudokuScreen", "Box sized: width=$boardWidth, height=$boardHeight")
-                        }
-                    }
+                    .fillMaxSize()
+                    .padding(paddingValues)
             ) {
-                if (boardWidth > 0 && boardHeight > 0) {
-                    AndroidView(
-                        factory = { context ->
-                            android.util.Log.d("SudokuScreen", "AndroidView factory called with width=$boardWidth, height=$boardHeight")
-                            sudokuLayout.apply {
-                                post {
-                                    android.util.Log.d("SudokuScreen", "Calling optiZoom with width=$boardWidth, height=$boardHeight")
-                                    optiZoom(boardWidth, boardHeight)
-                                }
+                // Sudoku Board - takes 60% of width
+                var boardWidth by remember { mutableStateOf(0) }
+                var boardHeight by remember { mutableStateOf(0) }
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(0.6f)
+                        .onGloballyPositioned { coordinates ->
+                            val newWidth = coordinates.size.width
+                            val newHeight = coordinates.size.height
+                            if (newWidth > 0 && newHeight > 0 && (newWidth != boardWidth || newHeight != boardHeight)) {
+                                boardWidth = newWidth
+                                boardHeight = newHeight
+                                android.util.Log.d("SudokuScreen", "Box sized (landscape): width=$boardWidth, height=$boardHeight")
                             }
-                        },
-                        modifier = Modifier.fillMaxSize()
+                        }
+                ) {
+                    if (boardWidth > 0 && boardHeight > 0) {
+                        AndroidView(
+                            factory = { context ->
+                                android.util.Log.d("SudokuScreen", "AndroidView factory called (landscape)")
+                                sudokuLayout.apply {
+                                    post {
+                                        android.util.Log.d("SudokuScreen", "Calling optiZoom (landscape)")
+                                        optiZoom(boardWidth, boardHeight)
+                                    }
+                                }
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+                
+                // Right side: Controls and Keyboard
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(0.4f)
+                        .padding(start = 8.dp)
+                ) {
+                    // Control Panel
+                    SudokuControlPanel(
+                        onUndoClick = onUndoClick,
+                        onRedoClick = onRedoClick,
+                        onHintClick = onHintClick,
+                        onSolveClick = onSolveClick,
+                        onNoteToggle = onNoteToggle,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .padding(horizontal = 4.dp, vertical = 4.dp)
                     )
+                    
+                    // Virtual Keyboard or Hint Panel
+                    if (state.hintText != null) {
+                        HintPanel(
+                            text = state.hintText,
+                            showExecute = state.hintHasExecute,
+                            onContinue = state.onHintContinue ?: {},
+                            onExecute = state.onHintExecute ?: {},
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(horizontal = 4.dp, vertical = 4.dp)
+                        )
+                    } else {
+                        ComposeKeyboard(
+                            buttons = state.keyboardButtons,
+                            onButtonClick = onKeyboardInput,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(horizontal = 4.dp, vertical = 4.dp)
+                        )
+                    }
                 }
             }
-            
-            // Control Panel
-            SudokuControlPanel(
-                onUndoClick = onUndoClick,
-                onRedoClick = onRedoClick,
-                onHintClick = onHintClick,
-                onSolveClick = onSolveClick,
-                onNoteToggle = onNoteToggle,
+        } else {
+            // Portrait layout: Board on top, controls and keyboard below
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            )
-            
-            // Virtual Keyboard or Hint Panel
-            if (state.hintText != null) {
-                // Show hint panel in keyboard area
-                HintPanel(
-                    text = state.hintText,
-                    showExecute = state.hintHasExecute,
-                    onContinue = state.onHintContinue ?: {},
-                    onExecute = state.onHintExecute ?: {},
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                // Sudoku Board - takes most of the space
+                var boardWidth by remember { mutableStateOf(0) }
+                var boardHeight by remember { mutableStateOf(0) }
+                
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp)
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            } else {
-                // Show virtual keyboard (Material Design Compose version)
-                ComposeKeyboard(
-                    buttons = state.keyboardButtons,
-                    onButtonClick = onKeyboardInput,
+                        .weight(1f)
+                        .onGloballyPositioned { coordinates ->
+                            val newWidth = coordinates.size.width
+                            val newHeight = coordinates.size.height
+                            if (newWidth > 0 && newHeight > 0 && (newWidth != boardWidth || newHeight != boardHeight)) {
+                                boardWidth = newWidth
+                                boardHeight = newHeight
+                                android.util.Log.d("SudokuScreen", "Box sized (portrait): width=$boardWidth, height=$boardHeight")
+                            }
+                        }
+                ) {
+                    if (boardWidth > 0 && boardHeight > 0) {
+                        AndroidView(
+                            factory = { context ->
+                                android.util.Log.d("SudokuScreen", "AndroidView factory called (portrait)")
+                                sudokuLayout.apply {
+                                    post {
+                                        android.util.Log.d("SudokuScreen", "Calling optiZoom (portrait)")
+                                        optiZoom(boardWidth, boardHeight)
+                                    }
+                                }
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+                
+                // Control Panel
+                SudokuControlPanel(
+                    onUndoClick = onUndoClick,
+                    onRedoClick = onRedoClick,
+                    onHintClick = onHintClick,
+                    onSolveClick = onSolveClick,
+                    onNoteToggle = onNoteToggle,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp)
+                        .height(64.dp)
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
+                
+                // Virtual Keyboard or Hint Panel
+                if (state.hintText != null) {
+                    // Show hint panel in keyboard area
+                    HintPanel(
+                        text = state.hintText,
+                        showExecute = state.hintHasExecute,
+                        onContinue = state.onHintContinue ?: {},
+                        onExecute = state.onHintExecute ?: {},
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                } else {
+                    // Show virtual keyboard (Material Design Compose version)
+                    ComposeKeyboard(
+                        buttons = state.keyboardButtons,
+                        onButtonClick = onKeyboardInput,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
             }
         }
     }
