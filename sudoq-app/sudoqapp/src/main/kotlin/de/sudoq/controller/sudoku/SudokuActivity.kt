@@ -66,21 +66,13 @@ import kotlin.math.abs
  * Spielfeld zu reagieren. Die Klasse wird außerdem benutzt um zu verwalten,
  * welche Navigationselemente dem Nutzer angezeigt werden.
  */
-class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListener,
-    ActionTreeNavListener {
+class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListener {
 
     private lateinit var profilesFile: File
     private lateinit var sudokuFile: File
 
     private lateinit var sudokuTypeRepo: SudokuTypeRepo
     private lateinit var gameManager: GameManager
-
-    /**
-     * Eine Referenz auf einen ActionTreeController, der die Verwaltung der
-     * ActionTree-Anzeige und Benutzerinteraktion übernimmt
-     */
-    var actionTreeController: ActionTreeController? = null
-        private set
 
     /**
      * Eine Referenz auf einen SudokuController, der Nutzereingaben verwaltet
@@ -252,8 +244,7 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
             // Initialize controllers
             sudokuController = SudokuController(game!!, this)
             // TODO: ActionTreeController needs to be reimplemented for Compose
-            // actionTreeController = ActionTreeController(this)
-            actionTreeController = null
+
             Log.d(LOG_TAG, "Initialized")
             
             // Initialize views with proper styling
@@ -398,6 +389,21 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                             }
                             keyboardButtons = getKeyboardButtonStates()
                             updateButtons()
+                        },
+                        onActionTreeBookmarkToggle = { targetElement ->
+                            // Toggle bookmark on the selected element
+                            if (targetElement.isMarked) {
+                                // Unmark is not implemented in ActionTreeElement, so we'll just mark it again
+                                // In future, could add an unmark() method
+                                targetElement.mark()
+                            } else {
+                                targetElement.mark()
+                            }
+                            // Refresh action tree to show updated bookmark state
+                            gameState.value = gameState.value.copy(
+                                isActionTreeShown = isActionTreeShown
+                            )
+
                         },
                         onUndoClick = {
                             sudokuController!!.onUndo()
@@ -1054,14 +1060,14 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
     /**
      * {@inheritDoc}
      */
-    override fun onHoverTreeElement(ate: ActionTreeElement) {
+     fun onHoverTreeElement(ate: ActionTreeElement) {
         updateButtons()
     }
 
     /**
      * {@inheritDoc}
      */
-    override fun onLoadState(ate: ActionTreeElement) {
+     fun onLoadState(ate: ActionTreeElement) {
         updateButtons()
     }
 

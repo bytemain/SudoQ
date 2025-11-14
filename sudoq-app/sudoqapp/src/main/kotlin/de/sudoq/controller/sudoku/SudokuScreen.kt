@@ -81,6 +81,7 @@ fun SudokuScreen(
     onMenuClick: (SudokuMenuItem) -> Unit,
     onActionTreeToggle: () -> Unit,
     onActionTreeNavigate: (de.sudoq.model.actionTree.ActionTreeElement) -> Unit,
+    onActionTreeBookmarkToggle: ((de.sudoq.model.actionTree.ActionTreeElement) -> Unit)? = null,
     onUndoClick: () -> Unit,
     onRedoClick: () -> Unit,
     onHintClick: () -> Unit,
@@ -172,6 +173,7 @@ fun SudokuScreen(
                     actionTree = stateHandler.actionTree.root,
                     currentElement = stateHandler.currentState,
                     onActionClick = onActionTreeNavigate,
+                    onToggleBookmark = onActionTreeBookmarkToggle,
                     onClose = onActionTreeToggle
                 )
             }
