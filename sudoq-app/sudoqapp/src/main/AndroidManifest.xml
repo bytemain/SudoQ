@@ -16,7 +16,6 @@
         <activity android:name=".controller.menus.NewSudokuActivity" android:label="@string/sf_sudokupreferences_title" />
         <activity android:name=".controller.menus.SudokuLoadingActivity" android:configChanges="orientation" android:label="@string/sf_sudokuloading_title" android:noHistory="true" />
 
-        <activity android:name=".controller.menus.GestureBuilder" android:label="@string/gesture_builder_title" />
         <activity android:name=".controller.sudoku.SudokuActivity" />
         <activity android:name=".controller.test.ComposeTestActivity" android:label="Compose Test" android:exported="false" />
         <activity android:name=".controller.menus.preferences.PlayerPreferencesActivity" android:label="@string/profile_preference_title" android:windowSoftInputMode="stateHidden" />

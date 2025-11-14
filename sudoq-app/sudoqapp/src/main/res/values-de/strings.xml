@@ -36,8 +36,6 @@
     <string name="action_new_profile">Neues Profil erstellen</string>
     <string name="action_delete_profile">Dieses Profil löschen</string>
     <string name="action_switch_profile">Profil wechseln</string>
-    <string name="action_delete_all_gestures">Alle Gesten löschen</string>
-    <string name="action_delete_single_gesture">Spezifische Geste löschen</string>
     <string name="action_restore_all">Alle wiederherstellen</string>
 
 
@@ -72,10 +70,6 @@
 	<string name="player_preferences_button_changeprofile">Profil wechseln</string>
 	
 
-    <!-- GestureBuilder -->
-    <string name="gesture_builder_title">Gesten definieren</string>
-    <string name="gesture_builder_define_gesture">Zeichne die gewünschte Geste</string>
-    
     <!-- GameTypeSelection Buttons -->
     <string name="sf_gametypeselection_local_sudoku">Sudoku</string>
     <string name="sf_gametypeselection_server_sudoku">Offizielles Sudoku</string>

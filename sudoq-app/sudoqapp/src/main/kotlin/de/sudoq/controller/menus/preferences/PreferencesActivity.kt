@@ -6,7 +6,6 @@ import android.widget.Button
 import android.widget.CheckBox
 import de.sudoq.R
 import de.sudoq.controller.SudoqCompatActivity
-import de.sudoq.controller.menus.GestureBuilder
 import de.sudoq.model.ModelChangeListener
 import de.sudoq.model.game.Assistances
 import de.sudoq.model.game.GameSettings
@@ -36,17 +35,6 @@ abstract class PreferencesActivity : SudoqCompatActivity(), ModelChangeListener<
     public override fun onPause() {
         super.onPause()
         adjustValuesAndSave()
-    }
-
-    /**
-     * Öffnet den GestureBuilder.
-     *
-     * @param view
-     * unbenutzt
-     */
-    fun openGestureBuilder(view: View?) {
-        val gestureBuilderIntent = Intent(this, GestureBuilder::class.java)
-        startActivity(gestureBuilderIntent)
     }
 
     /**

@@ -380,10 +380,6 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                                     // Go back to main menu for new game
                                     finish()
                                 }
-                                SudokuMenuItem.Gestures -> {
-                                    // Show gesture management
-                                    Toast.makeText(this@SudokuActivity, "Gesture management coming soon", Toast.LENGTH_SHORT).show()
-                                }
                             }
                         },
                         onActionTreeToggle = {

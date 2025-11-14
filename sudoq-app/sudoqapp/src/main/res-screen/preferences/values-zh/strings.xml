@@ -2,7 +2,6 @@
 <resources>
     <string name="profile_preference_title">用户设置</string>
     <string name="profile_preference_title_name">名称</string>
-    <string name="profile_preference_title_gesture">手势输入</string>
     <string name="profile_preference_title_intelligent_assistant">启用提示与辅助</string>
     <string name="profile_preference_title_left_hand_mode">左手模式</string>
     <string name="profile_preference_title_cat_profile">配置文件设置</string>
@@ -18,7 +17,6 @@
     <string name="profile_preference_title_assistance_showCompletedDigits">为完成的数字显示对勾</string>
     <string name="profile_preference_title_profile">配置文件</string>
     <string name="profile_preference_button_statistics">统计</string>
-    <string name="profile_preference_button_gesture_builder">手势构建器</string>
     <string name="profile_preference_button_save">保存</string>
     <string name="profile_preference_button_advanced_preferences">高级设置</string>
     <string name="profile_preference_button_provide_restricted_set_of_types">选择提供的类型</string>
