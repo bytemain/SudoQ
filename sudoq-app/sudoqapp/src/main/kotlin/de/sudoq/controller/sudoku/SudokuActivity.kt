@@ -329,6 +329,7 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                         mutableStateOf(
                             SudokuGameState(
                                 game = game!!,
+                                complexity = game!!.sudoku?.complexity,
                                 isActionTreeShown = isActionTreeShown,
                                 isFinished = finished,
                                 elapsedTime = game!!.time.toLong() * 1000,

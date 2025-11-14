@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import de.sudoq.R
 import de.sudoq.model.game.Game
+import de.sudoq.model.sudoku.complexity.Complexity
 import de.sudoq.view.SudokuLayout
 import android.view.Gravity
 
@@ -27,6 +28,7 @@ import android.view.Gravity
  */
 data class SudokuGameState(
     val game: Game,
+    val complexity: Complexity? = null,
     val isActionTreeShown: Boolean = false,
     val isFinished: Boolean = false,
     val elapsedTime: Long = 0,
@@ -48,6 +50,20 @@ data class KeyboardButtonState(
     val isEnabled: Boolean = true,
     val showCheckmark: Boolean = false
 )
+
+/**
+ * Get the string resource ID for a complexity level
+ */
+private fun getComplexityStringRes(complexity: Complexity?): Int {
+    return when (complexity) {
+        Complexity.easy -> R.string.complexity_easy
+        Complexity.medium -> R.string.complexity_medium
+        Complexity.difficult -> R.string.complexity_difficult
+        Complexity.infernal -> R.string.complexity_infernal
+        Complexity.arbitrary -> R.string.complexity_arbitrary
+        else -> R.string.app_name
+    }
+}
 
 /**
  * Main Sudoku game screen with Material3 design
@@ -76,7 +92,7 @@ fun SudokuScreen(
                 title = {
                     Column {
                         Text(
-                            text = stringResource(R.string.app_name),
+                            text = stringResource(getComplexityStringRes(state.complexity)),
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
