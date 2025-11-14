@@ -472,11 +472,19 @@ fun ComposeKeyboard(
                                 ),
                                 shape = MaterialTheme.shapes.medium
                             ) {
-                                Text(
-                                    text = if (button.showCheckmark) "✓" else button.displayText,
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontSize = 24.sp
-                                )
+                                if (button.showCheckmark) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Completed",
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                } else {
+                                    Text(
+                                        text = button.displayText,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontSize = 24.sp
+                                    )
+                                }
                             }
                         } else {
                             // Empty spacer for incomplete grid
