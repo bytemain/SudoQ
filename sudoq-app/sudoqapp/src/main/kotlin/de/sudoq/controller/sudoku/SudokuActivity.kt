@@ -762,25 +762,8 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
             return
         }
         
-        // Build path from root to target
-        val pathToTarget = mutableListOf<de.sudoq.model.actionTree.ActionTreeElement>()
-        var node: de.sudoq.model.actionTree.ActionTreeElement? = targetElement
-        while (node != null && node != stateHandler.actionTree.root) {
-            pathToTarget.add(0, node)
-            node = node.parent
-        }
-        
-        // Undo to common ancestor
-        var current = currentElement
-        while (current != null && !pathToTarget.contains(current)) {
-            current = current.undo()
-        }
-        
-        // Execute actions from common ancestor to target
-        val startIndex = if (current != null) pathToTarget.indexOf(current) + 1 else 0
-        for (i in startIndex until pathToTarget.size) {
-            pathToTarget[i].execute()
-        }
+        // Use the StateHandler's goToState method which properly updates currentState
+        stateHandler.goToState(targetElement)
         
         // Refresh the board
         sudokuLayout?.refresh()

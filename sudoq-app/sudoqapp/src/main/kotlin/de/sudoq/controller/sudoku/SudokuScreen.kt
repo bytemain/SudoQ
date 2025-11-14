@@ -24,6 +24,8 @@ import de.sudoq.model.game.Game
 import de.sudoq.model.sudoku.complexity.Complexity
 import de.sudoq.view.SudokuLayout
 import android.view.Gravity
+import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
 
 /**
  * State for the Sudoku game screen
@@ -371,7 +373,7 @@ fun SudokuControlPanel(
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Undo,
+                    imageVector = Icons.AutoMirrored.Filled.Undo,
                     contentDescription = stringResource(R.string.sf_sudoku_button_undo),
                     modifier = Modifier.size(24.dp)
                 )
@@ -383,7 +385,7 @@ fun SudokuControlPanel(
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Redo,
+                    imageVector = Icons.AutoMirrored.Filled.Redo,
                     contentDescription = stringResource(R.string.sf_sudoku_button_redo),
                     modifier = Modifier.size(24.dp)
                 )
@@ -419,7 +421,7 @@ fun SudokuControlPanel(
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Notes,
+                    imageVector = Icons.Default.GridOn,
                     contentDescription = stringResource(R.string.sf_sudoku_button_fill_candidates),
                     modifier = Modifier.size(24.dp)
                 )
