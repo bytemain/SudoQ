@@ -197,9 +197,6 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
         Symbol.createSymbol(currentSymbolSet)
     }
 
-    var panel: ControlPanelFragment? = null
-        private set
-
     /**
      * Wird beim ersten Aufruf der Activity aufgerufen. Setzt das Layout der
      * Activity und nimmt Initialisierungen vor.
@@ -736,30 +733,6 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
     }
 
     /**
-     * Erstellt die Views und Buttons für diese Activity
-     */
-    private fun inflateViewAndButtons() {
-        sudokuScrollView = findViewById(R.id.sudoku_cell)
-        sudokuLayout = SudokuLayout(this)
-        Log.d(LOG_TAG, "Inflated sudoku layout")
-        sudokuLayout!!.gravity = Gravity.CENTER
-        sudokuScrollView!!.addView(sudokuLayout!!)
-        panel =
-            supportFragmentManager.findFragmentById(R.id.controlPanelFragment) as ControlPanelFragment
-        panel!!.initialize()
-        panel!!.inflateButtons()
-        var currentControlsView: LinearLayout? /* = (LinearLayout) findViewById(R.id.sudoku_time_border);
-		FieldViewPainter.getInstance().setMarking(currentControlsView, FieldViewStates.CONTROLS);*/
-        currentControlsView = findViewById(R.id.sudoku_border)
-        instance!!.setMarking(currentControlsView, CellViewStates.SUDOKU)
-        currentControlsView = findViewById(R.id.controls)
-        instance!!.setMarking(currentControlsView, CellViewStates.KEYBOARD)
-        val keyboardView = findViewById<VirtualKeyboardLayout>(R.id.virtual_keyboard)
-        instance!!.setMarking(keyboardView, CellViewStates.KEYBOARD)
-        keyboardView.refresh(game!!.sudoku!!.sudokuType!!.numberOfSymbols)
-    }
-
-    /**
      * Schaltet den ActionTree an bzw. aus.
      */
     fun toogleActionTree() {
@@ -983,13 +956,6 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
         finished = true
         updateButtons()
         sudokuLayout!!.currentCellView?.select(game!!.isAssistanceAvailable(Assistances.markRowColumn))
-
-        // Disable keyboard input when game is finished
-        val keyView = findViewById<VirtualKeyboardLayout>(R.id.virtual_keyboard)
-        keyView.isEnabled = false
-        for (i in 0 until keyView.childCount) {
-            keyView.getChildAt(i).isEnabled = false
-        }
         
         if (showWinDialog) showWinDialog(surrendered)
         timeHandler.removeCallbacks(timeUpdate)
