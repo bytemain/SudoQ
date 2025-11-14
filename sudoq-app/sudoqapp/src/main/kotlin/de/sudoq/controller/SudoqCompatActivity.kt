@@ -7,13 +7,8 @@
  */
 package de.sudoq.controller
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
 import de.sudoq.R
-import de.sudoq.controller.tutorial.TutorialActivity
 
 /**
  * Eine Activity, welche die für einwandfreie Funktionalität der SudoQ-App
@@ -37,44 +32,5 @@ open class SudoqCompatActivity : LanguageAdaptingCompatActivity() {
     public override fun onDestroy() {
         super.onDestroy()
         System.gc()
-    }
-
-    /**
-     * Erstellt das Optionsmenü mit einem Tutorial-Eintrag.
-     *
-     * @param menu
-     * Das Menü
-     * @return true
-     */
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.action_bar_standard, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-    /**
-     * Fügt dem übergebenen Menü die globalen Einträge (Tutorial) hinzu.
-     *
-     * @param menu
-     * Das Menü
-     *
-     * protected void prepareOptionsMenu(Menu menu) {
-     * menu.add(0, MENU_TUTORIAL, 0, getString(R.string.action_show_tutorial));
-     * }
-     */
-    /**
-     * Verarbeitet das Auswählen des Tutorial-Menüeintrags.
-     *
-     * @param item
-     * Das ausgewählte Menü-Item
-     * @return true
-     */
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_show_tutorial -> {
-                startActivity(Intent(this, TutorialActivity::class.java))
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 }

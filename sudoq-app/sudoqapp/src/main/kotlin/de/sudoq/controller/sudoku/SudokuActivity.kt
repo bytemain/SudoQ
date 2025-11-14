@@ -16,8 +16,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.Gravity
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.View.MeasureSpec
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
@@ -186,9 +184,6 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
         private set
 
     private lateinit var currentSymbolSet: Array<String>
-
-    /** for time. YES IT IS USED! */
-    private var mMenu: Menu? = null
 
     /** Methods  */
     private fun initializeSymbolSet() {
@@ -1044,39 +1039,14 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
         decorView?.addView(dialogFragment)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.action_bar_sudoku, menu)
-        return true
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        mMenu = menu
-        return super.onPrepareOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_settings -> {
-                val settingsIntent = Intent(this, PlayerPreferencesActivity::class.java)
-                startActivity(settingsIntent)
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
     /**
-     * Das Update-Runnable für die Zeit
-     * Note: In Compose UI, time updates are handled by LaunchedEffect in SudokuScreen
+     * Updates the game time every second.
+     * This runnable increments the game model's time counter.
+     * The UI display is handled separately by Compose's LaunchedEffect in SudokuScreen.
      */
     private val timeUpdate: Runnable = object : Runnable {
-        private val offset = StringBuilder()
         override fun run() {
             game!!.addTime(1)
-
-            // No longer needed in Compose - time display is managed by Compose state
-            // Time updates are handled in SudokuScreen's LaunchedEffect
             timeHandler.postDelayed(this, 1000)
         }
     }
