@@ -107,6 +107,9 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     private val boardPainter: BoardPainter
     val hintPainter: HintPainter
     private val paint: Paint
+    
+    /** Border color for block separators and cell grid lines (theme-aware) */
+    private var borderColor: Int = Color.BLACK
 
     /** Exposes whether a symbol (0-based) is fully filled in the current sudoku. */
     fun isSymbolFullyFilled(symbol: Int): Boolean {
@@ -186,6 +189,22 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
         get() = (spacing * zoomFactor).toInt()
 
     /**
+     * Sets the border color for block separators and cell grid lines based on theme
+     *
+     * @param color The border color (Android color int)
+     */
+    fun setBorderColor(color: Int) {
+        borderColor = color
+        // Update grid border color on all cells
+        sudokuCellViews?.forEach { row ->
+            row.forEach { cell ->
+                cell?.setGridBorderColor(color)
+            }
+        }
+        invalidate()
+    }
+
+    /**
      * Berechnet das aktuelle obere Margin (gem. dem aktuellen ZoomFaktor) und
      * gibt es zurück.
      *
@@ -241,15 +260,14 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     }
 
     /**
-     * Draws all black borders for the sudoku, nothing else
-     * Cells have to be drawn after this method
-     * No insight on the coordinate-wise workings, unsure about the 'i's.
+     * Draws all block borders for the sudoku
+     * Cells draw their own grid borders
      */
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         Log.d(LOG_TAG, "SudokuLayout.onDraw()")
         paint.reset()
-        paint.color = Color.BLACK
+        paint.color = borderColor
         boardPainter.paintBoard(paint, canvas)
         hintPainter.invalidateAll()
     }

@@ -98,6 +98,11 @@ class SudokuCellView(
     private var highlightedCandidateNumber: Int = -1
 
     /**
+     * Grid border color for cell boundaries (theme-aware)
+     */
+    private var gridBorderColor: Int = Color.GRAY
+
+    /**
      * The game associated with this view
      */
     private val game: Game
@@ -132,6 +137,9 @@ class SudokuCellView(
         if (cell.isNotSolved) {
             drawNotes(canvas)
         }
+        
+        // Draw cell grid border (always on top)
+        drawCellBorder(canvas)
     }
     
     /**
@@ -146,6 +154,29 @@ class SudokuCellView(
         
         val rect = RectF(4f, 4f, width.toFloat() - 4f, height.toFloat() - 4f)
         canvas.drawRect(rect, paint)
+    }
+    
+    /**
+     * Draws grid border around the cell
+     */
+    private fun drawCellBorder(canvas: Canvas) {
+        val paint = Paint()
+        paint.color = gridBorderColor
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 1f
+        paint.isAntiAlias = true
+        
+        // Draw border lines on right and bottom edges
+        canvas.drawLine(width.toFloat() - 0.5f, 0f, width.toFloat() - 0.5f, height.toFloat(), paint)
+        canvas.drawLine(0f, height.toFloat() - 0.5f, width.toFloat(), height.toFloat() - 0.5f, paint)
+    }
+    
+    /**
+     * Sets the grid border color
+     */
+    fun setGridBorderColor(color: Int) {
+        gridBorderColor = color
+        invalidate()
     }
 
     /**
