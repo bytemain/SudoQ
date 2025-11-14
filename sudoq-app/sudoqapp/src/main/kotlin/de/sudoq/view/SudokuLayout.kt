@@ -27,6 +27,8 @@ import de.sudoq.model.game.Game
 import de.sudoq.model.sudoku.Constraint
 import de.sudoq.model.sudoku.ConstraintType
 import de.sudoq.model.sudoku.Position
+import de.sudoq.view.theme.ThemeManager
+import de.sudoq.view.theme.ThemeColor
 import java.util.*
 
 /**
@@ -686,8 +688,16 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
             text = context.getString(de.sudoq.R.string.button_exit_multi_select)
             visibility = android.view.View.GONE // Hidden by default
             
-            // Style as a modern button
-            setBackgroundColor(android.graphics.Color.parseColor("#2196F3")) // Material Blue
+            // Style as a modern button with theme colors
+            val themeColor = ThemeManager.loadThemeColor(context)
+            val buttonColor = when (themeColor) {
+                ThemeColor.GREEN -> Color.parseColor("#2E7D32")
+                ThemeColor.BLUE -> Color.parseColor("#1565C0")
+                ThemeColor.PURPLE -> Color.parseColor("#6750A4")
+                ThemeColor.RED -> Color.parseColor("#C62828")
+                ThemeColor.ORANGE -> Color.parseColor("#E65100")
+            }
+            setBackgroundColor(buttonColor)
             setTextColor(android.graphics.Color.WHITE)
             textSize = 14f
             isAllCaps = false

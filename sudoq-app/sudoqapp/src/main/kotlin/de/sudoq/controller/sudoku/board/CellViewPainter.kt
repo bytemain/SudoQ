@@ -15,6 +15,23 @@ import java.util.*
 import kotlin.collections.set
 
 /**
+ * Data class holding theme-based colors for board rendering.
+ * All colors are in android.graphics.Color integer format.
+ */
+data class BoardThemeColors(
+    val selectionInputColor: Int = Color.rgb(255, 80, 80),
+    val selectionNoteColor: Int = Color.YELLOW,
+    val selectionColor: Int = Color.rgb(180, 180, 255),
+    val connectedColor: Int = Color.rgb(220, 220, 255),
+    val sameNumberColor: Int = Color.rgb(180, 230, 180),
+    val defaultColor: Int = Color.rgb(250, 250, 250),
+    val borderColor: Int = Color.DKGRAY,
+    val fixedTextColor: Int = Color.rgb(0, 100, 0),
+    val errorTextColor: Int = Color.RED,
+    val normalTextColor: Int = Color.BLACK
+)
+
+/**
  * This class is responsible for Animationens and highlighting of cells.
  * TODO does it have to be singleton?
  */
@@ -34,8 +51,21 @@ class CellViewPainter private constructor() {
     /** Optional symbol to align indicator to; if absent, falls back to current cell symbol. */
     private val preFillIndicatorSymbols: Hashtable<View, String>
     private var sl: SudokuLayout? = null
+    
+    /**
+     * Theme colors for board rendering. Can be updated to follow user theme settings.
+     */
+    private var themeColors: BoardThemeColors = BoardThemeColors()
+    
     fun setSudokuLayout(sl: SudokuLayout?) {
         this.sl = sl
+    }
+    
+    /**
+     * Updates the theme colors used for board rendering
+     */
+    fun setThemeColors(colors: BoardThemeColors) {
+        this.themeColors = colors
     }
     /* Methods */
     /**
@@ -61,67 +91,67 @@ class CellViewPainter private constructor() {
         if (cellState != null && !justText) {
             when (cellState) {
                 CellViewStates.SELECTED_INPUT_BORDER -> {
-                    drawBackground(canvas, cell, Color.DKGRAY, true, darken)
-                    drawInner(canvas, cell, Color.rgb(255, 80, 80), true, darken)
-                    drawText(canvas, cell, Color.BLACK, false, symbol)
+                    drawBackground(canvas, cell, themeColors.borderColor, true, darken)
+                    drawInner(canvas, cell, themeColors.selectionInputColor, true, darken)
+                    drawText(canvas, cell, themeColors.normalTextColor, false, symbol)
                 }
                 CellViewStates.SELECTED_INPUT -> {
-                    drawBackground(canvas, cell, Color.rgb(255, 80, 80), true, darken)
-                    drawText(canvas, cell, Color.BLACK, false, symbol)
+                    drawBackground(canvas, cell, themeColors.selectionInputColor, true, darken)
+                    drawText(canvas, cell, themeColors.normalTextColor, false, symbol)
                 }
                 CellViewStates.SELECTED_INPUT_WRONG -> {
-                    drawBackground(canvas, cell, Color.rgb(255, 80, 80), true, darken)
-                    drawText(canvas, cell, Color.RED, false, symbol)
+                    drawBackground(canvas, cell, themeColors.selectionInputColor, true, darken)
+                    drawText(canvas, cell, themeColors.errorTextColor, false, symbol)
                 }
                 CellViewStates.SELECTED_NOTE_BORDER -> {
-                    drawBackground(canvas, cell, Color.DKGRAY, true, darken)
-                    drawInner(canvas, cell, Color.YELLOW, true, darken)
-                    drawText(canvas, cell, Color.BLACK, false, symbol)
+                    drawBackground(canvas, cell, themeColors.borderColor, true, darken)
+                    drawInner(canvas, cell, themeColors.selectionNoteColor, true, darken)
+                    drawText(canvas, cell, themeColors.normalTextColor, false, symbol)
                 }
                 CellViewStates.SELECTED_NOTE -> {
-                    drawBackground(canvas, cell, Color.YELLOW, true, darken)
-                    drawText(canvas, cell, Color.BLACK, false, symbol)
+                    drawBackground(canvas, cell, themeColors.selectionNoteColor, true, darken)
+                    drawText(canvas, cell, themeColors.normalTextColor, false, symbol)
                 }
                 CellViewStates.SELECTED_NOTE_WRONG -> {
-                    drawBackground(canvas, cell, Color.YELLOW, true, darken)
-                    drawText(canvas, cell, Color.RED, false, symbol)
+                    drawBackground(canvas, cell, themeColors.selectionNoteColor, true, darken)
+                    drawText(canvas, cell, themeColors.errorTextColor, false, symbol)
                 }
                 CellViewStates.SELECTED -> {
-                    drawBackground(canvas, cell, Color.rgb(180, 180, 255), true, darken)
-                    drawText(canvas, cell, Color.rgb(0, 140, 0), true, symbol)
+                    drawBackground(canvas, cell, themeColors.selectionColor, true, darken)
+                    drawText(canvas, cell, themeColors.fixedTextColor, true, symbol)
                 }
                 CellViewStates.SELECTED_FIXED -> {
-                    drawBackground(canvas, cell, Color.rgb(220, 220, 255), true, darken)
-                    drawText(canvas, cell, Color.rgb(0, 100, 0), true, symbol)
+                    drawBackground(canvas, cell, themeColors.connectedColor, true, darken)
+                    drawText(canvas, cell, themeColors.fixedTextColor, true, symbol)
                 }
                 CellViewStates.CONNECTED -> {
-                    drawBackground(canvas, cell, Color.rgb(220, 220, 255), true, darken)
-                    drawText(canvas, cell, Color.BLACK, false, symbol)
+                    drawBackground(canvas, cell, themeColors.connectedColor, true, darken)
+                    drawText(canvas, cell, themeColors.normalTextColor, false, symbol)
                 }
                 CellViewStates.CONNECTED_WRONG -> {
-                    drawBackground(canvas, cell, Color.rgb(220, 220, 255), true, darken)
-                    drawText(canvas, cell, Color.RED, false, symbol)
+                    drawBackground(canvas, cell, themeColors.connectedColor, true, darken)
+                    drawText(canvas, cell, themeColors.errorTextColor, false, symbol)
                 }
                 CellViewStates.SAME_NUMBER -> {
-                    drawBackground(canvas, cell, Color.rgb(180, 230, 180), true, darken)
-                    drawText(canvas, cell, Color.BLACK, true, symbol)
+                    drawBackground(canvas, cell, themeColors.sameNumberColor, true, darken)
+                    drawText(canvas, cell, themeColors.normalTextColor, true, symbol)
                 }
                 CellViewStates.FIXED -> {
-                    drawBackground(canvas, cell, Color.rgb(250, 250, 250), true, darken)
-                    drawText(canvas, cell, Color.rgb(0, 100, 0), true, symbol)
+                    drawBackground(canvas, cell, themeColors.defaultColor, true, darken)
+                    drawText(canvas, cell, themeColors.fixedTextColor, true, symbol)
                 }
                 CellViewStates.DEFAULT_BORDER -> {
-                    drawBackground(canvas, cell, Color.DKGRAY, true, darken)
-                    drawInner(canvas, cell, Color.rgb(250, 250, 250), true, darken)
-                    drawText(canvas, cell, Color.BLACK, false, symbol)
+                    drawBackground(canvas, cell, themeColors.borderColor, true, darken)
+                    drawInner(canvas, cell, themeColors.defaultColor, true, darken)
+                    drawText(canvas, cell, themeColors.normalTextColor, false, symbol)
                 }
                 CellViewStates.DEFAULT_WRONG -> {
-                    drawBackground(canvas, cell, Color.rgb(250, 250, 250), true, darken)
-                    drawText(canvas, cell, Color.RED, false, symbol)
+                    drawBackground(canvas, cell, themeColors.defaultColor, true, darken)
+                    drawText(canvas, cell, themeColors.errorTextColor, false, symbol)
                 }
                 CellViewStates.DEFAULT -> {
-                    drawBackground(canvas, cell, Color.rgb(250, 250, 250), true, darken)
-                    drawText(canvas, cell, Color.BLACK, false, symbol)
+                    drawBackground(canvas, cell, themeColors.defaultColor, true, darken)
+                    drawText(canvas, cell, themeColors.normalTextColor, false, symbol)
                 }
                 CellViewStates.CONTROLS -> drawBackground(
                     canvas,
@@ -151,14 +181,14 @@ class CellViewPainter private constructor() {
                 CellViewStates.CONNECTED,
                 CellViewStates.SAME_NUMBER,
                 CellViewStates.DEFAULT_BORDER,
-                CellViewStates.DEFAULT -> drawText(canvas, cell, Color.BLACK, false, symbol)
+                CellViewStates.DEFAULT -> drawText(canvas, cell, themeColors.normalTextColor, false, symbol)
                 CellViewStates.SELECTED_INPUT_WRONG,
                 CellViewStates.SELECTED_NOTE_WRONG,
                 CellViewStates.DEFAULT_WRONG,
-                CellViewStates.CONNECTED_WRONG -> drawText(canvas, cell, Color.RED, false, symbol)
+                CellViewStates.CONNECTED_WRONG -> drawText(canvas, cell, themeColors.errorTextColor, false, symbol)
                 CellViewStates.SELECTED_FIXED,
                 CellViewStates.SELECTED,
-                CellViewStates.FIXED -> drawText(canvas, cell, Color.rgb(0, 100, 0), true, symbol)
+                CellViewStates.FIXED -> drawText(canvas, cell, themeColors.fixedTextColor, true, symbol)
                 else -> {}
             }
         }

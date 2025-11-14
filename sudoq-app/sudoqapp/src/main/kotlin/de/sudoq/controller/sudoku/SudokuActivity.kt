@@ -295,6 +295,15 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                     themeColor = themeColor,
                     darkTheme = darkMode
                 ) {
+                    // Apply theme colors to board painter
+                    val colorScheme = MaterialTheme.colorScheme
+                    LaunchedEffect(colorScheme, darkMode) {
+                        val boardColors = de.sudoq.view.theme.createBoardThemeColors(colorScheme, darkMode)
+                        instance?.setThemeColors(boardColors)
+                        // Trigger board refresh
+                        sudokuLayout?.invalidate()
+                    }
+                    
                     var hintState by remember { mutableStateOf<HintState?>(null) }
                     var keyboardButtons by remember { mutableStateOf<List<KeyboardButtonState>>(emptyList()) }
                     val keyboardTrigger by keyboardUpdateTrigger

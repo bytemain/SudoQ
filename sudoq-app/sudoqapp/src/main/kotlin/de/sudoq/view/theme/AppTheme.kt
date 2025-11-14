@@ -4,6 +4,8 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import de.sudoq.controller.sudoku.board.BoardThemeColors
 
 /**
  * Theme color options for the app
@@ -166,4 +168,32 @@ fun getDarkColorScheme(themeColor: ThemeColor): ColorScheme {
             onSecondaryContainer = OrangeContainer
         )
     }
+}
+
+/**
+ * Converts Compose Color to Android Color integer format (ARGB)
+ */
+private fun Color.toAndroidColor(): Int = this.toArgb()
+
+/**
+ * Creates BoardThemeColors from the current theme's ColorScheme.
+ * Uses primary color for selections and highlights while keeping error colors consistent.
+ */
+fun createBoardThemeColors(colorScheme: ColorScheme, isDark: Boolean): BoardThemeColors {
+    // Use lighter/desaturated versions for backgrounds in dark mode
+    val selectionAlpha = if (isDark) 0.4f else 0.3f
+    val connectedAlpha = if (isDark) 0.25f else 0.2f
+    
+    return BoardThemeColors(
+        selectionInputColor = colorScheme.primary.copy(alpha = selectionAlpha).toAndroidColor(),
+        selectionNoteColor = colorScheme.secondary.copy(alpha = selectionAlpha).toAndroidColor(),
+        selectionColor = colorScheme.primaryContainer.toAndroidColor(),
+        connectedColor = colorScheme.secondaryContainer.copy(alpha = connectedAlpha).toAndroidColor(),
+        sameNumberColor = colorScheme.tertiaryContainer.toAndroidColor(),
+        defaultColor = colorScheme.surface.toAndroidColor(),
+        borderColor = colorScheme.outline.toAndroidColor(),
+        fixedTextColor = colorScheme.onSurfaceVariant.toAndroidColor(),
+        errorTextColor = colorScheme.error.toAndroidColor(),
+        normalTextColor = colorScheme.onSurface.toAndroidColor()
+    )
 }
