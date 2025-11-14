@@ -318,4 +318,11 @@ class SudokuController(
             game.addAndExecute(fillAction)
         }
     }
+    
+    /**
+     * Get the current action tree element
+     */
+    fun getCurrentActionTreeElement(): de.sudoq.model.actionTree.ActionTreeElement? {
+        return game.currentState
+    }
 }

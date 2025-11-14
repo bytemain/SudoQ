@@ -225,7 +225,7 @@ class SudokuLayout(context: Context) : RelativeLayout(context), ObservableCellIn
     /**
      * Aktualisiert die Sudoku-Anzeige bzw. der enthaltenen Felder.
      */
-    private fun refresh() {
+    fun refresh() {
         Log.d(LOG_TAG, "SudokuLayout.refresh()")
         if (sudokuCellViews != null) {
             val type = game.sudoku!!.sudokuType

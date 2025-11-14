@@ -388,6 +388,17 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                             toogleActionTree()
                             gameState.value = gameState.value.copy(isActionTreeShown = isActionTreeShown)
                         },
+                        onActionTreeNavigate = { targetElement ->
+                            // Navigate to the selected action tree element
+                            navigateToActionTreeElement(targetElement)
+                            // Close action tree after navigation
+                            if (isActionTreeShown) {
+                                toogleActionTree()
+                                gameState.value = gameState.value.copy(isActionTreeShown = false)
+                            }
+                            keyboardButtons = getKeyboardButtonStates()
+                            updateButtons()
+                        },
                         onUndoClick = {
                             sudokuController!!.onUndo()
                             keyboardButtons = getKeyboardButtonStates()
@@ -736,14 +747,44 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
      * Schaltet den ActionTree an bzw. aus.
      */
     fun toogleActionTree() {
-        // TODO: ActionTree needs Compose implementation
-        if (actionTreeController == null) {
-            Toast.makeText(this, "Action Tree not available in Compose UI yet", Toast.LENGTH_SHORT).show()
+        isActionTreeShown = !isActionTreeShown
+        updateButtons()
+    }
+    
+    /**
+     * Navigate to a specific action tree element
+     */
+    private fun navigateToActionTreeElement(targetElement: de.sudoq.model.actionTree.ActionTreeElement) {
+        val stateHandler = game!!.stateHandler ?: return
+        val currentElement = stateHandler.currentState
+        
+        if (currentElement == null || targetElement == currentElement) {
             return
         }
-        isActionTreeShown = !isActionTreeShown //toggle value
-        actionTreeController?.setVisibility(isActionTreeShown) //update AT-Controller
-        updateButtons()
+        
+        // Build path from root to target
+        val pathToTarget = mutableListOf<de.sudoq.model.actionTree.ActionTreeElement>()
+        var node: de.sudoq.model.actionTree.ActionTreeElement? = targetElement
+        while (node != null && node != stateHandler.actionTree.root) {
+            pathToTarget.add(0, node)
+            node = node.parent
+        }
+        
+        // Undo to common ancestor
+        var current = currentElement
+        while (current != null && !pathToTarget.contains(current)) {
+            current = current.undo()
+        }
+        
+        // Execute actions from common ancestor to target
+        val startIndex = if (current != null) pathToTarget.indexOf(current) + 1 else 0
+        for (i in startIndex until pathToTarget.size) {
+            pathToTarget[i].execute()
+        }
+        
+        // Refresh the board
+        sudokuLayout?.refresh()
+        sudokuLayout?.invalidate()
     }
 
     /**

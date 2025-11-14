@@ -78,6 +78,7 @@ fun SudokuScreen(
     onBackClick: () -> Unit,
     onMenuClick: (SudokuMenuItem) -> Unit,
     onActionTreeToggle: () -> Unit,
+    onActionTreeNavigate: (de.sudoq.model.actionTree.ActionTreeElement) -> Unit,
     onUndoClick: () -> Unit,
     onRedoClick: () -> Unit,
     onHintClick: () -> Unit,
@@ -118,7 +119,7 @@ fun SudokuScreen(
                     // Action Tree toggle
                     IconButton(onClick = onActionTreeToggle) {
                         Icon(
-                            imageVector = if (state.isActionTreeShown) Icons.Default.Close else Icons.Default.List,
+                            imageVector = if (state.isActionTreeShown) Icons.Default.Close else Icons.Default.Commit,
                             contentDescription = "Action Tree"
                         )
                     }
@@ -161,7 +162,18 @@ fun SudokuScreen(
         },
         modifier = modifier
     ) { paddingValues ->
-        if (isLandscape) {
+        // Show ActionTree overlay when toggled
+        if (state.isActionTreeShown) {
+            val stateHandler = state.game.stateHandler
+            if (stateHandler != null) {
+                de.sudoq.view.actionTree.ActionTreeScreen(
+                    actionTree = stateHandler.actionTree.root,
+                    currentElement = stateHandler.currentState,
+                    onActionClick = onActionTreeNavigate,
+                    onClose = onActionTreeToggle
+                )
+            }
+        } else if (isLandscape) {
             // Landscape layout: Board on left, controls and keyboard on right
             Row(
                 modifier = Modifier
