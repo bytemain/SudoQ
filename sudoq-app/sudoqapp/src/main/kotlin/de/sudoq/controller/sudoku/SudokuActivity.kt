@@ -433,6 +433,7 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                         onNoteToggle = {
                             mediator?.toggleNoteMode()
                             keyboardButtons = getKeyboardButtonStates()
+                            isNoteMode = mediator?.isNoteMode() ?: false
                         },
                         onKeyboardInput = { symbol ->
                             mediator?.onInput(symbol)
