@@ -1,6 +1,5 @@
 package de.sudoq.persistence.sudoku
 
-import android.util.Log
 import de.sudoq.model.persistence.IRepo
 import de.sudoq.model.sudoku.Cell
 import de.sudoq.model.sudoku.Position
@@ -58,16 +57,8 @@ class SudokuBE() : XmlableWithRepo<SudokuType> {
             fieldmap.addAttribute(XmlAttribute("id", "" + value.id))
             fieldmap.addAttribute(XmlAttribute("editable", "" + value.isEditable))
             fieldmap.addAttribute(XmlAttribute("solution", "" + value.solution))
-            // Persist notes (noticeFlags) as a comma-separated list of indices if any are set
-            val notes = value.getAllNotes()
-            if (notes.isNotEmpty()) {
-                fieldmap.addAttribute(
-                    XmlAttribute(
-                        "notes",
-                        notes.joinToString(separator = ",")
-                    )
-                )
-            }
+            // Notes are NOT persisted here - they are reconstructed by replaying the action tree
+            // in GameBE.fillFromXml(). Saving notes here would cause double-toggling issues.
             val position = XmlTree("position")
             position.addAttribute(XmlAttribute("x", "" + key.x))
             position.addAttribute(XmlAttribute("y", "" + key.y))
@@ -116,20 +107,9 @@ class SudokuBE() : XmlableWithRepo<SudokuType> {
                 val pos = Position[x, y]
                 val cell = Cell(editable, solution, fieldId, sudokuType!!.numberOfSymbols)
                 
-                // Restore notes (noticeFlags) if present
-                val notesAttr = sub.getAttributeValue("notes")
-                if (!notesAttr.isNullOrBlank()) {
-                    val noteIndices = notesAttr.split(',')
-                        .mapNotNull { it.trim().toIntOrNull() }
-                    for (noteIdx in noteIndices) {
-                        // Note: maxValue = numberOfSymbols - 1, so valid range is 0 to numberOfSymbols-1
-                        if (noteIdx >= 0 && noteIdx < sudokuType!!.numberOfSymbols) {
-                            cell.toggleNote(noteIdx)
-                        } else {
-                            Log.w("SudokuBE", "Skipping invalid note index $noteIdx (valid range: 0-${sudokuType!!.numberOfSymbols - 1})")
-                        }
-                    }
-                }
+                // Notes are NOT restored here - they are reconstructed by replaying the action tree
+                // in GameBE.fillFromXml(). Loading notes here would cause double-toggling issues.
+                // The "notes" attribute in XML is ignored for compatibility with old save files.
                 
                 cells!![pos] = cell
                 cellIdCounter++
