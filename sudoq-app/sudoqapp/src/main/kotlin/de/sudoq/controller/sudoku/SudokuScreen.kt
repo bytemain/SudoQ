@@ -1,5 +1,6 @@
 package de.sudoq.controller.sudoku
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -93,6 +94,11 @@ fun SudokuScreen(
     var showMenu by remember { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    
+    // Handle back navigation for action tree
+    BackHandler(enabled = state.isActionTreeShown) {
+        onActionTreeToggle()
+    }
     
     Scaffold(
         topBar = {
