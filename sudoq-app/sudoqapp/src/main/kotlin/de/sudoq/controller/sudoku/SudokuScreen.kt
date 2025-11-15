@@ -83,10 +83,10 @@ private data class SwipePreviewState(
 )
 
 enum class SwipeDirection {
-    UP,      // Swipe up: Delete note
-    DOWN,    // Swipe down: Normal note
-    LEFT,    // Swipe left: Strikethrough note
-    RIGHT,   // Swipe right: Cancel
+    UP,      // Swipe up: Strikethrough note
+    DOWN,    // Swipe down: Cancel (do nothing)
+    LEFT,    // Swipe left: Delete note
+    RIGHT,   // Swipe right: Normal note
     NONE     // No direction
 }
 
@@ -812,20 +812,20 @@ fun ComposeKeyboard(
                                             },
                                         colors = ButtonDefaults.filledTonalButtonColors(
                                             containerColor = when (swipeDirection) {
-                                                SwipeDirection.UP -> MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
-                                                SwipeDirection.DOWN -> MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                                                SwipeDirection.LEFT -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.6f)
-                                                SwipeDirection.RIGHT -> MaterialTheme.colorScheme.surfaceVariant
+                                                SwipeDirection.UP -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.6f)
+                                                SwipeDirection.DOWN -> MaterialTheme.colorScheme.surfaceVariant
+                                                SwipeDirection.LEFT -> MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
+                                                SwipeDirection.RIGHT -> MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                                                 SwipeDirection.NONE -> {
                                                     if (button.showCheckmark) MaterialTheme.colorScheme.tertiaryContainer
                                                     else MaterialTheme.colorScheme.secondaryContainer
                                                 }
                                             },
                                             contentColor = when (swipeDirection) {
-                                                SwipeDirection.UP -> MaterialTheme.colorScheme.onError
-                                                SwipeDirection.DOWN -> MaterialTheme.colorScheme.onPrimary
-                                                SwipeDirection.LEFT -> MaterialTheme.colorScheme.onTertiary
-                                                SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiary
+                                                SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                SwipeDirection.LEFT -> MaterialTheme.colorScheme.onError
+                                                SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimary
                                                 SwipeDirection.NONE -> {
                                                     if (button.showCheckmark) MaterialTheme.colorScheme.onTertiaryContainer
                                                     else MaterialTheme.colorScheme.onSecondaryContainer
@@ -877,10 +877,10 @@ fun ComposeKeyboard(
                         shadowElevation = 32.dp,
                         tonalElevation = 24.dp,
                         color = when (preview.direction) {
-                            SwipeDirection.UP -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.95f)
-                            SwipeDirection.DOWN -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
-                            SwipeDirection.LEFT -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.95f)
-                            SwipeDirection.RIGHT -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f)
+                            SwipeDirection.UP -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.95f)
+                            SwipeDirection.DOWN -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f)
+                            SwipeDirection.LEFT -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.95f)
+                            SwipeDirection.RIGHT -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
                             SwipeDirection.NONE -> MaterialTheme.colorScheme.surface
                         }
                     ) {
@@ -894,20 +894,20 @@ fun ComposeKeyboard(
                             // Operation name (top, most prominent)
                             Text(
                                 text = when (preview.direction) {
-                                    SwipeDirection.UP -> "Delete Note"
-                                    SwipeDirection.DOWN -> "Normal Note"
-                                    SwipeDirection.LEFT -> "Strikethrough Note"
-                                    SwipeDirection.RIGHT -> "Cancel"
+                                    SwipeDirection.UP -> "Strikethrough"
+                                    SwipeDirection.DOWN -> "Cancel"
+                                    SwipeDirection.LEFT -> "Delete"
+                                    SwipeDirection.RIGHT -> "Normal"
                                     SwipeDirection.NONE -> ""
                                 },
                                 style = MaterialTheme.typography.headlineLarge,
                                 fontSize = 32.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = when (preview.direction) {
-                                    SwipeDirection.UP -> MaterialTheme.colorScheme.onErrorContainer
-                                    SwipeDirection.DOWN -> MaterialTheme.colorScheme.onPrimaryContainer
-                                    SwipeDirection.LEFT -> MaterialTheme.colorScheme.onTertiaryContainer
-                                    SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onSurfaceVariant
+                                    SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiaryContainer
+                                    SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
+                                    SwipeDirection.LEFT -> MaterialTheme.colorScheme.onErrorContainer
+                                    SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimaryContainer
                                     SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
                                 }
                             )
@@ -929,10 +929,10 @@ fun ComposeKeyboard(
                                     },
                                     contentDescription = null,
                                     tint = when (preview.direction) {
-                                        SwipeDirection.UP -> MaterialTheme.colorScheme.onErrorContainer
-                                        SwipeDirection.DOWN -> MaterialTheme.colorScheme.onPrimaryContainer
-                                        SwipeDirection.LEFT -> MaterialTheme.colorScheme.onTertiaryContainer
-                                        SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onSurfaceVariant
+                                        SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiaryContainer
+                                        SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
+                                        SwipeDirection.LEFT -> MaterialTheme.colorScheme.onErrorContainer
+                                        SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimaryContainer
                                         SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
                                     },
                                     modifier = Modifier.size(64.dp)
@@ -947,10 +947,10 @@ fun ComposeKeyboard(
                                     fontSize = 72.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = when (preview.direction) {
-                                        SwipeDirection.UP -> MaterialTheme.colorScheme.onErrorContainer
-                                        SwipeDirection.DOWN -> MaterialTheme.colorScheme.onPrimaryContainer
-                                        SwipeDirection.LEFT -> MaterialTheme.colorScheme.onTertiaryContainer
-                                        SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onSurfaceVariant
+                                        SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiaryContainer
+                                        SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
+                                        SwipeDirection.LEFT -> MaterialTheme.colorScheme.onErrorContainer
+                                        SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimaryContainer
                                         SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
                                     }
                                 )
