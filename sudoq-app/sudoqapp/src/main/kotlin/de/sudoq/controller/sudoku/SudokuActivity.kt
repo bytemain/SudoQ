@@ -294,6 +294,7 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                     
                     var hintState by remember { mutableStateOf<HintState?>(null) }
                     var keyboardButtons by remember { mutableStateOf<List<KeyboardButtonState>>(emptyList()) }
+                    var isNoteMode by remember { mutableStateOf(false) }
                     val keyboardTrigger by keyboardUpdateTrigger
                     
                     // Update hint state when currentHintState changes
@@ -304,12 +305,14 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                     // Initialize keyboard buttons
                     LaunchedEffect(Unit) {
                         keyboardButtons = getKeyboardButtonStates()
+                        isNoteMode = mediator?.isNoteMode() ?: false
                     }
                     
                     // Update keyboard when trigger changes
                     LaunchedEffect(keyboardTrigger) {
                         if (keyboardTrigger > 0) {
                             keyboardButtons = getKeyboardButtonStates()
+                            isNoteMode = mediator?.isNoteMode() ?: false
                         }
                     }
                     
@@ -325,7 +328,8 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                                 hintHasExecute = hintState?.hasExecute ?: false,
                                 onHintContinue = hintState?.onContinue,
                                 onHintExecute = hintState?.onExecute,
-                                keyboardButtons = keyboardButtons
+                                keyboardButtons = keyboardButtons,
+                                isNoteMode = isNoteMode
                             )
                         )
                     }
@@ -340,10 +344,11 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                         )
                     }
                     
-                    // Update game state when keyboard buttons change
-                    LaunchedEffect(keyboardButtons) {
+                    // Update game state when keyboard buttons or note mode changes
+                    LaunchedEffect(keyboardButtons, isNoteMode) {
                         gameState.value = gameState.value.copy(
-                            keyboardButtons = keyboardButtons
+                            keyboardButtons = keyboardButtons,
+                            isNoteMode = isNoteMode
                         )
                     }
                     
