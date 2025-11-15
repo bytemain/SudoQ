@@ -50,7 +50,4 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- actiontree, initially hidden -->
-    <include layout="@layout/actiontree_landscape" />
-
 </FrameLayout>

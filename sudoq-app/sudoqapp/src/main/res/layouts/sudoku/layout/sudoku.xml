@@ -50,6 +50,4 @@
 
     </LinearLayout>
 
-    <include layout="@layout/actiontree_portrait" />
-
 </FrameLayout>
