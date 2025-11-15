@@ -75,7 +75,7 @@ data class KeyboardButtonState(
 /**
  * State for swipe preview overlay
  */
-private data class SwipePreviewState(
+data class SwipePreviewState(
     val buttonText: String,
     val direction: SwipeDirection,
     val dragOffset: Offset, // Offset relative to button start position
@@ -130,12 +130,16 @@ fun SudokuScreen(
     var showMenu by remember { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    
+    // Track active swipe preview at screen level
+    var activeSwipePreview by remember { mutableStateOf<SwipePreviewState?>(null) }
 
     // Handle back navigation for action tree
     BackHandler(enabled = state.isActionTreeShown) {
         onActionTreeToggle()
     }
 
+    Box {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -309,6 +313,7 @@ fun SudokuScreen(
                             buttons = state.keyboardButtons,
                             onButtonClick = onKeyboardInput,
                             onButtonSwipe = onKeyboardSwipe,
+                            onSwipePreviewChange = { activeSwipePreview = it },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
@@ -402,6 +407,7 @@ fun SudokuScreen(
                         buttons = state.keyboardButtons,
                         onButtonClick = onKeyboardInput,
                         onButtonSwipe = onKeyboardSwipe,
+                        onSwipePreviewChange = { activeSwipePreview = it },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(180.dp)
@@ -410,6 +416,101 @@ fun SudokuScreen(
                 }
             }
         }
+    }
+    
+    // Global gesture feedback overlay at screen top level
+    activeSwipePreview?.let { preview ->
+        val context = LocalContext.current
+        val gestureUp = remember { GesturePreferences.loadGestureUp(context) }
+        val gestureDown = remember { GesturePreferences.loadGestureDown(context) }
+        val gestureLeft = remember { GesturePreferences.loadGestureLeft(context) }
+        val gestureRight = remember { GesturePreferences.loadGestureRight(context) }
+        
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) { /* Intercept touch events */ },
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                modifier = Modifier.wrapContentSize(),
+                shape = RoundedCornerShape(12.dp),
+                shadowElevation = 16.dp,
+                tonalElevation = 12.dp,
+                color = when (preview.direction) {
+                    SwipeDirection.UP -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.95f)
+                    SwipeDirection.DOWN -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f)
+                    SwipeDirection.LEFT -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.95f)
+                    SwipeDirection.RIGHT -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
+                    SwipeDirection.NONE -> MaterialTheme.colorScheme.surface
+                }
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Direction icon
+                    Icon(
+                        imageVector = when (preview.direction) {
+                            SwipeDirection.UP -> Icons.Default.KeyboardArrowUp
+                            SwipeDirection.DOWN -> Icons.Default.KeyboardArrowDown
+                            SwipeDirection.LEFT -> Icons.Default.KeyboardArrowLeft
+                            SwipeDirection.RIGHT -> Icons.Default.KeyboardArrowRight
+                            SwipeDirection.NONE -> Icons.Default.Check
+                        },
+                        contentDescription = null,
+                        tint = when (preview.direction) {
+                            SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiaryContainer
+                            SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
+                            SwipeDirection.LEFT -> MaterialTheme.colorScheme.onErrorContainer
+                            SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimaryContainer
+                            SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
+                        },
+                        modifier = Modifier.size(32.dp)
+                    )
+                    
+                    // Current number
+                    Text(
+                        text = preview.buttonText,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontSize = 36.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = when (preview.direction) {
+                            SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiaryContainer
+                            SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
+                            SwipeDirection.LEFT -> MaterialTheme.colorScheme.onErrorContainer
+                            SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimaryContainer
+                            SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
+                        }
+                    )
+                    
+                    // Operation name
+                    Text(
+                        text = when (preview.direction) {
+                            SwipeDirection.UP -> gestureUp.getDisplayName()
+                            SwipeDirection.DOWN -> gestureDown.getDisplayName()
+                            SwipeDirection.LEFT -> gestureLeft.getDisplayName()
+                            SwipeDirection.RIGHT -> gestureRight.getDisplayName()
+                            SwipeDirection.NONE -> ""
+                        },
+                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        color = when (preview.direction) {
+                            SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiaryContainer
+                            SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
+                            SwipeDirection.LEFT -> MaterialTheme.colorScheme.onErrorContainer
+                            SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimaryContainer
+                            SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
+                        }
+                    )
+                }
+            }
+        }
+    }
     }
 }
 
@@ -629,6 +730,7 @@ fun ComposeKeyboard(
     buttons: List<KeyboardButtonState>,
     onButtonClick: (Int) -> Unit,
     onButtonSwipe: (Int, de.sudoq.model.sudoku.NoteStyle?) -> Unit = { _, _ -> },
+    onSwipePreviewChange: (SwipePreviewState?) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     if (buttons.isEmpty()) return
@@ -643,12 +745,6 @@ fun ComposeKeyboard(
     val gestureDown = remember { GesturePreferences.loadGestureDown(context) }
     val gestureLeft = remember { GesturePreferences.loadGestureLeft(context) }
     val gestureRight = remember { GesturePreferences.loadGestureRight(context) }
-
-    // Track active swipe preview globally
-    var activeSwipePreview by remember { mutableStateOf<SwipePreviewState?>(null) }
-    
-    // Get screen density for dp to px conversion
-    val density = LocalDensity.current
 
     Box(modifier = modifier) {
         Surface(
@@ -732,7 +828,7 @@ fun ComposeKeyboard(
                                                         dragStart = offset
                                                         currentDragOffset = Offset.Zero
                                                         swipeDirection = SwipeDirection.NONE
-                                                        activeSwipePreview = null
+                                                        onSwipePreviewChange(null)
                                                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                                     },
                                                     onDragEnd = {
@@ -756,13 +852,13 @@ fun ComposeKeyboard(
                                                         swipeDirection = SwipeDirection.NONE
                                                         dragStart = null
                                                         currentDragOffset = Offset.Zero
-                                                        activeSwipePreview = null
+                                                        onSwipePreviewChange(null)
                                                     },
                                                     onDragCancel = {
                                                         swipeDirection = SwipeDirection.NONE
                                                         dragStart = null
                                                         currentDragOffset = Offset.Zero
-                                                        activeSwipePreview = null
+                                                        onSwipePreviewChange(null)
                                                     },
                                                     onDrag = { change, dragAmount ->
                                                         val start = dragStart
@@ -794,16 +890,18 @@ fun ComposeKeyboard(
                                                             
                                                             swipeDirection = newDirection
 
-                                                            // Update global preview state
+                                                            // Update global preview state via callback
                                                             if (swipeDirection != SwipeDirection.NONE) {
-                                                                activeSwipePreview = SwipePreviewState(
-                                                                    buttonText = button.displayText,
-                                                                    direction = swipeDirection,
-                                                                    dragOffset = currentDragOffset,
-                                                                    buttonCenter = buttonGlobalCenter
+                                                                onSwipePreviewChange(
+                                                                    SwipePreviewState(
+                                                                        buttonText = button.displayText,
+                                                                        direction = swipeDirection,
+                                                                        dragOffset = currentDragOffset,
+                                                                        buttonCenter = buttonGlobalCenter
+                                                                    )
                                                                 )
                                                             } else {
-                                                                activeSwipePreview = null
+                                                                onSwipePreviewChange(null)
                                                             }
 
                                                             change.consume()
@@ -855,106 +953,6 @@ fun ComposeKeyboard(
                             } else {
                                 // Empty spacer for incomplete grid
                                 Spacer(modifier = Modifier.weight(1f))
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Global gesture feedback overlay (similar to WeChat voice input)
-            activeSwipePreview?.let { preview ->
-                // Display large feedback area in screen center
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .pointerInput(Unit) { /* Intercept underlying touch events */ },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .sizeIn(minWidth = 200.dp, minHeight = 200.dp)
-                            .padding(32.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        shadowElevation = 32.dp,
-                        tonalElevation = 24.dp,
-                        color = when (preview.direction) {
-                            SwipeDirection.UP -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.95f)
-                            SwipeDirection.DOWN -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f)
-                            SwipeDirection.LEFT -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.95f)
-                            SwipeDirection.RIGHT -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
-                            SwipeDirection.NONE -> MaterialTheme.colorScheme.surface
-                        }
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            // Operation name (top, most prominent)
-                            Text(
-                                text = when (preview.direction) {
-                                    SwipeDirection.UP -> gestureUp.getDisplayName()
-                                    SwipeDirection.DOWN -> gestureDown.getDisplayName()
-                                    SwipeDirection.LEFT -> gestureLeft.getDisplayName()
-                                    SwipeDirection.RIGHT -> gestureRight.getDisplayName()
-                                    SwipeDirection.NONE -> ""
-                                },
-                                style = MaterialTheme.typography.headlineLarge,
-                                fontSize = 32.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = when (preview.direction) {
-                                    SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiaryContainer
-                                    SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
-                                    SwipeDirection.LEFT -> MaterialTheme.colorScheme.onErrorContainer
-                                    SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimaryContainer
-                                    SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
-                                }
-                            )
-                            
-                            Spacer(modifier = Modifier.height(24.dp))
-                            
-                            // Direction icon and number (horizontal layout)
-                            Row(
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = when (preview.direction) {
-                                        SwipeDirection.UP -> Icons.Default.KeyboardArrowUp
-                                        SwipeDirection.DOWN -> Icons.Default.KeyboardArrowDown
-                                        SwipeDirection.LEFT -> Icons.Default.KeyboardArrowLeft
-                                        SwipeDirection.RIGHT -> Icons.Default.KeyboardArrowRight
-                                        SwipeDirection.NONE -> Icons.Default.Check
-                                    },
-                                    contentDescription = null,
-                                    tint = when (preview.direction) {
-                                        SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiaryContainer
-                                        SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
-                                        SwipeDirection.LEFT -> MaterialTheme.colorScheme.onErrorContainer
-                                        SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimaryContainer
-                                        SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
-                                    },
-                                    modifier = Modifier.size(64.dp)
-                                )
-                                
-                                Spacer(modifier = Modifier.width(16.dp))
-                                
-                                // Current number
-                                Text(
-                                    text = preview.buttonText,
-                                    style = MaterialTheme.typography.displayLarge,
-                                    fontSize = 72.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = when (preview.direction) {
-                                        SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiaryContainer
-                                        SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
-                                        SwipeDirection.LEFT -> MaterialTheme.colorScheme.onErrorContainer
-                                        SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimaryContainer
-                                        SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
-                                    }
-                                )
                             }
                         }
                     }

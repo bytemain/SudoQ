@@ -34,9 +34,9 @@ object GesturePreferences {
         }
         
         fun getDisplayName(): String = when (this) {
-            NORMAL -> "Normal Note"
-            STRIKETHROUGH -> "Strikethrough Note"
-            DELETE -> "Delete Note"
+            NORMAL -> "Normal"
+            STRIKETHROUGH -> "Strike"
+            DELETE -> "Delete"
             CANCEL -> "Cancel"
         }
     }
