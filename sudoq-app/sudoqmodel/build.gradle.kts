@@ -29,6 +29,7 @@ dependencies {
     testImplementation(libs.junit.vintage.engine)
 
     testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kluent)
     testImplementation(libs.mockk)
 

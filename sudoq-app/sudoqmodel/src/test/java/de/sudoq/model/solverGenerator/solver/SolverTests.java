@@ -233,7 +233,7 @@ public class SolverTests {
 		int count = 0;
 		for (int i = 0; i < 16; i++) {
 			for (int j = 0; j < 16; j++) {
-				assertEquals(map.get(Position.get(i, j)), new Integer(count));
+				assertEquals(map.get(Position.get(i, j)), Integer.valueOf(count));
 				count++;
 			}
 		}

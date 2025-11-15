@@ -4,8 +4,8 @@ import de.sudoq.model.persistence.IRepo;
 
 public class TypeBuilder {
 
-	//this is a dummy so it compiles todo use xmls from resources
-	private static IRepo<SudokuType> sudokuTypeRepo;//todo use mocks = new SudokuTypeRepo();
+	// Test repository that creates basic SudokuType instances
+	private static IRepo<SudokuType> sudokuTypeRepo = new TestSudokuTypeRepo();
 
 	public static SudokuType getType(SudokuTypes st){
 		return SudokuTypeProvider.getSudokuType(st, sudokuTypeRepo);

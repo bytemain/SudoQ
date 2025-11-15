@@ -104,7 +104,7 @@ public class SudokuTests {
 		PositionMap<Integer> solutions = new PositionMap<Integer>(Position.get(9, 9));
 		for (int x = 0; x < 9; x++) {
 			for (int y = 0; y < 9; y++) {
-				solutions.put(Position.get(x, y), new Integer(0));
+				solutions.put(Position.get(x, y), Integer.valueOf(0));
 			}
 		}
 		Sudoku sudoku = new Sudoku(sudokuType, solutions, null);
