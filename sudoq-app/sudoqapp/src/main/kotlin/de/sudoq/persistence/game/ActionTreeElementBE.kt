@@ -49,6 +49,20 @@ class ActionTreeElementBE(val id: Int, val action: Action, private val parentId:
         xml.addAttribute(XmlAttribute(DIFF, action.diff.toString()))
         xml.addAttribute(XmlAttribute(FIELD_ID, action.cellId.toString()))
         xml.addAttribute(XmlAttribute(ACTION_TYPE, action.XML_ATTRIBUTE_NAME))
+        
+        // Save NoteAction type (SET/REMOVE) to prevent double-toggling on load
+        if (action is de.sudoq.model.actionTree.NoteAction) {
+            xml.addAttribute(XmlAttribute(NOTE_ACTION_TYPE, action.actionType.name))
+        }
+        
+        // Save FillCandidatesAction cell changes data
+        if (action is de.sudoq.model.actionTree.FillCandidatesAction) {
+            // Serialize as: cellId1:candidate1:shouldSet1,cellId2:candidate2:shouldSet2,...
+            val cellChangesData = action.getCellChangesForSerialization()
+                .joinToString(",") { "${it.cell.id}:${it.candidate}:${it.shouldSet}" }
+            xml.addAttribute(XmlAttribute(FILL_CANDIDATES_DATA, cellChangesData))
+        }
+        
         xml.addAttribute(XmlAttribute(MARKED, java.lang.Boolean.toString(isMarked)))
         if (isMistake) {
             xml.addAttribute(XmlAttribute(MISTAKE, java.lang.Boolean.toString(true)))
@@ -95,6 +109,16 @@ class ActionTreeElementBE(val id: Int, val action: Action, private val parentId:
          * Constant for XmlAttribute
          */
         const val MISTAKE = "mistake"
+
+        /**
+         * Constant for XmlAttribute
+         */
+        const val NOTE_ACTION_TYPE = "note_action_type"
+
+        /**
+         * Constant for XmlAttribute - stores serialized FillCandidatesAction data
+         */
+        const val FILL_CANDIDATES_DATA = "fill_candidates_data"
 
         /**
          * Constant for XmlAttribute

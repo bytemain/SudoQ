@@ -68,6 +68,14 @@ class FillCandidatesAction(
         // Undo is handled by the undo() method which toggles notes back
         return false
     }
+    
+    /**
+     * Returns the cell changes for serialization.
+     * This is needed to properly save and restore FillCandidatesAction from XML.
+     */
+    fun getCellChangesForSerialization(): List<CellChange> {
+        return cellChanges
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

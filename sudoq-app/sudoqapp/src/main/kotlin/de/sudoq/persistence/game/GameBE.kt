@@ -79,7 +79,7 @@ class GameBE : XmlableWithRepo<SudokuType> {
         return representation
     }
 
-    override fun fillFromXml(xmlTreeRepresentation: XmlTree, sudokuTypeRepo: IRepo<SudokuType>) {
+    override fun fillFromXml(xmlTreeRepresentation: XmlTree, repo: IRepo<SudokuType>) {
         id = xmlTreeRepresentation.getAttributeValue("id")!!.toInt()
         time = xmlTreeRepresentation.getAttributeValue("time")!!.toInt()
         val currentStateId = xmlTreeRepresentation.getAttributeValue("currentTurnId")!!.toInt()
@@ -91,7 +91,7 @@ class GameBE : XmlableWithRepo<SudokuType> {
         for (sub in xmlTreeRepresentation) {
             if (sub.name == "sudoku") {
                 val sudokuBE = SudokuBE()
-                sudokuBE.fillFromXml(sub, sudokuTypeRepo)
+                sudokuBE.fillFromXml(sub, repo)
                 sudoku = SudokuMapper.fromBE(sudokuBE)
             } else if (sub.name == "gameSettings") {
                 val gameSettingsBE = GameSettingsBE()
@@ -116,15 +116,51 @@ class GameBE : XmlableWithRepo<SudokuType> {
                 // every element has e parent
                 val field_id = sub.getAttributeValue(ActionTreeElementBE.FIELD_ID)!!.toInt()
                 val f = sudoku!!.getCell(field_id)!!
-                if (sub.getAttributeValue(ActionTreeElementBE.ACTION_TYPE) == SolveAction::class.java.simpleName) {
+                val actionTypeName = sub.getAttributeValue(ActionTreeElementBE.ACTION_TYPE)
+                
+                if (actionTypeName == SolveAction::class.java.simpleName) {
                     stateHandler!!.addAndExecute(
                         SolveActionFactory().createAction(
                             f.currentValue + diff,
                             f
                         )
                     )
-                } else { // if(sub.getAttributeValue(ActionTreeElement.ACTION_TYPE).equals(NoteAction.class.getSimpleName()))
-                    stateHandler!!.addAndExecute(NoteActionFactory().createAction(diff, f))
+                } else if (actionTypeName == "FillCandidatesAction") {
+                    // Load FillCandidatesAction with all cell changes
+                    val fillCandidatesDataStr = sub.getAttributeValue(ActionTreeElementBE.FILL_CANDIDATES_DATA)
+                    if (fillCandidatesDataStr != null && fillCandidatesDataStr.isNotEmpty()) {
+                        // Parse: cellId1:candidate1:shouldSet1,cellId2:candidate2:shouldSet2,...
+                        val cellChanges = fillCandidatesDataStr.split(",").mapNotNull { entry ->
+                            val parts = entry.split(":")
+                            if (parts.size == 3) {
+                                val cellId = parts[0].toIntOrNull()
+                                val candidate = parts[1].toIntOrNull()
+                                val shouldSet = parts[2].toBooleanStrictOrNull()
+                                if (cellId != null && candidate != null && shouldSet != null) {
+                                    val cell = sudoku!!.getCell(cellId)
+                                    if (cell != null) {
+                                        de.sudoq.model.actionTree.FillCandidatesAction.CellChange(cell, candidate, shouldSet)
+                                    } else null
+                                } else null
+                            } else null
+                        }
+                        if (cellChanges.isNotEmpty()) {
+                            val fillAction = de.sudoq.model.actionTree.FillCandidatesAction(cellChanges)
+                            stateHandler!!.addAndExecute(fillAction)
+                        }
+                    }
+                } else { // NoteAction
+                    // Load NoteAction with saved actionType to prevent double-toggling
+                    val noteActionTypeStr = sub.getAttributeValue(ActionTreeElementBE.NOTE_ACTION_TYPE)
+                    val noteAction = if (noteActionTypeStr != null) {
+                        // New format: actionType is saved in XML
+                        val actionType = de.sudoq.model.actionTree.NoteAction.Action.valueOf(noteActionTypeStr)
+                        de.sudoq.model.actionTree.NoteAction(diff, actionType, f)
+                    } else {
+                        // Old format: use factory (for backward compatibility)
+                        NoteActionFactory().createAction(diff, f)
+                    }
+                    stateHandler!!.addAndExecute(noteAction)
                 }
                 if (java.lang.Boolean.parseBoolean(sub.getAttributeValue(ActionTreeElementBE.MARKED))) {
                     markCurrentState()
