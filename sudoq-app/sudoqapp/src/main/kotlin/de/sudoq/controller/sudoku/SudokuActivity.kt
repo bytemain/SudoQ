@@ -344,8 +344,8 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                         )
                     }
                     
-                    // Update game state when keyboard buttons change
-                    LaunchedEffect(keyboardButtons) {
+                    // Update game state when keyboard buttons or note mode changes
+                    LaunchedEffect(keyboardButtons, isNoteMode) {
                         gameState.value = gameState.value.copy(
                             keyboardButtons = keyboardButtons,
                             isNoteMode = isNoteMode
