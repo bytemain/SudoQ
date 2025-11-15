@@ -7,6 +7,7 @@
  */
 package de.sudoq.controller.tutorial
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -69,6 +70,14 @@ fun TutorialScreen(
 ) {
     var currentSection by remember { mutableStateOf(TutorialSection.OVERVIEW) }
     var selectedTechnique by remember { mutableStateOf<TechniqueDetail?>(null) }
+
+    // Handle back navigation for technique details and sections
+    BackHandler(enabled = selectedTechnique != null || currentSection != TutorialSection.OVERVIEW) {
+        when {
+            selectedTechnique != null -> selectedTechnique = null
+            currentSection != TutorialSection.OVERVIEW -> currentSection = TutorialSection.OVERVIEW
+        }
+    }
 
     Scaffold(
         topBar = {

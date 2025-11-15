@@ -7,6 +7,7 @@
  */
 package de.sudoq.view.actionTree
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -71,6 +72,11 @@ fun ActionTreeScreen(
     onToggleBookmark: ((ActionTreeElement) -> Unit)? = null,
     onClose: () -> Unit
 ) {
+    // Handle back button to close action tree
+    BackHandler {
+        onClose()
+    }
+    
     Scaffold(
         topBar = {
             TopAppBar(
