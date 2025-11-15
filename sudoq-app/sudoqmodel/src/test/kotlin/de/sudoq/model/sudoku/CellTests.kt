@@ -184,4 +184,72 @@ class CellTests {
         val cell = Cell(true, 2, 0, 4)
         invoking { run { cell.currentValue = 4 } } `should throw` IllegalArgumentException::class
     }
+
+    @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class StrikethroughNotes {
+        
+        @Test
+        fun `should toggle strikethrough for existing note`() {
+            val cell = Cell(true, 5, -1, 9)
+            cell.toggleNote(3)
+            
+            cell.isNoteStrikethrough(3).`should be false`()
+            
+            cell.toggleNoteStrikethrough(3)
+            cell.isNoteStrikethrough(3).`should be true`()
+            
+            cell.toggleNoteStrikethrough(3)
+            cell.isNoteStrikethrough(3).`should be false`()
+        }
+        
+        @Test
+        fun `should not toggle strikethrough for non-existing note`() {
+            val cell = Cell(true, 5, -1, 9)
+            // Note 3 is not set
+            
+            cell.toggleNoteStrikethrough(3)
+            cell.isNoteStrikethrough(3).`should be false`()
+        }
+        
+        @Test
+        fun `strikethrough should be preserved in clone`() {
+            val cell = Cell(true, 5, -1, 9)
+            cell.toggleNote(3)
+            cell.toggleNoteStrikethrough(3)
+            
+            val clone = cell.clone() as Cell
+            clone.isNoteSet(3).`should be true`()
+            clone.isNoteStrikethrough(3).`should be true`()
+        }
+        
+        @Test
+        fun `strikethrough should affect equality`() {
+            val cell1 = Cell(true, 5, -1, 9)
+            val cell2 = Cell(true, 5, -1, 9)
+            
+            cell1.toggleNote(3)
+            cell2.toggleNote(3)
+            
+            cell1 `should be equal to` cell2
+            
+            cell1.toggleNoteStrikethrough(3)
+            cell1 `should not be equal to` cell2
+            
+            cell2.toggleNoteStrikethrough(3)
+            cell1 `should be equal to` cell2
+        }
+        
+        @Test
+        fun `should clear strikethrough`() {
+            val cell = Cell(true, 5, -1, 9)
+            cell.toggleNote(3)
+            cell.toggleNoteStrikethrough(3)
+            
+            cell.isNoteStrikethrough(3).`should be true`()
+            
+            cell.clearNoteStrikethrough(3)
+            cell.isNoteStrikethrough(3).`should be false`()
+        }
+    }
 }
