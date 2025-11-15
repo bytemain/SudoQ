@@ -637,6 +637,13 @@ fun ComposeKeyboard(
     val totalSymbols = buttons.size
     val gridSize = kotlin.math.ceil(kotlin.math.sqrt(totalSymbols.toDouble())).toInt()
 
+    // Load gesture preferences
+    val context = LocalContext.current
+    val gestureUp = remember { GesturePreferences.loadGestureUp(context) }
+    val gestureDown = remember { GesturePreferences.loadGestureDown(context) }
+    val gestureLeft = remember { GesturePreferences.loadGestureLeft(context) }
+    val gestureRight = remember { GesturePreferences.loadGestureRight(context) }
+
     // Track active swipe preview globally
     var activeSwipePreview by remember { mutableStateOf<SwipePreviewState?>(null) }
     
@@ -729,26 +736,20 @@ fun ComposeKeyboard(
                                                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                                     },
                                                     onDragEnd = {
-                                                        // Execute operation based on final direction
-                                                        when (swipeDirection) {
-                                                            SwipeDirection.UP -> {
-                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                                onButtonSwipe(button.symbol, NoteStyle.STRIKETHROUGH)
-                                                            }
-                                                            SwipeDirection.DOWN -> {
-                                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                            }
-                                                            SwipeDirection.LEFT -> {
-                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                                onButtonSwipe(button.symbol, null)
-                                                            }
-                                                            SwipeDirection.RIGHT -> {
-                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                                onButtonSwipe(button.symbol, NoteStyle.NORMAL)
-                                                            }
-                                                            SwipeDirection.NONE -> {
-                                                                // No direction, no operation
-                                                            }
+                                                        // Execute operation based on final direction and user preferences
+                                                        val action = when (swipeDirection) {
+                                                            SwipeDirection.UP -> gestureUp
+                                                            SwipeDirection.DOWN -> gestureDown
+                                                            SwipeDirection.LEFT -> gestureLeft
+                                                            SwipeDirection.RIGHT -> gestureRight
+                                                            SwipeDirection.NONE -> null
+                                                        }
+                                                        
+                                                        if (action != null && action != GesturePreferences.GestureAction.CANCEL) {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            onButtonSwipe(button.symbol, action.toNoteStyle())
+                                                        } else if (action == GesturePreferences.GestureAction.CANCEL) {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                                         }
                                                         
                                                         // Reset state
@@ -894,10 +895,10 @@ fun ComposeKeyboard(
                             // Operation name (top, most prominent)
                             Text(
                                 text = when (preview.direction) {
-                                    SwipeDirection.UP -> "Strikethrough"
-                                    SwipeDirection.DOWN -> "Cancel"
-                                    SwipeDirection.LEFT -> "Delete"
-                                    SwipeDirection.RIGHT -> "Normal"
+                                    SwipeDirection.UP -> gestureUp.getDisplayName()
+                                    SwipeDirection.DOWN -> gestureDown.getDisplayName()
+                                    SwipeDirection.LEFT -> gestureLeft.getDisplayName()
+                                    SwipeDirection.RIGHT -> gestureRight.getDisplayName()
                                     SwipeDirection.NONE -> ""
                                 },
                                 style = MaterialTheme.typography.headlineLarge,

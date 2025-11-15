@@ -220,6 +220,14 @@ fun AppSettingsScreen(
             }
             
             item {
+                GestureSettingsSection()
+            }
+            
+            item {
+                Divider(modifier = Modifier.padding(horizontal = 16.dp))
+            }
+            
+            item {
                 SettingsNavigationItem(
                     title = stringResource(R.string.restrict_sudoku_types),
                     subtitle = stringResource(R.string.restrict_sudoku_types_desc),
@@ -683,6 +691,170 @@ private fun KeyboardLayoutDropdown(
                         { Icon(Icons.Default.Check, contentDescription = null) }
                     } else null
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun GestureSettingsSection() {
+    val context = LocalContext.current
+    
+    var gestureUp by remember { 
+        mutableStateOf(de.sudoq.controller.sudoku.GesturePreferences.loadGestureUp(context)) 
+    }
+    var gestureDown by remember { 
+        mutableStateOf(de.sudoq.controller.sudoku.GesturePreferences.loadGestureDown(context)) 
+    }
+    var gestureLeft by remember { 
+        mutableStateOf(de.sudoq.controller.sudoku.GesturePreferences.loadGestureLeft(context)) 
+    }
+    var gestureRight by remember { 
+        mutableStateOf(de.sudoq.controller.sudoku.GesturePreferences.loadGestureRight(context)) 
+    }
+    
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = "Gesture Settings",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        
+        Text(
+            text = "Configure keyboard swipe gestures",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        
+        // Swipe Up
+        GestureActionSelector(
+            label = "Swipe Up",
+            icon = "↑",
+            currentAction = gestureUp,
+            onActionChange = { 
+                gestureUp = it
+                de.sudoq.controller.sudoku.GesturePreferences.saveGestureUp(context, it)
+            }
+        )
+        
+        // Swipe Down
+        GestureActionSelector(
+            label = "Swipe Down",
+            icon = "↓",
+            currentAction = gestureDown,
+            onActionChange = { 
+                gestureDown = it
+                de.sudoq.controller.sudoku.GesturePreferences.saveGestureDown(context, it)
+            }
+        )
+        
+        // Swipe Left
+        GestureActionSelector(
+            label = "Swipe Left",
+            icon = "←",
+            currentAction = gestureLeft,
+            onActionChange = { 
+                gestureLeft = it
+                de.sudoq.controller.sudoku.GesturePreferences.saveGestureLeft(context, it)
+            }
+        )
+        
+        // Swipe Right
+        GestureActionSelector(
+            label = "Swipe Right",
+            icon = "→",
+            currentAction = gestureRight,
+            onActionChange = { 
+                gestureRight = it
+                de.sudoq.controller.sudoku.GesturePreferences.saveGestureRight(context, it)
+            }
+        )
+        
+        // Reset to defaults button
+        OutlinedButton(
+            onClick = {
+                gestureUp = de.sudoq.controller.sudoku.GesturePreferences.GestureAction.STRIKETHROUGH
+                gestureDown = de.sudoq.controller.sudoku.GesturePreferences.GestureAction.CANCEL
+                gestureLeft = de.sudoq.controller.sudoku.GesturePreferences.GestureAction.DELETE
+                gestureRight = de.sudoq.controller.sudoku.GesturePreferences.GestureAction.NORMAL
+                
+                de.sudoq.controller.sudoku.GesturePreferences.saveGestureUp(context, gestureUp)
+                de.sudoq.controller.sudoku.GesturePreferences.saveGestureDown(context, gestureDown)
+                de.sudoq.controller.sudoku.GesturePreferences.saveGestureLeft(context, gestureLeft)
+                de.sudoq.controller.sudoku.GesturePreferences.saveGestureRight(context, gestureRight)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Reset to Defaults")
+        }
+    }
+}
+
+@Composable
+private fun GestureActionSelector(
+    label: String,
+    icon: String,
+    currentAction: de.sudoq.controller.sudoku.GesturePreferences.GestureAction,
+    onActionChange: (de.sudoq.controller.sudoku.GesturePreferences.GestureAction) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    
+    Surface(
+        tonalElevation = 1.dp,
+        shape = MaterialTheme.shapes.small,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = icon,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            
+            Box {
+                FilledTonalButton(
+                    onClick = { expanded = true }
+                ) {
+                    Text(currentAction.getDisplayName())
+                }
+                
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    de.sudoq.controller.sudoku.GesturePreferences.GestureAction.entries.forEach { action ->
+                        DropdownMenuItem(
+                            text = { Text(action.getDisplayName()) },
+                            onClick = {
+                                onActionChange(action)
+                                expanded = false
+                            },
+                            leadingIcon = if (action == currentAction) {
+                                { Icon(Icons.Default.Check, contentDescription = null) }
+                            } else null
+                        )
+                    }
+                }
             }
         }
     }
