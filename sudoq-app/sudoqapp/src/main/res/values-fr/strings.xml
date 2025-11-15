@@ -88,6 +88,7 @@
     <!-- SudokuActivity -->
     <string name="sf_sudoku_button_bookmark">Marque-page</string>
     <string name="sf_sudoku_button_close">Fermer</string>
+    <string name="sf_sudoku_button_clear">Effacer</string>
     <string name="sf_sudoku_assistances_title">Aide</string>
     <string name="sf_sudoku_assistances_check">Vérifier la solution</string>
     <string name="sf_sudoku_assistances_solve_specific">Résoudre la case choisie</string>

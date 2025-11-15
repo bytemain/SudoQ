@@ -94,6 +94,7 @@
     <string name="sf_sudoku_button_undo">撤销</string>
     <string name="sf_sudoku_button_redo">重做</string>
     <string name="sf_sudoku_button_note">笔记</string>
+    <string name="sf_sudoku_button_clear">清除</string>
     <string name="sf_sudoku_button_hint">提示</string>
     <string name="sf_sudoku_button_solve">求解</string>
     <string name="sf_sudoku_button_autofill">自动填充唯一候选数</string>

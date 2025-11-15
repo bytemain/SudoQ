@@ -44,7 +44,8 @@ data class SudokuGameState(
     val onHintContinue: (() -> Unit)? = null,
     val onHintExecute: (() -> Unit)? = null,
     val keyboardButtons: List<KeyboardButtonState> = emptyList(),
-    val isNoteMode: Boolean = false
+    val isNoteMode: Boolean = false,
+    val canClearSelectedCell: Boolean = false
 )
 
 /**
@@ -89,6 +90,7 @@ fun SudokuScreen(
     onHintClick: () -> Unit,
     onSolveClick: () -> Unit,
     onNoteToggle: () -> Unit,
+    onClearClick: () -> Unit,
     onKeyboardInput: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -235,11 +237,13 @@ fun SudokuScreen(
                     // Control Panel
                     SudokuControlPanel(
                         isNoteMode = state.isNoteMode,
+                        canClearSelectedCell = state.canClearSelectedCell,
                         onUndoClick = onUndoClick,
                         onRedoClick = onRedoClick,
                         onHintClick = onHintClick,
                         onSolveClick = onSolveClick,
                         onNoteToggle = onNoteToggle,
+                        onClearClick = onClearClick,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
@@ -314,11 +318,13 @@ fun SudokuScreen(
                 // Control Panel
                 SudokuControlPanel(
                     isNoteMode = state.isNoteMode,
+                    canClearSelectedCell = state.canClearSelectedCell,
                     onUndoClick = onUndoClick,
                     onRedoClick = onRedoClick,
                     onHintClick = onHintClick,
                     onSolveClick = onSolveClick,
                     onNoteToggle = onNoteToggle,
+                    onClearClick = onClearClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(64.dp)
@@ -360,11 +366,13 @@ fun SudokuScreen(
 @Composable
 fun SudokuControlPanel(
     isNoteMode: Boolean,
+    canClearSelectedCell: Boolean,
     onUndoClick: () -> Unit,
     onRedoClick: () -> Unit,
     onHintClick: () -> Unit,
     onSolveClick: () -> Unit,
     onNoteToggle: () -> Unit,
+    onClearClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -403,28 +411,47 @@ fun SudokuControlPanel(
                 )
             }
             
-            // Note toggle button - shows different icons based on mode
-            FilledTonalIconButton(
-                onClick = onNoteToggle,
-                modifier = Modifier.size(48.dp),
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = if (isNoteMode) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceVariant
-                    },
-                    contentColor = if (isNoteMode) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
-                )
-            ) {
-                Icon(
-                    imageVector = if (isNoteMode) Icons.Default.EditNote else Icons.Default.Create,
-                    contentDescription = stringResource(R.string.sf_sudoku_button_note),
-                    modifier = Modifier.size(24.dp)
-                )
+            // Note toggle / Clear button - changes based on whether a filled cell is selected
+            if (canClearSelectedCell) {
+                // Clear button - shown when a filled cell is selected
+                FilledTonalIconButton(
+                    onClick = onClearClick,
+                    modifier = Modifier.size(48.dp),
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = stringResource(R.string.sf_sudoku_button_clear),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            } else {
+                // Note toggle button - shows different icons based on mode
+                FilledTonalIconButton(
+                    onClick = onNoteToggle,
+                    modifier = Modifier.size(48.dp),
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = if (isNoteMode) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        },
+                        contentColor = if (isNoteMode) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                ) {
+                    Icon(
+                        imageVector = if (isNoteMode) Icons.Default.EditNote else Icons.Default.Create,
+                        contentDescription = stringResource(R.string.sf_sudoku_button_note),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
             
             // Hint button

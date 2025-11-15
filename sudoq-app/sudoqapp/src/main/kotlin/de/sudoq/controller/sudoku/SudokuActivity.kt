@@ -329,7 +329,8 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                                 onHintContinue = hintState?.onContinue,
                                 onHintExecute = hintState?.onExecute,
                                 keyboardButtons = keyboardButtons,
-                                isNoteMode = isNoteMode
+                                isNoteMode = isNoteMode,
+                                canClearSelectedCell = canClearSelectedCell()
                             )
                         )
                     }
@@ -345,10 +346,11 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                     }
                     
                     // Update game state when keyboard buttons or note mode changes
-                    LaunchedEffect(keyboardButtons, isNoteMode) {
+                    LaunchedEffect(keyboardButtons, isNoteMode, keyboardUpdateTrigger.value) {
                         gameState.value = gameState.value.copy(
                             keyboardButtons = keyboardButtons,
-                            isNoteMode = isNoteMode
+                            isNoteMode = isNoteMode,
+                            canClearSelectedCell = canClearSelectedCell()
                         )
                     }
                     
@@ -435,10 +437,21 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                             keyboardButtons = getKeyboardButtonStates()
                             isNoteMode = mediator?.isNoteMode() ?: false
                         },
+                        onClearClick = {
+                            // Clear the selected cell by setting it to empty value
+                            val currentField = sudokuLayout!!.currentCellView
+                            if (currentField != null && currentField.cell.isEditable && currentField.cell.currentValue != Cell.EMPTYVAL) {
+                                mediator?.onInput(currentField.cell.currentValue) // Clicking same value deletes it
+                                keyboardButtons = getKeyboardButtonStates()
+                                updateButtons()
+                                requestKeyboardUpdate() // Trigger immediate UI update
+                            }
+                        },
                         onKeyboardInput = { symbol ->
                             mediator?.onInput(symbol)
                             keyboardButtons = getKeyboardButtonStates()
                             updateButtons()
+                            requestKeyboardUpdate() // Trigger immediate UI update
                         }
                     )
                 }
@@ -946,6 +959,15 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
         }
         
         return buttons
+    }
+    
+    /**
+     * Check if the currently selected cell can be cleared
+     */
+    private fun canClearSelectedCell(): Boolean {
+        val currentField = sudokuLayout?.currentCellView ?: return false
+        val cell = currentField.cell
+        return cell.isEditable && cell.currentValue != Cell.EMPTYVAL
     }
     
     /**
