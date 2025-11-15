@@ -42,7 +42,8 @@ data class SudokuGameState(
     val hintHasExecute: Boolean = false,
     val onHintContinue: (() -> Unit)? = null,
     val onHintExecute: (() -> Unit)? = null,
-    val keyboardButtons: List<KeyboardButtonState> = emptyList()
+    val keyboardButtons: List<KeyboardButtonState> = emptyList(),
+    val isNoteMode: Boolean = false
 )
 
 /**
@@ -227,6 +228,7 @@ fun SudokuScreen(
                 ) {
                     // Control Panel
                     SudokuControlPanel(
+                        isNoteMode = state.isNoteMode,
                         onUndoClick = onUndoClick,
                         onRedoClick = onRedoClick,
                         onHintClick = onHintClick,
@@ -305,6 +307,7 @@ fun SudokuScreen(
                 
                 // Control Panel
                 SudokuControlPanel(
+                    isNoteMode = state.isNoteMode,
                     onUndoClick = onUndoClick,
                     onRedoClick = onRedoClick,
                     onHintClick = onHintClick,
@@ -350,6 +353,7 @@ fun SudokuScreen(
  */
 @Composable
 fun SudokuControlPanel(
+    isNoteMode: Boolean,
     onUndoClick: () -> Unit,
     onRedoClick: () -> Unit,
     onHintClick: () -> Unit,
@@ -393,13 +397,25 @@ fun SudokuControlPanel(
                 )
             }
             
-            // Note toggle button
+            // Note toggle button - shows different icons based on mode
             FilledTonalIconButton(
                 onClick = onNoteToggle,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(48.dp),
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = if (isNoteMode) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    },
+                    contentColor = if (isNoteMode) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
             ) {
                 Icon(
-                    imageVector = Icons.Default.Edit,
+                    imageVector = if (isNoteMode) Icons.Default.EditNote else Icons.Default.Create,
                     contentDescription = stringResource(R.string.sf_sudoku_button_note),
                     modifier = Modifier.size(24.dp)
                 )

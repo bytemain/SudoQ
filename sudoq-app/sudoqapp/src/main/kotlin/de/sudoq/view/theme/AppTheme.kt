@@ -184,9 +184,16 @@ fun createBoardThemeColors(colorScheme: ColorScheme, isDark: Boolean): BoardThem
     val selectionAlpha = if (isDark) 0.4f else 0.3f
     val connectedAlpha = if (isDark) 0.25f else 0.2f
     
+    // Use a distinct yellow/amber color for note mode to differentiate from input mode
+    val noteColor = if (isDark) {
+        Color(0xFFFFD54F) // Amber 300 - lighter yellow for dark mode
+    } else {
+        Color(0xFFFFF59D) // Yellow 200 - bright yellow for light mode
+    }
+    
     return BoardThemeColors(
         selectionInputColor = colorScheme.primary.copy(alpha = selectionAlpha).toAndroidColor(),
-        selectionNoteColor = colorScheme.secondary.copy(alpha = selectionAlpha).toAndroidColor(),
+        selectionNoteColor = noteColor.copy(alpha = selectionAlpha).toAndroidColor(),
         selectionColor = colorScheme.primaryContainer.toAndroidColor(),
         connectedColor = colorScheme.secondaryContainer.copy(alpha = connectedAlpha).toAndroidColor(),
         sameNumberColor = colorScheme.tertiaryContainer.toAndroidColor(),
