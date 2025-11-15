@@ -67,6 +67,16 @@ class SudokuBE() : XmlableWithRepo<SudokuType> {
                         notes.joinToString(separator = ",")
                     )
                 )
+                // Persist strikethrough state for notes
+                val strikethroughNotes = notes.filter { value.isNoteStrikethrough(it) }
+                if (strikethroughNotes.isNotEmpty()) {
+                    fieldmap.addAttribute(
+                        XmlAttribute(
+                            "notesStrikethrough",
+                            strikethroughNotes.joinToString(separator = ",")
+                        )
+                    )
+                }
             }
             val position = XmlTree("position")
             position.addAttribute(XmlAttribute("x", "" + key.x))
@@ -127,6 +137,18 @@ class SudokuBE() : XmlableWithRepo<SudokuType> {
                             cell.toggleNote(noteIdx)
                         } else {
                             Log.w("SudokuBE", "Skipping invalid note index $noteIdx (valid range: 0-${sudokuType!!.numberOfSymbols - 1})")
+                        }
+                    }
+                    
+                    // Restore strikethrough state for notes if present
+                    val strikethroughAttr = sub.getAttributeValue("notesStrikethrough")
+                    if (!strikethroughAttr.isNullOrBlank()) {
+                        val strikethroughIndices = strikethroughAttr.split(',')
+                            .mapNotNull { it.trim().toIntOrNull() }
+                        for (noteIdx in strikethroughIndices) {
+                            if (noteIdx >= 0 && noteIdx < sudokuType!!.numberOfSymbols) {
+                                cell.toggleNoteStrikethrough(noteIdx)
+                            }
                         }
                     }
                 }

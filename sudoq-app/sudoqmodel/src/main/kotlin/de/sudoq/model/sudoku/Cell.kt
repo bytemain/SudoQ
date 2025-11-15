@@ -34,6 +34,9 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
     /** The set notes in this cell; Symbol $n$ is represented by bit number n-1 being set */
     private var noticeFlags: BitSet
 
+    /** The strikethrough state for notes; Symbol $n$ is represented by bit number n-1 being set */
+    private var notesStrikethrough: BitSet
+
     /** The highest value this cell can take */
     val maxValue: Int
 
@@ -167,6 +170,44 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
     }
 
     /**
+     * Checks if a note has strikethrough applied.
+     *
+     * @param value note value
+     * @return true if the note has strikethrough, false otherwise
+     */
+    fun isNoteStrikethrough(value: Int): Boolean {
+        return value >= 0 && notesStrikethrough[value]
+    }
+
+    /**
+     * Toggles the strikethrough state for a note. If the note is not set, nothing happens.
+     *
+     * @param value the note to toggle strikethrough for
+     */
+    fun toggleNoteStrikethrough(value: Int) {
+        if (value < 0 || value > maxValue) {
+            return
+        }
+        // Only toggle strikethrough if the note is actually set
+        if (noticeFlags[value]) {
+            notesStrikethrough.flip(value)
+            notifyListeners(this)
+        }
+    }
+
+    /**
+     * Clears the strikethrough state for a note.
+     *
+     * @param value the note to clear strikethrough from
+     */
+    fun clearNoteStrikethrough(value: Int) {
+        if (value >= 0 && value <= maxValue && notesStrikethrough[value]) {
+            notesStrikethrough.clear(value)
+            notifyListeners(this)
+        }
+    }
+
+    /**
      * Returns the number of notes set in this cell.
      *
      * @return the count of set notes
@@ -263,6 +304,7 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
                     && currentVal == other.currentVal
                     && isEditable == other.isEditable
                     && noticeFlags == other.noticeFlags
+                    && notesStrikethrough == other.notesStrikethrough
         }
         return false
     }
@@ -287,6 +329,7 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
         )
         clone.currentValue = currentVal
         clone.noticeFlags = noticeFlags.clone() as BitSet
+        clone.notesStrikethrough = notesStrikethrough.clone() as BitSet
         return clone
     }
 
@@ -305,6 +348,7 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
     init {
         require(!(solution < 0 && solution != EMPTYVAL)) { "Solution has to be positive." }
         noticeFlags = BitSet()
+        notesStrikethrough = BitSet()
         maxValue = numberOfValues - 1
         this.id = id
         isEditable = editable

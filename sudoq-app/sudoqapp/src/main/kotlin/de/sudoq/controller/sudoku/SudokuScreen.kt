@@ -44,7 +44,8 @@ data class SudokuGameState(
     val onHintContinue: (() -> Unit)? = null,
     val onHintExecute: (() -> Unit)? = null,
     val keyboardButtons: List<KeyboardButtonState> = emptyList(),
-    val isNoteMode: Boolean = false
+    val isNoteMode: Boolean = false,
+    val selectedCellHasValue: Boolean = false
 )
 
 /**
@@ -111,9 +112,17 @@ fun SudokuScreen(
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = formatTime(state.elapsedTime),
+                            text = if (state.selectedCellHasValue) {
+                                stringResource(R.string.hint_tap_to_clear)
+                            } else {
+                                formatTime(state.elapsedTime)
+                            },
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = if (state.selectedCellHasValue) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
                         )
                     }
                 },

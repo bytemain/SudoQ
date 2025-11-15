@@ -218,7 +218,18 @@ class SudokuCellView(
                     canvas.drawRect(bgRect, bgPaint)
                 }
                 
+                // Draw the note text
                 canvas.drawText(note + "", cx, baseline, notePaint)
+                
+                // Draw strikethrough line if enabled for this note
+                if (cell.isNoteStrikethrough(i)) {
+                    val strikePaint = Paint()
+                    strikePaint.color = Color.RED
+                    strikePaint.strokeWidth = 2f
+                    strikePaint.isAntiAlias = true
+                    // Draw diagonal line from bottom-left to top-right
+                    canvas.drawLine(left + 2f, bottom - 2f, right - 2f, top + 2f, strikePaint)
+                }
             }
         }
     }
@@ -445,6 +456,58 @@ class SudokuCellView(
 	}*/
     companion object {
     }
+    
+    /**
+     * Override onTouchEvent to detect long-press on individual notes
+     */
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        // Only handle long-press on notes when cell is not solved and not in note entry mode
+        if (cell.isNotSolved && event.action == MotionEvent.ACTION_DOWN && !isNoteMode) {
+            // Calculate which note was touched
+            val noteIndex = getNoteIndexAtPosition(event.x, event.y)
+            if (noteIndex >= 0 && cell.isNoteSet(noteIndex)) {
+                // Detected touch on a note - start a timer for long-press detection
+                lastTouchedNoteIndex = noteIndex
+                lastTouchTime = System.currentTimeMillis()
+            }
+        } else if (event.action == MotionEvent.ACTION_UP && lastTouchedNoteIndex >= 0) {
+            // Check if it was a long-press (held for at least 500ms)
+            val touchDuration = System.currentTimeMillis() - lastTouchTime
+            if (touchDuration >= 500) {
+                // Toggle strikethrough for this note
+                cell.toggleNoteStrikethrough(lastTouchedNoteIndex)
+                invalidate()
+                lastTouchedNoteIndex = -1
+                return true  // Consume the event
+            }
+            lastTouchedNoteIndex = -1
+        }
+        return super.onTouchEvent(event)
+    }
+
+    /**
+     * Track which note was last touched and when
+     */
+    private var lastTouchedNoteIndex: Int = -1
+    private var lastTouchTime: Long = 0
+
+    /**
+     * Determines which note (if any) was touched at the given coordinates.
+     * Returns -1 if no note was touched.
+     */
+    private fun getNoteIndexAtPosition(x: Float, y: Float): Int {
+        val raster = Symbol.getInstance().getRasterSize()
+        val noteCellSize = height / raster.toFloat()
+        
+        val col = (x / noteCellSize).toInt()
+        val row = (y / noteCellSize).toInt()
+        
+        if (col >= 0 && col < raster && row >= 0 && row < raster) {
+            return row * raster + col
+        }
+        return -1
+    }
+    
     /* Constructors */ /**
      * Instantiates a SudokuCellView.
      *

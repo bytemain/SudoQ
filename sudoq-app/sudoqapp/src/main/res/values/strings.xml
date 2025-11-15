@@ -43,6 +43,7 @@
     <string name="toast_multi_select_deactivated">Multi-selection mode deactivated</string>
     <string name="toast_cell_not_editable">This cell is not editable</string>
     <string name="button_exit_multi_select">Cancel Selection</string>
+    <string name="hint_tap_to_clear">Tap again to clear</string>
     
     <!-- Splash -->
     <string name="splash_text">SudoQ is being initialized for the first start</string>    

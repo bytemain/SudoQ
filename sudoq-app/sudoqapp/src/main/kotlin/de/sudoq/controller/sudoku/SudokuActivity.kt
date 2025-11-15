@@ -295,6 +295,7 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                     var hintState by remember { mutableStateOf<HintState?>(null) }
                     var keyboardButtons by remember { mutableStateOf<List<KeyboardButtonState>>(emptyList()) }
                     var isNoteMode by remember { mutableStateOf(false) }
+                    var selectedCellHasValue by remember { mutableStateOf(false) }
                     val keyboardTrigger by keyboardUpdateTrigger
                     
                     // Update hint state when currentHintState changes
@@ -313,6 +314,8 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                         if (keyboardTrigger > 0) {
                             keyboardButtons = getKeyboardButtonStates()
                             isNoteMode = mediator?.isNoteMode() ?: false
+                            // Update selected cell state
+                            selectedCellHasValue = sudokuLayout?.currentCellView?.cell?.isSolved ?: false
                         }
                     }
                     
@@ -329,7 +332,8 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                                 onHintContinue = hintState?.onContinue,
                                 onHintExecute = hintState?.onExecute,
                                 keyboardButtons = keyboardButtons,
-                                isNoteMode = isNoteMode
+                                isNoteMode = isNoteMode,
+                                selectedCellHasValue = selectedCellHasValue
                             )
                         )
                     }
@@ -345,10 +349,11 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                     }
                     
                     // Update game state when keyboard buttons or note mode changes
-                    LaunchedEffect(keyboardButtons, isNoteMode) {
+                    LaunchedEffect(keyboardButtons, isNoteMode, selectedCellHasValue) {
                         gameState.value = gameState.value.copy(
                             keyboardButtons = keyboardButtons,
-                            isNoteMode = isNoteMode
+                            isNoteMode = isNoteMode,
+                            selectedCellHasValue = selectedCellHasValue
                         )
                     }
                     
