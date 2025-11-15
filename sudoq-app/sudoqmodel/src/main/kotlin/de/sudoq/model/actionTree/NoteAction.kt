@@ -8,11 +8,17 @@
 package de.sudoq.model.actionTree
 
 import de.sudoq.model.sudoku.Cell
+import de.sudoq.model.sudoku.NoteStyle
 
 /**
  * This class represents an action that adds or removes notes from a [cell].
  */
-class NoteAction(diff: Int, val actionType: Action, cell: Cell) : Action(diff, cell) {
+class NoteAction(
+    diff: Int, 
+    val actionType: Action, 
+    cell: Cell,
+    val noteStyle: NoteStyle = NoteStyle.NORMAL
+) : Action(diff, cell) {
 
     enum class Action {SET, REMOVE}
 
@@ -26,8 +32,13 @@ class NoteAction(diff: Int, val actionType: Action, cell: Cell) : Action(diff, c
      */
     override fun execute() {
         if (actionType == Action.SET && !cell.isNoteSet(diff)
-            || actionType == Action.REMOVE && cell.isNoteSet(diff))
+            || actionType == Action.REMOVE && cell.isNoteSet(diff)) {
             cell.toggleNote(diff)
+            // Set the style after adding the note
+            if (actionType == Action.SET) {
+                cell.setNoteStyle(diff, noteStyle)
+            }
+        }
     }
 
     /**

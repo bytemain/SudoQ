@@ -218,7 +218,28 @@ class SudokuCellView(
                     canvas.drawRect(bgRect, bgPaint)
                 }
                 
+                // Check note style and apply visual effects
+                val noteStyle = cell.getNoteStyle(i)
+                if (noteStyle == de.sudoq.model.sudoku.NoteStyle.STRIKETHROUGH) {
+                    // Use gray color for strikethrough notes
+                    notePaint.color = Color.GRAY
+                }
+                
                 canvas.drawText(note + "", cx, baseline, notePaint)
+                
+                // Draw strikethrough line if needed
+                if (noteStyle == de.sudoq.model.sudoku.NoteStyle.STRIKETHROUGH) {
+                    val linePaint = Paint()
+                    linePaint.color = Color.GRAY
+                    linePaint.strokeWidth = 2f
+                    linePaint.isAntiAlias = true
+                    // Draw horizontal line through the middle of the note
+                    val lineY = (top + bottom) / 2f
+                    canvas.drawLine(left + 2f, lineY, right - 2f, lineY, linePaint)
+                }
+                
+                // Reset color for next note
+                notePaint.color = Color.BLACK
             }
         }
     }

@@ -53,6 +53,7 @@ class ActionTreeElementBE(val id: Int, val action: Action, private val parentId:
         // Save NoteAction type (SET/REMOVE) to prevent double-toggling on load
         if (action is de.sudoq.model.actionTree.NoteAction) {
             xml.addAttribute(XmlAttribute(NOTE_ACTION_TYPE, action.actionType.name))
+            xml.addAttribute(XmlAttribute(NOTE_STYLE, action.noteStyle.name))
         }
         
         // Save FillCandidatesAction cell changes data
@@ -114,6 +115,11 @@ class ActionTreeElementBE(val id: Int, val action: Action, private val parentId:
          * Constant for XmlAttribute
          */
         const val NOTE_ACTION_TYPE = "note_action_type"
+
+        /**
+         * Constant for XmlAttribute - stores note style (NORMAL/STRIKETHROUGH)
+         */
+        const val NOTE_STYLE = "note_style"
 
         /**
          * Constant for XmlAttribute - stores serialized FillCandidatesAction data

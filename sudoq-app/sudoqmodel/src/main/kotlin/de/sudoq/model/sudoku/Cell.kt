@@ -33,6 +33,9 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
 
     /** The set notes in this cell; Symbol $n$ is represented by bit number n-1 being set */
     private var noticeFlags: BitSet
+    
+    /** The style (strikethrough/normal) for each note; Symbol $n$ style is stored at bit n */
+    private var noteStyleFlags: BitSet
 
     /** The highest value this cell can take */
     val maxValue: Int
@@ -163,6 +166,47 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
             return
         }
         noticeFlags.flip(value)
+        notifyListeners(this)
+    }
+    
+    /**
+     * Returns the style of a note.
+     *
+     * @param value the note value
+     * @return the note style (NORMAL or STRIKETHROUGH)
+     */
+    fun getNoteStyle(value: Int): NoteStyle {
+        return if (value >= 0 && noteStyleFlags[value]) {
+            NoteStyle.STRIKETHROUGH
+        } else {
+            NoteStyle.NORMAL
+        }
+    }
+    
+    /**
+     * Sets the style of a note.
+     *
+     * @param value the note value
+     * @param style the style to set
+     */
+    fun setNoteStyle(value: Int, style: NoteStyle) {
+        if (value < 0 || value > maxValue) return
+        
+        when (style) {
+            NoteStyle.NORMAL -> noteStyleFlags.clear(value)
+            NoteStyle.STRIKETHROUGH -> noteStyleFlags.set(value)
+        }
+        notifyListeners(this)
+    }
+    
+    /**
+     * Toggles the style of a note between NORMAL and STRIKETHROUGH.
+     *
+     * @param value the note value
+     */
+    fun toggleNoteStyle(value: Int) {
+        if (value < 0 || value > maxValue) return
+        noteStyleFlags.flip(value)
         notifyListeners(this)
     }
 
@@ -305,6 +349,7 @@ class Cell(editable: Boolean, solution: Int, id: Int, numberOfValues: Int) :
     init {
         require(!(solution < 0 && solution != EMPTYVAL)) { "Solution has to be positive." }
         noticeFlags = BitSet()
+        noteStyleFlags = BitSet()
         maxValue = numberOfValues - 1
         this.id = id
         isEditable = editable

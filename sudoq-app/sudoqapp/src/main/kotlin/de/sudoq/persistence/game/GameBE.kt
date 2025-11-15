@@ -152,10 +152,16 @@ class GameBE : XmlableWithRepo<SudokuType> {
                 } else { // NoteAction
                     // Load NoteAction with saved actionType to prevent double-toggling
                     val noteActionTypeStr = sub.getAttributeValue(ActionTreeElementBE.NOTE_ACTION_TYPE)
+                    val noteStyleStr = sub.getAttributeValue(ActionTreeElementBE.NOTE_STYLE)
                     val noteAction = if (noteActionTypeStr != null) {
                         // New format: actionType is saved in XML
                         val actionType = de.sudoq.model.actionTree.NoteAction.Action.valueOf(noteActionTypeStr)
-                        de.sudoq.model.actionTree.NoteAction(diff, actionType, f)
+                        val noteStyle = if (noteStyleStr != null) {
+                            de.sudoq.model.sudoku.NoteStyle.valueOf(noteStyleStr)
+                        } else {
+                            de.sudoq.model.sudoku.NoteStyle.NORMAL
+                        }
+                        de.sudoq.model.actionTree.NoteAction(diff, actionType, f, noteStyle)
                     } else {
                         // Old format: use factory (for backward compatibility)
                         NoteActionFactory().createAction(diff, f)
@@ -177,7 +183,16 @@ class GameBE : XmlableWithRepo<SudokuType> {
         }
         finished =
             java.lang.Boolean.parseBoolean(xmlTreeRepresentation.getAttributeValue("finished"))
-        goToState(stateHandler!!.actionTree.getElement(currentStateId)!!)
+        
+        // Safely navigate to the current state, fallback to root if not found
+        val targetState = stateHandler!!.actionTree.getElement(currentStateId)
+        if (targetState != null) {
+            goToState(targetState)
+        } else {
+            // Fallback to root if currentStateId doesn't exist (corrupted save file)
+            android.util.Log.w("GameBE", "Could not find action with id $currentStateId, falling back to root")
+            goToState(stateHandler!!.actionTree.root)
+        }
     }
 
     /**

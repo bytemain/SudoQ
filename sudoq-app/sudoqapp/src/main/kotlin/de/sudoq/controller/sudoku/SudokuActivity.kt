@@ -452,6 +452,18 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                             keyboardButtons = getKeyboardButtonStates()
                             updateButtons()
                             requestKeyboardUpdate() // Trigger immediate UI update
+                        },
+                        onKeyboardSwipe = { symbol, style ->
+                            // Handle swipe gesture with note style
+                            // If style is null, it means delete the note
+                            if (style != null) {
+                                mediator?.onInputWithStyle(symbol, style)
+                            } else {
+                                mediator?.onInputDelete(symbol)
+                            }
+                            keyboardButtons = getKeyboardButtonStates()
+                            updateButtons()
+                            requestKeyboardUpdate() // Trigger immediate UI update
                         }
                     )
                 }

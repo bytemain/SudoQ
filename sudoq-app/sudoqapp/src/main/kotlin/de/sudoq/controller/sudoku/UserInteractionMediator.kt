@@ -93,6 +93,149 @@ class UserInteractionMediator(
      * Die Bibliothek für die Gesteneingabe.
      */
     private val gestureStore: GestureStore
+    
+    /**
+     * Handle input with a specific note style (e.g., strikethrough)
+     * Only applies to note mode
+     */
+    fun onInputWithStyle(symbol: Int, style: de.sudoq.model.sudoku.NoteStyle) {
+        // Get all selected cells
+        val selectedCells = sudokuView!!.getSelectedCellViews()
+        
+        if (selectedCells.isEmpty()) {
+            Log.w("UserInteractionMediator", "No cells selected for styled input")
+            return
+        }
+        
+        Log.d(LOG_TAG, "Styled input to ${selectedCells.size} cell(s): value=$symbol, style=$style")
+        
+        // Collect all note actions with the specified style
+        val actions = mutableListOf<de.sudoq.model.actionTree.Action>()
+        
+        for (cellView in selectedCells) {
+            val cell = cellView.cell
+            if (!cell.isEditable) {
+                Log.d(LOG_TAG, "Skipping non-editable cell")
+                continue
+            }
+            
+            // Always treat swipe as note action, regardless of current mode
+            if (cell.isNoteSet(symbol)) {
+                // If note exists, update its style or remove it
+                val currentStyle = cell.getNoteStyle(symbol)
+                if (currentStyle == style) {
+                    // Same style, remove the note
+                    actions.add(de.sudoq.model.actionTree.NoteAction(
+                        symbol, 
+                        de.sudoq.model.actionTree.NoteAction.Action.REMOVE, 
+                        cell
+                    ))
+                } else {
+                    // Different style, toggle to new style
+                    // First remove, then add with new style
+                    actions.add(de.sudoq.model.actionTree.NoteAction(
+                        symbol, 
+                        de.sudoq.model.actionTree.NoteAction.Action.REMOVE, 
+                        cell
+                    ))
+                    actions.add(de.sudoq.model.actionTree.NoteAction(
+                        symbol, 
+                        de.sudoq.model.actionTree.NoteAction.Action.SET, 
+                        cell,
+                        style
+                    ))
+                }
+            } else {
+                // Add new note with specified style
+                actions.add(de.sudoq.model.actionTree.NoteAction(
+                    symbol, 
+                    de.sudoq.model.actionTree.NoteAction.Action.SET, 
+                    cell,
+                    style
+                ))
+            }
+        }
+        
+        // Execute actions
+        if (actions.isNotEmpty()) {
+            Log.d(LOG_TAG, "Executing ${actions.size} styled note action(s)")
+            
+            if (actions.size > 1) {
+                val batchAction = de.sudoq.model.actionTree.BatchAction(actions)
+                game!!.addAndExecute(batchAction)
+            } else {
+                game!!.addAndExecute(actions[0])
+            }
+            
+            // Notify UI update
+            for (listener in actionListener) {
+                if (listener is de.sudoq.controller.sudoku.SudokuActivity) {
+                    listener.onInputAction()
+                    break
+                }
+            }
+        }
+        
+        restrictCandidates()
+        updateKeyboard()
+    }
+    
+    /**
+     * Delete a specific note from selected cells (triggered by swipe-up gesture)
+     */
+    fun onInputDelete(symbol: Int) {
+        val selectedCells = sudokuView!!.getSelectedCellViews()
+        
+        if (selectedCells.isEmpty()) {
+            Log.w("UserInteractionMediator", "No cells selected for delete")
+            return
+        }
+        
+        Log.d(LOG_TAG, "Delete note from ${selectedCells.size} cell(s): value=$symbol")
+        
+        val actions = mutableListOf<de.sudoq.model.actionTree.Action>()
+        
+        for (cellView in selectedCells) {
+            val cell = cellView.cell
+            if (!cell.isEditable) {
+                Log.d(LOG_TAG, "Skipping non-editable cell")
+                continue
+            }
+            
+            // Only delete if the note exists
+            if (cell.isNoteSet(symbol)) {
+                actions.add(de.sudoq.model.actionTree.NoteAction(
+                    symbol, 
+                    de.sudoq.model.actionTree.NoteAction.Action.REMOVE, 
+                    cell
+                ))
+            }
+        }
+        
+        // Execute actions
+        if (actions.isNotEmpty()) {
+            Log.d(LOG_TAG, "Executing ${actions.size} delete note action(s)")
+            
+            if (actions.size > 1) {
+                val batchAction = de.sudoq.model.actionTree.BatchAction(actions)
+                game!!.addAndExecute(batchAction)
+            } else {
+                game!!.addAndExecute(actions[0])
+            }
+            
+            // Notify UI update
+            for (listener in actionListener) {
+                if (listener is de.sudoq.controller.sudoku.SudokuActivity) {
+                    listener.onInputAction()
+                    break
+                }
+            }
+        }
+        
+        restrictCandidates()
+        updateKeyboard()
+    }
+    
     override fun onInput(symbol: Int) {
         // Get all selected cells (multi-select or single select)
         val selectedCells = sudokuView!!.getSelectedCellViews()

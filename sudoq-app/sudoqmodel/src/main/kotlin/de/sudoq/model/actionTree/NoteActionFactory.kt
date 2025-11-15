@@ -8,6 +8,7 @@
 package de.sudoq.model.actionTree
 
 import de.sudoq.model.sudoku.Cell
+import de.sudoq.model.sudoku.NoteStyle
 
 /**
  * This class creates [NoteAction]s.
@@ -25,6 +26,17 @@ class NoteActionFactory : ActionFactory {
             false -> NoteAction.Action.SET
         }
 
-        return NoteAction(value, actionType, cell)
+        return NoteAction(value, actionType, cell, NoteStyle.NORMAL)
+    }
+    
+    /**
+     * Creates a NoteAction with specified style
+     */
+    fun createAction(value: Int, cell: Cell, style: NoteStyle): Action {
+        val actionType = when(cell.isNoteSet(value)) {
+            true -> NoteAction.Action.REMOVE
+            false -> NoteAction.Action.SET
+        }
+        return NoteAction(value, actionType, cell, style)
     }
 }

@@ -1,6 +1,9 @@
 package de.sudoq.controller.sudoku
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,21 +15,32 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.viewinterop.AndroidView
 import android.content.res.Configuration
 import de.sudoq.R
 import de.sudoq.model.game.Game
 import de.sudoq.model.sudoku.complexity.Complexity
+import de.sudoq.model.sudoku.NoteStyle
 import de.sudoq.view.SudokuLayout
 import android.view.Gravity
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
+import kotlin.math.abs
 
 /**
  * State for the Sudoku game screen
@@ -57,6 +71,24 @@ data class KeyboardButtonState(
     val isEnabled: Boolean = true,
     val showCheckmark: Boolean = false
 )
+
+/**
+ * State for swipe preview overlay
+ */
+private data class SwipePreviewState(
+    val buttonText: String,
+    val direction: SwipeDirection,
+    val dragOffset: Offset, // Offset relative to button start position
+    val buttonCenter: Offset // Button center in global coordinates
+)
+
+enum class SwipeDirection {
+    UP,      // Swipe up: Delete note
+    DOWN,    // Swipe down: Normal note
+    LEFT,    // Swipe left: Strikethrough note
+    RIGHT,   // Swipe right: Cancel
+    NONE     // No direction
+}
 
 /**
  * Get the string resource ID for a complexity level
@@ -92,17 +124,18 @@ fun SudokuScreen(
     onNoteToggle: () -> Unit,
     onClearClick: () -> Unit,
     onKeyboardInput: (Int) -> Unit,
+    onKeyboardSwipe: (Int, NoteStyle?) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    
+
     // Handle back navigation for action tree
     BackHandler(enabled = state.isActionTreeShown) {
         onActionTreeToggle()
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -135,7 +168,7 @@ fun SudokuScreen(
                             contentDescription = "Action Tree"
                         )
                     }
-                    
+
                     // More options menu
                     IconButton(onClick = { showMenu = true }) {
                         Icon(
@@ -143,7 +176,7 @@ fun SudokuScreen(
                             contentDescription = stringResource(R.string.sf_mainmenu_preferences)
                         )
                     }
-                    
+
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
@@ -196,7 +229,7 @@ fun SudokuScreen(
                 // Sudoku Board - takes 60% of width
                 var boardWidth by remember { mutableStateOf(0) }
                 var boardHeight by remember { mutableStateOf(0) }
-                
+
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
@@ -207,17 +240,26 @@ fun SudokuScreen(
                             if (newWidth > 0 && newHeight > 0 && (newWidth != boardWidth || newHeight != boardHeight)) {
                                 boardWidth = newWidth
                                 boardHeight = newHeight
-                                android.util.Log.d("SudokuScreen", "Box sized (landscape): width=$boardWidth, height=$boardHeight")
+                                android.util.Log.d(
+                                    "SudokuScreen",
+                                    "Box sized (landscape): width=$boardWidth, height=$boardHeight"
+                                )
                             }
                         }
                 ) {
                     if (boardWidth > 0 && boardHeight > 0) {
                         AndroidView(
                             factory = { context ->
-                                android.util.Log.d("SudokuScreen", "AndroidView factory called (landscape)")
+                                android.util.Log.d(
+                                    "SudokuScreen",
+                                    "AndroidView factory called (landscape)"
+                                )
                                 sudokuLayout.apply {
                                     post {
-                                        android.util.Log.d("SudokuScreen", "Calling optiZoom (landscape)")
+                                        android.util.Log.d(
+                                            "SudokuScreen",
+                                            "Calling optiZoom (landscape)"
+                                        )
                                         optiZoom(boardWidth, boardHeight)
                                     }
                                 }
@@ -226,7 +268,7 @@ fun SudokuScreen(
                         )
                     }
                 }
-                
+
                 // Right side: Controls and Keyboard
                 Column(
                     modifier = Modifier
@@ -249,7 +291,7 @@ fun SudokuScreen(
                             .height(56.dp)
                             .padding(horizontal = 4.dp, vertical = 4.dp)
                     )
-                    
+
                     // Virtual Keyboard or Hint Panel
                     if (state.hintText != null) {
                         HintPanel(
@@ -266,6 +308,7 @@ fun SudokuScreen(
                         ComposeKeyboard(
                             buttons = state.keyboardButtons,
                             onButtonClick = onKeyboardInput,
+                            onButtonSwipe = onKeyboardSwipe,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
@@ -284,7 +327,7 @@ fun SudokuScreen(
                 // Sudoku Board - takes most of the space
                 var boardWidth by remember { mutableStateOf(0) }
                 var boardHeight by remember { mutableStateOf(0) }
-                
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -295,17 +338,26 @@ fun SudokuScreen(
                             if (newWidth > 0 && newHeight > 0 && (newWidth != boardWidth || newHeight != boardHeight)) {
                                 boardWidth = newWidth
                                 boardHeight = newHeight
-                                android.util.Log.d("SudokuScreen", "Box sized (portrait): width=$boardWidth, height=$boardHeight")
+                                android.util.Log.d(
+                                    "SudokuScreen",
+                                    "Box sized (portrait): width=$boardWidth, height=$boardHeight"
+                                )
                             }
                         }
                 ) {
                     if (boardWidth > 0 && boardHeight > 0) {
                         AndroidView(
                             factory = { context ->
-                                android.util.Log.d("SudokuScreen", "AndroidView factory called (portrait)")
+                                android.util.Log.d(
+                                    "SudokuScreen",
+                                    "AndroidView factory called (portrait)"
+                                )
                                 sudokuLayout.apply {
                                     post {
-                                        android.util.Log.d("SudokuScreen", "Calling optiZoom (portrait)")
+                                        android.util.Log.d(
+                                            "SudokuScreen",
+                                            "Calling optiZoom (portrait)"
+                                        )
                                         optiZoom(boardWidth, boardHeight)
                                     }
                                 }
@@ -314,7 +366,7 @@ fun SudokuScreen(
                         )
                     }
                 }
-                
+
                 // Control Panel
                 SudokuControlPanel(
                     isNoteMode = state.isNoteMode,
@@ -330,7 +382,7 @@ fun SudokuScreen(
                         .height(64.dp)
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
-                
+
                 // Virtual Keyboard or Hint Panel
                 if (state.hintText != null) {
                     // Show hint panel in keyboard area
@@ -349,6 +401,7 @@ fun SudokuScreen(
                     ComposeKeyboard(
                         buttons = state.keyboardButtons,
                         onButtonClick = onKeyboardInput,
+                        onButtonSwipe = onKeyboardSwipe,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(180.dp)
@@ -398,7 +451,7 @@ fun SudokuControlPanel(
                     modifier = Modifier.size(24.dp)
                 )
             }
-            
+
             // Redo button
             IconButton(
                 onClick = onRedoClick,
@@ -410,7 +463,7 @@ fun SudokuControlPanel(
                     modifier = Modifier.size(24.dp)
                 )
             }
-            
+
             // Note toggle / Clear button - changes based on whether a filled cell is selected
             if (canClearSelectedCell) {
                 // Clear button - shown when a filled cell is selected
@@ -453,7 +506,7 @@ fun SudokuControlPanel(
                     )
                 }
             }
-            
+
             // Hint button
             IconButton(
                 onClick = onHintClick,
@@ -465,7 +518,7 @@ fun SudokuControlPanel(
                     modifier = Modifier.size(24.dp)
                 )
             }
-            
+
             // Fill candidates button
             IconButton(
                 onClick = onSolveClick,
@@ -518,9 +571,9 @@ fun HintPanel(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // Buttons row
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -560,7 +613,7 @@ private fun formatTime(milliseconds: Long): String {
     val seconds = (milliseconds / 1000) % 60
     val minutes = (milliseconds / (1000 * 60)) % 60
     val hours = (milliseconds / (1000 * 60 * 60))
-    
+
     return if (hours > 0) {
         String.format("%02d:%02d:%02d", hours, minutes, seconds)
     } else {
@@ -575,82 +628,333 @@ private fun formatTime(milliseconds: Long): String {
 fun ComposeKeyboard(
     buttons: List<KeyboardButtonState>,
     onButtonClick: (Int) -> Unit,
+    onButtonSwipe: (Int, de.sudoq.model.sudoku.NoteStyle?) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     if (buttons.isEmpty()) return
-    
+
     // Calculate grid dimensions (3x3 for 9 buttons, 4x4 for 16, etc.)
     val totalSymbols = buttons.size
     val gridSize = kotlin.math.ceil(kotlin.math.sqrt(totalSymbols.toDouble())).toInt()
+
+    // Track active swipe preview globally
+    var activeSwipePreview by remember { mutableStateOf<SwipePreviewState?>(null) }
     
-    Surface(
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 1.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+    // Get screen density for dp to px conversion
+    val density = LocalDensity.current
+
+    Box(modifier = modifier) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 1.dp
         ) {
-            // Create rows
-            for (row in 0 until gridSize) {
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Create columns
-                    for (col in 0 until gridSize) {
-                        val index = row * gridSize + col
-                        if (index < buttons.size) {
-                            val button = buttons[index]
-                            FilledTonalButton(
-                                onClick = { 
-                                    if (button.isEnabled) {
-                                        onButtonClick(button.symbol)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Create rows
+                for (row in 0 until gridSize) {
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Create columns
+                        for (col in 0 until gridSize) {
+                            val index = row * gridSize + col
+                            if (index < buttons.size) {
+                                val button = buttons[index]
+
+                                // Track gesture state for swipe detection
+                                var dragStart by remember { mutableStateOf<Offset?>(null) }
+                                var currentDragOffset by remember { mutableStateOf(Offset.Zero) }
+                                var swipeDirection by remember { mutableStateOf(SwipeDirection.NONE) }
+                                var buttonGlobalCenter by remember { mutableStateOf(Offset.Zero) }
+                                val haptic = LocalHapticFeedback.current
+
+                                // Animate scale when swiping
+                                val scale by animateFloatAsState(
+                                    targetValue = if (swipeDirection != SwipeDirection.NONE) 0.90f else 1f,
+                                    label = "buttonScale"
+                                )
+
+                                // Animate alpha for stronger feedback
+                                val buttonAlpha by animateFloatAsState(
+                                    targetValue = when {
+                                        !button.isEnabled -> 0.3f
+                                        swipeDirection != SwipeDirection.NONE -> 0.7f
+                                        else -> 1f
+                                    },
+                                    label = "buttonAlpha"
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight()
+                                        .onGloballyPositioned { coordinates ->
+                                            // Calculate button center in screen coordinates (using size instead of boundsInWindow)
+                                            val size = coordinates.size
+                                            buttonGlobalCenter = Offset(
+                                                size.width / 2f,
+                                                size.height / 2f
+                                            )
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    FilledTonalButton(
+                                        onClick = {
+                                            if (button.isEnabled) {
+                                                onButtonClick(button.symbol)
+                                            }
+                                        },
+                                        enabled = button.isEnabled,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .scale(scale)
+                                            .alpha(buttonAlpha)
+                                            .pointerInput(button.symbol, button.isEnabled) {
+                                                if (!button.isEnabled) return@pointerInput
+
+                                                detectDragGestures(
+                                                    onDragStart = { offset ->
+                                                        dragStart = offset
+                                                        currentDragOffset = Offset.Zero
+                                                        swipeDirection = SwipeDirection.NONE
+                                                        activeSwipePreview = null
+                                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                    },
+                                                    onDragEnd = {
+                                                        // Execute operation based on final direction
+                                                        when (swipeDirection) {
+                                                            SwipeDirection.UP -> {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                onButtonSwipe(button.symbol, NoteStyle.STRIKETHROUGH)
+                                                            }
+                                                            SwipeDirection.DOWN -> {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                            }
+                                                            SwipeDirection.LEFT -> {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                onButtonSwipe(button.symbol, null)
+                                                            }
+                                                            SwipeDirection.RIGHT -> {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                onButtonSwipe(button.symbol, NoteStyle.NORMAL)
+                                                            }
+                                                            SwipeDirection.NONE -> {
+                                                                // No direction, no operation
+                                                            }
+                                                        }
+                                                        
+                                                        // Reset state
+                                                        swipeDirection = SwipeDirection.NONE
+                                                        dragStart = null
+                                                        currentDragOffset = Offset.Zero
+                                                        activeSwipePreview = null
+                                                    },
+                                                    onDragCancel = {
+                                                        swipeDirection = SwipeDirection.NONE
+                                                        dragStart = null
+                                                        currentDragOffset = Offset.Zero
+                                                        activeSwipePreview = null
+                                                    },
+                                                    onDrag = { change, dragAmount ->
+                                                        val start = dragStart
+                                                        if (start != null) {
+                                                            // Calculate cumulative offset
+                                                            val currentPos = change.position
+                                                            val deltaX = currentPos.x - start.x
+                                                            val deltaY = currentPos.y - start.y
+                                                            currentDragOffset = Offset(deltaX, deltaY)
+
+                                                            // Direction recognition threshold
+                                                            val threshold = 30f
+                                                            
+                                                            // Determine primary direction (four directions)
+                                                            val newDirection = when {
+                                                                abs(deltaX) < threshold && abs(deltaY) < threshold -> SwipeDirection.NONE
+                                                                abs(deltaY) > abs(deltaX) -> {
+                                                                    if (deltaY < 0) SwipeDirection.UP else SwipeDirection.DOWN
+                                                                }
+                                                                else -> {
+                                                                    if (deltaX < 0) SwipeDirection.LEFT else SwipeDirection.RIGHT
+                                                                }
+                                                            }
+                                                            
+                                                            // Trigger haptic feedback when direction changes
+                                                            if (newDirection != swipeDirection && newDirection != SwipeDirection.NONE) {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                            }
+                                                            
+                                                            swipeDirection = newDirection
+
+                                                            // Update global preview state
+                                                            if (swipeDirection != SwipeDirection.NONE) {
+                                                                activeSwipePreview = SwipePreviewState(
+                                                                    buttonText = button.displayText,
+                                                                    direction = swipeDirection,
+                                                                    dragOffset = currentDragOffset,
+                                                                    buttonCenter = buttonGlobalCenter
+                                                                )
+                                                            } else {
+                                                                activeSwipePreview = null
+                                                            }
+
+                                                            change.consume()
+                                                        }
+                                                    }
+                                                )
+                                            },
+                                        colors = ButtonDefaults.filledTonalButtonColors(
+                                            containerColor = when (swipeDirection) {
+                                                SwipeDirection.UP -> MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
+                                                SwipeDirection.DOWN -> MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                                                SwipeDirection.LEFT -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.6f)
+                                                SwipeDirection.RIGHT -> MaterialTheme.colorScheme.surfaceVariant
+                                                SwipeDirection.NONE -> {
+                                                    if (button.showCheckmark) MaterialTheme.colorScheme.tertiaryContainer
+                                                    else MaterialTheme.colorScheme.secondaryContainer
+                                                }
+                                            },
+                                            contentColor = when (swipeDirection) {
+                                                SwipeDirection.UP -> MaterialTheme.colorScheme.onError
+                                                SwipeDirection.DOWN -> MaterialTheme.colorScheme.onPrimary
+                                                SwipeDirection.LEFT -> MaterialTheme.colorScheme.onTertiary
+                                                SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                SwipeDirection.NONE -> {
+                                                    if (button.showCheckmark) MaterialTheme.colorScheme.onTertiaryContainer
+                                                    else MaterialTheme.colorScheme.onSecondaryContainer
+                                                }
+                                            },
+                                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                        ),
+                                        shape = MaterialTheme.shapes.medium
+                                    ) {
+                                        if (button.showCheckmark) {
+                                            Icon(
+                                                imageVector = Icons.Default.Check,
+                                                contentDescription = "Completed",
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        } else {
+                                            Text(
+                                                text = button.displayText,
+                                                style = MaterialTheme.typography.titleLarge,
+                                                fontSize = 24.sp
+                                            )
+                                        }
                                     }
-                                },
-                                enabled = button.isEnabled,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
-                                    .alpha(if (button.isEnabled) 1f else 0.3f),  // Fade out disabled buttons
-                                colors = ButtonDefaults.filledTonalButtonColors(
-                                    containerColor = if (button.showCheckmark) {
-                                        MaterialTheme.colorScheme.tertiaryContainer
-                                    } else {
-                                        MaterialTheme.colorScheme.secondaryContainer
-                                    },
-                                    contentColor = if (button.showCheckmark) {
-                                        MaterialTheme.colorScheme.onTertiaryContainer
-                                    } else {
-                                        MaterialTheme.colorScheme.onSecondaryContainer
-                                    },
-                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                ),
-                                shape = MaterialTheme.shapes.medium
-                            ) {
-                                if (button.showCheckmark) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Completed",
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                } else {
-                                    Text(
-                                        text = button.displayText,
-                                        style = MaterialTheme.typography.titleLarge,
-                                        fontSize = 24.sp
-                                    )
                                 }
+                            } else {
+                                // Empty spacer for incomplete grid
+                                Spacer(modifier = Modifier.weight(1f))
                             }
-                        } else {
-                            // Empty spacer for incomplete grid
-                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+
+            // Global gesture feedback overlay (similar to WeChat voice input)
+            activeSwipePreview?.let { preview ->
+                // Display large feedback area in screen center
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) { /* Intercept underlying touch events */ },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .sizeIn(minWidth = 200.dp, minHeight = 200.dp)
+                            .padding(32.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        shadowElevation = 32.dp,
+                        tonalElevation = 24.dp,
+                        color = when (preview.direction) {
+                            SwipeDirection.UP -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.95f)
+                            SwipeDirection.DOWN -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
+                            SwipeDirection.LEFT -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.95f)
+                            SwipeDirection.RIGHT -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f)
+                            SwipeDirection.NONE -> MaterialTheme.colorScheme.surface
+                        }
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            // Operation name (top, most prominent)
+                            Text(
+                                text = when (preview.direction) {
+                                    SwipeDirection.UP -> "Delete Note"
+                                    SwipeDirection.DOWN -> "Normal Note"
+                                    SwipeDirection.LEFT -> "Strikethrough Note"
+                                    SwipeDirection.RIGHT -> "Cancel"
+                                    SwipeDirection.NONE -> ""
+                                },
+                                style = MaterialTheme.typography.headlineLarge,
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = when (preview.direction) {
+                                    SwipeDirection.UP -> MaterialTheme.colorScheme.onErrorContainer
+                                    SwipeDirection.DOWN -> MaterialTheme.colorScheme.onPrimaryContainer
+                                    SwipeDirection.LEFT -> MaterialTheme.colorScheme.onTertiaryContainer
+                                    SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onSurfaceVariant
+                                    SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
+                                }
+                            )
+                            
+                            Spacer(modifier = Modifier.height(24.dp))
+                            
+                            // Direction icon and number (horizontal layout)
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = when (preview.direction) {
+                                        SwipeDirection.UP -> Icons.Default.KeyboardArrowUp
+                                        SwipeDirection.DOWN -> Icons.Default.KeyboardArrowDown
+                                        SwipeDirection.LEFT -> Icons.Default.KeyboardArrowLeft
+                                        SwipeDirection.RIGHT -> Icons.Default.KeyboardArrowRight
+                                        SwipeDirection.NONE -> Icons.Default.Check
+                                    },
+                                    contentDescription = null,
+                                    tint = when (preview.direction) {
+                                        SwipeDirection.UP -> MaterialTheme.colorScheme.onErrorContainer
+                                        SwipeDirection.DOWN -> MaterialTheme.colorScheme.onPrimaryContainer
+                                        SwipeDirection.LEFT -> MaterialTheme.colorScheme.onTertiaryContainer
+                                        SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onSurfaceVariant
+                                        SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
+                                    },
+                                    modifier = Modifier.size(64.dp)
+                                )
+                                
+                                Spacer(modifier = Modifier.width(16.dp))
+                                
+                                // Current number
+                                Text(
+                                    text = preview.buttonText,
+                                    style = MaterialTheme.typography.displayLarge,
+                                    fontSize = 72.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = when (preview.direction) {
+                                        SwipeDirection.UP -> MaterialTheme.colorScheme.onErrorContainer
+                                        SwipeDirection.DOWN -> MaterialTheme.colorScheme.onPrimaryContainer
+                                        SwipeDirection.LEFT -> MaterialTheme.colorScheme.onTertiaryContainer
+                                        SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onSurfaceVariant
+                                        SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
+                                    }
+                                )
+                            }
                         }
                     }
                 }
