@@ -33,7 +33,7 @@ import kotlinx.coroutines.delay
 import de.sudoq.R
 import de.sudoq.controller.SudoqCompatActivity
 import de.sudoq.controller.menus.Utility
-import de.sudoq.controller.menus.preferences.PlayerPreferencesActivity
+import de.sudoq.controller.menus.preferences.AppSettingsActivity
 import de.sudoq.controller.sudoku.CellInteractionListener.SelectEvent
 import de.sudoq.controller.sudoku.board.CellViewPainter.Companion.instance
 import de.sudoq.controller.sudoku.board.CellViewStates
@@ -374,7 +374,7 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                         onMenuClick = { menuItem ->
                             when (menuItem) {
                                 SudokuMenuItem.Settings -> {
-                                    startActivity(Intent(this@SudokuActivity, PlayerPreferencesActivity::class.java))
+                                    startActivity(Intent(this@SudokuActivity, AppSettingsActivity::class.java))
                                 }
                                 SudokuMenuItem.NewGame -> {
                                     // Go back to main menu for new game

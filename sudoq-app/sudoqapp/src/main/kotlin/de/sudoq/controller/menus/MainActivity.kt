@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import de.sudoq.R
 import de.sudoq.controller.SudoqCompatActivity
-import de.sudoq.controller.menus.preferences.PlayerPreferencesActivity
+import de.sudoq.controller.menus.preferences.AppSettingsActivity
 import de.sudoq.controller.sudoku.SudokuActivity
 import de.sudoq.controller.tutorial.TutorialActivity
 import de.sudoq.model.profile.ProfileManager
@@ -45,8 +45,8 @@ class MainActivity : SudoqCompatActivity() {
                     onLoadGameClick = {
                         startActivity(Intent(this, SudokuLoadingActivity::class.java))
                     },
-                    onProfileClick = {
-                        startActivity(Intent(this, PlayerPreferencesActivity::class.java))
+                    onPreferenceClick = {
+                        startActivity(Intent(this, AppSettingsActivity::class.java))
                     },
                     onStatisticsClick = {
                         startActivity(Intent(this, StatisticsActivity::class.java))
@@ -82,8 +82,8 @@ class MainActivity : SudoqCompatActivity() {
                     onLoadGameClick = {
                         startActivity(Intent(this, SudokuLoadingActivity::class.java))
                     },
-                    onProfileClick = {
-                        startActivity(Intent(this, PlayerPreferencesActivity::class.java))
+                    onPreferenceClick = {
+                        startActivity(Intent(this, AppSettingsActivity::class.java))
                     },
                     onStatisticsClick = {
                         startActivity(Intent(this, StatisticsActivity::class.java))

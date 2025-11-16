@@ -37,7 +37,7 @@ fun MainScreen(
     onNewGameClick: () -> Unit,
     onContinueGameClick: () -> Unit,
     onLoadGameClick: () -> Unit,
-    onProfileClick: () -> Unit,
+    onPreferenceClick: () -> Unit,
     onStatisticsClick: () -> Unit,
     onTutorialClick: () -> Unit
 ) {
@@ -61,9 +61,9 @@ fun MainScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onProfileClick) {
+                    IconButton(onClick = onPreferenceClick) {
                         Icon(
-                            imageVector = Icons.Default.Person,
+                            imageVector = Icons.Default.Settings,
                             contentDescription = stringResource(R.string.sf_mainmenu_profile)
                         )
                     }

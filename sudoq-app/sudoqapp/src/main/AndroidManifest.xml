@@ -18,7 +18,6 @@
 
         <activity android:name=".controller.sudoku.SudokuActivity" />
         <activity android:name=".controller.test.ComposeTestActivity" android:label="Compose Test" android:exported="false" />
-        <activity android:name=".controller.menus.preferences.PlayerPreferencesActivity" android:label="@string/profile_preference_title" android:windowSoftInputMode="stateHidden" />
         <activity android:name=".controller.menus.preferences.AppSettingsActivity" android:label="@string/app_settings" />
         <activity android:name=".controller.menus.StatisticsActivity" android:label="@string/statistics_title" />
 

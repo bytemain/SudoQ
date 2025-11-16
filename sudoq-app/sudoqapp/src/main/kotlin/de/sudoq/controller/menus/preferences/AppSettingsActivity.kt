@@ -10,6 +10,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +30,8 @@ import de.sudoq.persistence.profile.ProfilesListRepo
 import de.sudoq.view.theme.SudoQTheme
 import de.sudoq.view.theme.ThemeColor
 import de.sudoq.view.theme.ThemeManager
+import de.sudoq.model.game.Assistances
+import de.sudoq.model.profile.ProfileSingleton
 
 /**
  * Unified app settings activity combining theme and advanced settings
@@ -44,6 +49,9 @@ class AppSettingsActivity : SudoqCompatActivity() {
         val initialDebugEnabled = pm.appSettings.isDebugSet
         val initialKeyboardLayout = pm.appSettings.keyboardLayoutMode
         
+        // Load profile data
+        val profile = ProfileSingleton.getInstance(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
+        
         setContent {
             var themeColor by remember { mutableStateOf(ThemeManager.loadThemeColor(this)) }
             var isDarkMode by remember { mutableStateOf(ThemeManager.loadDarkMode(this)) }
@@ -54,6 +62,19 @@ class AppSettingsActivity : SudoqCompatActivity() {
             var debugClickCount by remember { mutableStateOf(0) }
             var showDebugOption by remember { mutableStateOf(initialDebugEnabled) }
             var isDebugEnabled by remember { mutableStateOf(initialDebugEnabled) }
+            
+            // Profile states
+            var profileName by remember { mutableStateOf(profile.name ?: "") }
+            var autoAdjustNotes by remember { mutableStateOf(profile.getAssistance(Assistances.autoAdjustNotes)) }
+            var markRowColumn by remember { mutableStateOf(profile.getAssistance(Assistances.markRowColumn)) }
+            var markWrongSymbol by remember { mutableStateOf(profile.getAssistance(Assistances.markWrongSymbol)) }
+            var restrictCandidates by remember { mutableStateOf(profile.getAssistance(Assistances.restrictCandidates)) }
+            var autoFillUniqueCandidates by remember { mutableStateOf(profile.getAssistance(Assistances.autoFillUniqueCandidates)) }
+            var showCompletedDigits by remember { mutableStateOf(profile.getAssistance(Assistances.showCompletedDigits)) }
+            var provideHints by remember { mutableStateOf(profile.getAssistance(Assistances.provideHints)) }
+            var showProfileDialog by remember { mutableStateOf(false) }
+            var canDeleteProfile by remember { mutableStateOf(profile.numberOfAvailableProfiles > 1) }
+            var canSwitchProfile by remember { mutableStateOf(profile.numberOfAvailableProfiles > 1) }
             
             SudoQTheme(
                 themeColor = themeColor,
@@ -66,6 +87,16 @@ class AppSettingsActivity : SudoqCompatActivity() {
                     keyboardLayoutMode = keyboardLayoutMode,
                     showDebugOption = showDebugOption,
                     isDebugEnabled = isDebugEnabled,
+                    profileName = profileName,
+                    autoAdjustNotes = autoAdjustNotes,
+                    markRowColumn = markRowColumn,
+                    markWrongSymbol = markWrongSymbol,
+                    restrictCandidates = restrictCandidates,
+                    autoFillUniqueCandidates = autoFillUniqueCandidates,
+                    showCompletedDigits = showCompletedDigits,
+                    provideHints = provideHints,
+                    canDeleteProfile = canDeleteProfile,
+                    canSwitchProfile = canSwitchProfile,
                     onThemeColorChange = { color ->
                         themeColor = color
                         ThemeManager.saveThemeColor(this, color)
@@ -96,6 +127,77 @@ class AppSettingsActivity : SudoqCompatActivity() {
                         // Restart activity to apply language change
                         recreate()
                     },
+                    onProfileNameChange = { newName ->
+                        profileName = newName
+                        profile.name = newName
+                        profile.saveChanges()
+                    },
+                    onAutoAdjustNotesChange = { value ->
+                        autoAdjustNotes = value
+                        profile.setAssistance(Assistances.autoAdjustNotes, value)
+                        profile.saveChanges()
+                    },
+                    onMarkRowColumnChange = { value ->
+                        markRowColumn = value
+                        profile.setAssistance(Assistances.markRowColumn, value)
+                        profile.saveChanges()
+                    },
+                    onMarkWrongSymbolChange = { value ->
+                        markWrongSymbol = value
+                        profile.setAssistance(Assistances.markWrongSymbol, value)
+                        profile.saveChanges()
+                    },
+                    onRestrictCandidatesChange = { value ->
+                        restrictCandidates = value
+                        profile.setAssistance(Assistances.restrictCandidates, value)
+                        profile.saveChanges()
+                    },
+                    onAutoFillUniqueCandidatesChange = { value ->
+                        autoFillUniqueCandidates = value
+                        profile.setAssistance(Assistances.autoFillUniqueCandidates, value)
+                        profile.saveChanges()
+                    },
+                    onShowCompletedDigitsChange = { value ->
+                        showCompletedDigits = value
+                        profile.setAssistance(Assistances.showCompletedDigits, value)
+                        profile.saveChanges()
+                    },
+                    onProvideHintsChange = { value ->
+                        provideHints = value
+                        profile.setAssistance(Assistances.provideHints, value)
+                        profile.saveChanges()
+                    },
+                    onNewProfileClick = {
+                        createProfile(this, profile)
+                        // Reload profile data
+                        profileName = profile.name ?: ""
+                        autoAdjustNotes = profile.getAssistance(Assistances.autoAdjustNotes)
+                        markRowColumn = profile.getAssistance(Assistances.markRowColumn)
+                        markWrongSymbol = profile.getAssistance(Assistances.markWrongSymbol)
+                        restrictCandidates = profile.getAssistance(Assistances.restrictCandidates)
+                        autoFillUniqueCandidates = profile.getAssistance(Assistances.autoFillUniqueCandidates)
+                        showCompletedDigits = profile.getAssistance(Assistances.showCompletedDigits)
+                        provideHints = profile.getAssistance(Assistances.provideHints)
+                        canDeleteProfile = profile.numberOfAvailableProfiles > 1
+                        canSwitchProfile = profile.numberOfAvailableProfiles > 1
+                    },
+                    onDeleteProfileClick = {
+                        profile.deleteProfile()
+                        // Reload profile data
+                        profileName = profile.name ?: ""
+                        autoAdjustNotes = profile.getAssistance(Assistances.autoAdjustNotes)
+                        markRowColumn = profile.getAssistance(Assistances.markRowColumn)
+                        markWrongSymbol = profile.getAssistance(Assistances.markWrongSymbol)
+                        restrictCandidates = profile.getAssistance(Assistances.restrictCandidates)
+                        autoFillUniqueCandidates = profile.getAssistance(Assistances.autoFillUniqueCandidates)
+                        showCompletedDigits = profile.getAssistance(Assistances.showCompletedDigits)
+                        provideHints = profile.getAssistance(Assistances.provideHints)
+                        canDeleteProfile = profile.numberOfAvailableProfiles > 1
+                        canSwitchProfile = profile.numberOfAvailableProfiles > 1
+                    },
+                    onSwitchProfileClick = {
+                        showProfileDialog = true
+                    },
                     onRestrictTypesClick = {
                         showRestrictDialog = true
                     },
@@ -125,6 +227,78 @@ class AppSettingsActivity : SudoqCompatActivity() {
                         }
                     )
                 }
+                
+                // Profile selection dialog
+                if (showProfileDialog) {
+                    val profiles = loadProfilesList(this)
+                    val currentProfileId = profile.currentProfileID
+                    
+                    de.sudoq.controller.menus.ProfileSelectionDialog(
+                        profiles = profiles,
+                        currentProfileId = currentProfileId,
+                        onProfileSelected = { profileId ->
+                            profile.changeProfile(profileId)
+                            // Reload profile data
+                            profileName = profile.name ?: ""
+                            autoAdjustNotes = profile.getAssistance(Assistances.autoAdjustNotes)
+                            markRowColumn = profile.getAssistance(Assistances.markRowColumn)
+                            markWrongSymbol = profile.getAssistance(Assistances.markWrongSymbol)
+                            restrictCandidates = profile.getAssistance(Assistances.restrictCandidates)
+                            autoFillUniqueCandidates = profile.getAssistance(Assistances.autoFillUniqueCandidates)
+                            showCompletedDigits = profile.getAssistance(Assistances.showCompletedDigits)
+                            provideHints = profile.getAssistance(Assistances.provideHints)
+                            canDeleteProfile = profile.numberOfAvailableProfiles > 1
+                            canSwitchProfile = profile.numberOfAvailableProfiles > 1
+                            showProfileDialog = false
+                        },
+                        onDismiss = { showProfileDialog = false }
+                    )
+                }
+            }
+        }
+    }
+    
+    companion object {
+        /**
+         * Create a new profile
+         */
+        private fun createProfile(activity: AppSettingsActivity, profile: ProfileSingleton) {
+            var newProfileName = activity.getString(R.string.profile_preference_new_profile)
+            var newIndex = 0
+            
+            // Find the next available profile number
+            val l: List<String> = profile.profilesNameList
+            for (s in l) {
+                if (s.startsWith(newProfileName)) {
+                    val currentIndex = s.substring(newProfileName.length)
+                    try {
+                        val otherIndex = if (currentIndex == "") 0 else currentIndex.toInt()
+                        newIndex = if (newIndex <= otherIndex) otherIndex + 1 else newIndex
+                    } catch (e: Exception) {
+                        // Ignore parsing errors
+                    }
+                }
+            }
+            
+            if (newIndex != 0) newProfileName += newIndex
+            profile.createAnotherProfile()
+            profile.name = newProfileName
+            profile.saveChanges()
+        }
+        
+        /**
+         * Load list of all profiles
+         */
+        private fun loadProfilesList(activity: AppSettingsActivity): List<de.sudoq.controller.menus.ProfileInfo> {
+            val profilesDir = activity.getDir(activity.getString(R.string.path_rel_profiles), MODE_PRIVATE)
+            val pm = ProfileManager(profilesDir, ProfileRepo(profilesDir), ProfilesListRepo(profilesDir))
+            pm.loadCurrentProfile()
+            
+            val ids = pm.profilesIdList
+            val names = pm.profilesNameList
+            
+            return ids.zip(names).map { (id, name) ->
+                de.sudoq.controller.menus.ProfileInfo(id, name)
             }
         }
     }
@@ -139,11 +313,32 @@ fun AppSettingsScreen(
     keyboardLayoutMode: String,
     showDebugOption: Boolean,
     isDebugEnabled: Boolean,
+    profileName: String,
+    autoAdjustNotes: Boolean,
+    markRowColumn: Boolean,
+    markWrongSymbol: Boolean,
+    restrictCandidates: Boolean,
+    autoFillUniqueCandidates: Boolean,
+    showCompletedDigits: Boolean,
+    provideHints: Boolean,
+    canDeleteProfile: Boolean,
+    canSwitchProfile: Boolean,
     onThemeColorChange: (ThemeColor) -> Unit,
     onDarkModeChange: (Boolean) -> Unit,
     onKeyboardLayoutChange: (String) -> Unit,
     onDebugChange: (Boolean) -> Unit,
     onLanguageChange: (LanguageCode) -> Unit,
+    onProfileNameChange: (String) -> Unit,
+    onAutoAdjustNotesChange: (Boolean) -> Unit,
+    onMarkRowColumnChange: (Boolean) -> Unit,
+    onMarkWrongSymbolChange: (Boolean) -> Unit,
+    onRestrictCandidatesChange: (Boolean) -> Unit,
+    onAutoFillUniqueCandidatesChange: (Boolean) -> Unit,
+    onShowCompletedDigitsChange: (Boolean) -> Unit,
+    onProvideHintsChange: (Boolean) -> Unit,
+    onNewProfileClick: () -> Unit,
+    onDeleteProfileClick: () -> Unit,
+    onSwitchProfileClick: () -> Unit,
     onRestrictTypesClick: () -> Unit,
     onTitleClick: () -> Unit,
     onBackClick: () -> Unit
@@ -177,8 +372,61 @@ fun AppSettingsScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            // Profile Section
+            item {
+                SettingsSectionHeader("Profile")
+            }
+            
+            item {
+                ProfileManagementSection(
+                    profileName = profileName,
+                    canDeleteProfile = canDeleteProfile,
+                    canSwitchProfile = canSwitchProfile,
+                    onProfileNameChange = onProfileNameChange,
+                    onNewProfileClick = onNewProfileClick,
+                    onDeleteProfileClick = onDeleteProfileClick,
+                    onSwitchProfileClick = onSwitchProfileClick
+                )
+            }
+            
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Divider(modifier = Modifier.padding(horizontal = 16.dp))
+            }
+            
+            // Assistances Section
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                SettingsSectionHeader(stringResource(R.string.profile_preference_title_cat_assistances))
+            }
+            
+            item {
+                AssistancesSection(
+                    autoAdjustNotes = autoAdjustNotes,
+                    markRowColumn = markRowColumn,
+                    markWrongSymbol = markWrongSymbol,
+                    restrictCandidates = restrictCandidates,
+                    autoFillUniqueCandidates = autoFillUniqueCandidates,
+                    showCompletedDigits = showCompletedDigits,
+                    provideHints = provideHints,
+                    onAutoAdjustNotesChange = onAutoAdjustNotesChange,
+                    onMarkRowColumnChange = onMarkRowColumnChange,
+                    onMarkWrongSymbolChange = onMarkWrongSymbolChange,
+                    onRestrictCandidatesChange = onRestrictCandidatesChange,
+                    onAutoFillUniqueCandidatesChange = onAutoFillUniqueCandidatesChange,
+                    onShowCompletedDigitsChange = onShowCompletedDigitsChange,
+                    onProvideHintsChange = onProvideHintsChange
+                )
+            }
+            
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Divider(modifier = Modifier.padding(horizontal = 16.dp))
+            }
+            
             // Appearance Section
             item {
+                Spacer(modifier = Modifier.height(16.dp))
                 SettingsSectionHeader(stringResource(R.string.settings_appearance))
             }
             
@@ -857,5 +1105,173 @@ private fun GestureActionSelector(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ProfileManagementSection(
+    profileName: String,
+    canDeleteProfile: Boolean,
+    canSwitchProfile: Boolean,
+    onProfileNameChange: (String) -> Unit,
+    onNewProfileClick: () -> Unit,
+    onDeleteProfileClick: () -> Unit,
+    onSwitchProfileClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Profile name text field
+        OutlinedTextField(
+            value = profileName,
+            onValueChange = onProfileNameChange,
+            label = { Text(stringResource(R.string.profile_preference_title_name)) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        
+        // Profile action buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // New profile button
+            OutlinedButton(
+                onClick = onNewProfileClick,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(stringResource(R.string.action_new_profile))
+            }
+            
+            // Switch profile button
+            if (canSwitchProfile) {
+                OutlinedButton(
+                    onClick = onSwitchProfileClick,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(stringResource(R.string.action_switch_profile))
+                }
+            }
+            
+            // Delete profile button
+            if (canDeleteProfile) {
+                OutlinedButton(
+                    onClick = onDeleteProfileClick,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(stringResource(R.string.action_delete_profile))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AssistancesSection(
+    autoAdjustNotes: Boolean,
+    markRowColumn: Boolean,
+    markWrongSymbol: Boolean,
+    restrictCandidates: Boolean,
+    autoFillUniqueCandidates: Boolean,
+    showCompletedDigits: Boolean,
+    provideHints: Boolean,
+    onAutoAdjustNotesChange: (Boolean) -> Unit,
+    onMarkRowColumnChange: (Boolean) -> Unit,
+    onMarkWrongSymbolChange: (Boolean) -> Unit,
+    onRestrictCandidatesChange: (Boolean) -> Unit,
+    onAutoFillUniqueCandidatesChange: (Boolean) -> Unit,
+    onShowCompletedDigitsChange: (Boolean) -> Unit,
+    onProvideHintsChange: (Boolean) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        SettingsSwitchItem(
+            title = stringResource(R.string.profile_preference_title_assistance_autoAdjustNotes),
+            subtitle = "",
+            checked = autoAdjustNotes,
+            onCheckedChange = onAutoAdjustNotesChange
+        )
+        
+        Divider()
+        
+        SettingsSwitchItem(
+            title = stringResource(R.string.profile_preference_title_assistance_markRowColumn),
+            subtitle = "",
+            checked = markRowColumn,
+            onCheckedChange = onMarkRowColumnChange
+        )
+        
+        Divider()
+        
+        SettingsSwitchItem(
+            title = stringResource(R.string.profile_preference_title_assistance_markWrongSymbol),
+            subtitle = "",
+            checked = markWrongSymbol,
+            onCheckedChange = onMarkWrongSymbolChange
+        )
+        
+        Divider()
+        
+        SettingsSwitchItem(
+            title = stringResource(R.string.profile_preference_title_assistance_restrictCandidates),
+            subtitle = "",
+            checked = restrictCandidates,
+            onCheckedChange = onRestrictCandidatesChange
+        )
+        
+        Divider()
+        
+        SettingsSwitchItem(
+            title = stringResource(R.string.profile_preference_title_assistance_autoFillUniqueCandidates),
+            subtitle = "",
+            checked = autoFillUniqueCandidates,
+            onCheckedChange = onAutoFillUniqueCandidatesChange
+        )
+        
+        Divider()
+        
+        SettingsSwitchItem(
+            title = stringResource(R.string.profile_preference_title_assistance_showCompletedDigits),
+            subtitle = "",
+            checked = showCompletedDigits,
+            onCheckedChange = onShowCompletedDigitsChange
+        )
+        
+        Divider()
+        
+        SettingsSwitchItem(
+            title = "Provide Hints",
+            subtitle = "",
+            checked = provideHints,
+            onCheckedChange = onProvideHintsChange
+        )
     }
 }
