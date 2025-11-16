@@ -372,8 +372,10 @@ class UserInteractionMediator(
                             sudokuView.addToMultiSelection(view)
                             view.setMultiSelected(true)
                             view.select(false)
+                            // Set the same note state as other selected cells
+                            view.setNoteState(noteMode)
                             virtualKeyboard.isActivated = true
-                            Log.d("multi-select", "Cell added to selection, keyboard activated")
+                            Log.d("multi-select", "Cell added to selection with noteMode=$noteMode, keyboard activated")
                         } else {
                             Toast.makeText(
                                 view.context, 
@@ -397,6 +399,9 @@ class UserInteractionMediator(
                 sudokuView.currentCellView = view
                 view.select(game!!.isAssistanceAvailable(Assistances.markRowColumn))
                 
+                // Set note state for the first cell in multi-selection
+                view.setNoteState(noteMode)
+                
                 // Enter multi-selection mode
                 sudokuView.startMultiSelectionMode()
                 view.setMultiSelected(true)
@@ -405,7 +410,7 @@ class UserInteractionMediator(
                     view.context.getString(R.string.toast_multi_select_activated), 
                     Toast.LENGTH_SHORT
                 ).show()
-                Log.d(LOG_TAG, "Multi-selection mode activated")
+                Log.d(LOG_TAG, "Multi-selection mode activated with noteMode=$noteMode")
                 updateKeyboard()
                 return
             }
@@ -812,8 +817,23 @@ class UserInteractionMediator(
      */
     fun toggleNoteMode() {
         noteMode = !noteMode
-        sudokuView?.currentCellView?.setNoteState(noteMode)
-        Log.d(LOG_TAG, "Note mode toggled to: $noteMode")
+        
+        // If in multi-selection mode, update all selected cells
+        if (sudokuView?.isMultiSelectionMode == true) {
+            val selectedCells = sudokuView.getSelectedCellViews()
+            for (cellView in selectedCells) {
+                cellView.setNoteState(noteMode)
+                // Force update marking to ensure visual state changes
+                cellView.invalidate()
+            }
+            // Also force redraw of the entire board to ensure all cells update
+            sudokuView.invalidate()
+            Log.d(LOG_TAG, "Note mode toggled to: $noteMode for ${selectedCells.size} selected cells")
+        } else {
+            // Single cell mode
+            sudokuView?.currentCellView?.setNoteState(noteMode)
+            Log.d(LOG_TAG, "Note mode toggled to: $noteMode")
+        }
     }
 
     /**
