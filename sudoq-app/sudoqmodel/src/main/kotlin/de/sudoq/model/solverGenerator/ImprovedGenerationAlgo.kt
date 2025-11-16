@@ -96,7 +96,7 @@ class ImprovedGenerationAlgo(
         generationAttempts++
         
         // 防止无限递归
-        if (generationAttempts > 100000) return false
+        if (generationAttempts > 10000) return false
         
         // 找到候选数最少的空格（MRV启发式）
         val bestPosition = findBestPosition(builder) ?: return true // 所有格子都已填充
@@ -159,9 +159,28 @@ class ImprovedGenerationAlgo(
     private fun getCandidates(builder: SudokuBuilder, pos: Position): List<Int> {
         val candidates = mutableListOf<Int>()
         val numberOfSymbols = sudoku.sudokuType!!.numberOfSymbols
+        val testSudoku = builder.createSudoku()
         
         for (value in 0 until numberOfSymbols) {
-            if (isValid(builder, pos, value)) {
+            // 检查该值是否与任何相关约束冲突
+            var isValid = true
+            for (constraint in sudoku.sudokuType!!) {
+                if (constraint.includes(pos)) {
+                    // 检查约束中是否已有该值
+                    var hasConflict = false
+                    for (constraintPos in constraint) {
+                        if (constraintPos != pos && testSudoku.getCell(constraintPos)?.currentValue == value) {
+                            hasConflict = true
+                            break
+                        }
+                    }
+                    if (hasConflict) {
+                        isValid = false
+                        break
+                    }
+                }
+            }
+            if (isValid) {
                 candidates.add(value)
             }
         }
@@ -171,27 +190,24 @@ class ImprovedGenerationAlgo(
 
     /**
      * 检查在指定位置填入指定值是否有效
+     * 注意：该方法不会修改 builder 状态
      */
     private fun isValid(builder: SudokuBuilder, pos: Position, value: Int): Boolean {
-        // 临时填入值进行检查
-        builder.addSolution(pos, value)
+        val testSudoku = builder.createSudoku()
         
-        // 检查所有约束
-        val valid = sudoku.sudokuType!!.all { constraint ->
+        // 检查该值是否与任何相关约束冲突
+        for (constraint in sudoku.sudokuType!!) {
             if (constraint.includes(pos)) {
-                // 只检查包含该位置的约束
-                constraint.isSaturated(builder.createSudoku())
-            } else {
-                true
+                // 检查约束中是否已有该值
+                for (constraintPos in constraint) {
+                    if (constraintPos != pos && testSudoku.getCell(constraintPos)?.currentValue == value) {
+                        return false
+                    }
+                }
             }
         }
         
-        // 移除临时填入的值
-        if (!valid) {
-            builder.removeSolution(pos)
-        }
-        
-        return valid
+        return true
     }
 
     /**
@@ -345,28 +361,6 @@ class ImprovedGenerationAlgo(
         for ((pos, value) in state) {
             builder.addSolution(pos, value)
         }
-    }
-
-    private fun SudokuBuilder.hasValueAt(pos: Position): Boolean {
-        // 需要在 SudokuBuilder 中添加此方法
-        // 临时实现：尝试创建 Sudoku 并检查
-        return try {
-            val tempSudoku = this.createSudoku()
-            !tempSudoku.getCell(pos)!!.isNotSolved
-        } catch (e: Exception) {
-            false
-        }
-    }
-
-    private fun SudokuBuilder.getValueAt(pos: Position): Int {
-        val tempSudoku = this.createSudoku()
-        return tempSudoku.getCell(pos)!!.currentValue
-    }
-
-    private fun SudokuBuilder.removeSolution(pos: Position) {
-        // 需要在 SudokuBuilder 中添加此方法
-        // 临时实现：设置为空值
-        this.addSolution(pos, Cell.EMPTYVAL)
     }
 
     companion object {

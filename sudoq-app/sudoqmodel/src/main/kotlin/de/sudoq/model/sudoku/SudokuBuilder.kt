@@ -56,4 +56,34 @@ class SudokuBuilder(private val type: SudokuType?) {
         setValues.put(pos!!, true)
     }
 
+    /**
+     * Check if a value has been set at the given position
+     *
+     * @param pos [Position] to check
+     * @return true if a value exists at this position
+     */
+    fun hasValueAt(pos: Position): Boolean {
+        val value = solutions.get(pos)
+        return value != null && value != Cell.EMPTYVAL
+    }
+
+    /**
+     * Get the value at the given position
+     *
+     * @param pos [Position] to get value from
+     * @return the value at this position, or Cell.EMPTYVAL if not set
+     */
+    fun getValueAt(pos: Position): Int {
+        return solutions.get(pos) ?: Cell.EMPTYVAL
+    }
+
+    /**
+     * Remove the solution at the given position
+     *
+     * @param pos [Position] to remove solution from
+     */
+    fun removeSolution(pos: Position) {
+        solutions.put(pos, Cell.EMPTYVAL)
+    }
+
 }

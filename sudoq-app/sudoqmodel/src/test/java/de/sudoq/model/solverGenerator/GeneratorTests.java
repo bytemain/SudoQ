@@ -126,7 +126,7 @@ public class GeneratorTests implements GeneratorCallback {
 		Random rnd = new Random(159145199318451l);
 		generator.setRandom(rnd);
 		Transformer.setRandom(rnd);
-		generator.generate(SudokuTypes.samurai, Complexity.difficult, this);
+		generator.generate(SudokuTypes.samurai, Complexity.difficult, this, false);
 		synchronized (this) {
 			try {
 				wait();

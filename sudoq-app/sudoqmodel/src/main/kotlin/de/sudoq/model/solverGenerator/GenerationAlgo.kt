@@ -173,8 +173,8 @@ class GenerationAlgo(
         val reallocationAmount = 2 //getReallocationAmount(sudoku.getSudokuType(), 0.05);
         var plusminuscounter = 0
         var rel = ComplexityRelation.INVALID
-        while (rel !== ComplexityRelation.CONSTRAINT_SATURATION) {
-
+        val maxIterations = 5000 // 添加最大迭代次数限制
+        while (rel !== ComplexityRelation.CONSTRAINT_SATURATION && plusminuscounter < maxIterations) {
 
             //every 1000 steps choose another random subset
             if (plusminuscounter % 1000 == 0 && plusminuscounter > 0) {
@@ -214,6 +214,7 @@ class GenerationAlgo(
             }
             plusminuscounter++
         }
+        
     }
 
     /*

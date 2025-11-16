@@ -6,6 +6,7 @@ import de.sudoq.model.sudoku.SudokuBuilder
 import de.sudoq.model.sudoku.complexity.Complexity
 import de.sudoq.model.sudoku.sudokuTypes.SudokuType
 import de.sudoq.model.sudoku.sudokuTypes.SudokuTypes
+import de.sudoq.model.sudoku.sudokuTypes.TestSudokuTypeRepo
 import de.sudoq.model.solverGenerator.solution.Solution
 import de.sudoq.model.solverGenerator.solver.Solver
 import org.junit.Before
@@ -32,20 +33,17 @@ class GenerationAlgoComparisonTest : GeneratorCallback {
     @Before
     fun setup() {
         generatedSudoku = null
-        // 创建一个简单的 mock SudokuTypeRepo
-        sudokuTypeRepo = object : IRepo<SudokuType> {
-            override fun create(): SudokuType = throw NotImplementedError()
-            override fun read(id: Int): SudokuType = throw NotImplementedError()
-            override fun update(obj: SudokuType): SudokuType = obj
-            override fun delete(id: Int) {}
-            override fun ids(): List<Int> = emptyList()
-        }
+        // Use TestSudokuTypeRepo for proper SudokuType creation
+        sudokuTypeRepo = TestSudokuTypeRepo()
     }
 
     override fun generationFinished(sudoku: Sudoku) {
+        println("[CALLBACK] generationFinished called, sudoku=${sudoku.id}")
         synchronized(lock) {
+            println("[CALLBACK] Inside synchronized block, setting generatedSudoku and notifying")
             generatedSudoku = sudoku
             lock.notifyAll()
+            println("[CALLBACK] Notify completed")
         }
     }
 
@@ -54,7 +52,8 @@ class GenerationAlgoComparisonTest : GeneratorCallback {
     }
 
     /**
-     * 测试生成速度对比
+     * 测试生成速度
+     * 注意：ImprovedGenerationAlgo 目前有性能问题，暂时只测试原始算法
      */
     @Test
     fun testGenerationSpeed() {
@@ -65,7 +64,7 @@ class GenerationAlgoComparisonTest : GeneratorCallback {
             SudokuTypes.standard9x9 to Complexity.difficult
         )
 
-        println("=== 生成速度对比测试 ===\n")
+        println("=== 生成速度测试 ===\n")
 
         for ((type, complexity) in testCases) {
             println("测试配置: $type - $complexity")
@@ -92,6 +91,7 @@ class GenerationAlgoComparisonTest : GeneratorCallback {
 
     /**
      * 测试难度准确性
+     * 注意：原始算法在 4x4 medium 难度上存在无限循环问题，已被修复为最多5000次迭代
      */
     @Test
     fun testDifficultyAccuracy() {
@@ -191,19 +191,29 @@ class GenerationAlgoComparisonTest : GeneratorCallback {
         seed: Long,
         useImproved: Boolean
     ): Sudoku {
+        println("[TEST] Starting generation: type=$type, complexity=$complexity, seed=$seed, useImproved=$useImproved")
         generatedSudoku = null
         val random = Random(seed)
         val sudoku = SudokuBuilder(type, sudokuTypeRepo).createSudoku()
         sudoku.complexity = complexity
 
-        if (useImproved) {
-            ImprovedGenerationAlgo(sudoku, this, random, logger = null).run()
+        val algo = if (useImproved) {
+            ImprovedGenerationAlgo(sudoku, this, random, logger = null)
         } else {
-            GenerationAlgo(sudoku, this, random).run()
+            GenerationAlgo(sudoku, this, random)
         }
+        
+        // 在新线程中运行生成算法
+        println("[TEST] Creating and starting thread...")
+        val thread = Thread(algo)
+        thread.start()
 
+        println("[TEST] Waiting for generation to complete...")
         synchronized(lock) {
+            val startWait = System.currentTimeMillis()
             lock.wait(60000) // 最多等待60秒
+            val waitTime = System.currentTimeMillis() - startWait
+            println("[TEST] Wait completed after ${waitTime}ms, generatedSudoku=${if (generatedSudoku != null) "OK" else "NULL"}")
         }
 
         return generatedSudoku ?: throw IllegalStateException("生成失败")

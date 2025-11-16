@@ -71,7 +71,7 @@ public class SudokuManagerTests extends TestWithInitCleanforSingletons {
 				}
 			}
 		};
-		sm.usedSudoku(s, false);
+		sm.usedSudoku(s, false, false);
 		synchronized (this) {
 			try {
 				wait();
