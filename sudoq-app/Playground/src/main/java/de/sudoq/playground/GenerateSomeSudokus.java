@@ -1,4 +1,4 @@
-package de.sudoq.playaround;
+package de.sudoq.playground;
 
 import java.io.File;
 import java.util.List;
