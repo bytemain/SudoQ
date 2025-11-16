@@ -52,11 +52,18 @@ open class SudokuManager(
 
     /**
      * Marks a Sudoku as used.
-     * If possible it will be transformed, otherwise a new one is generated.
+     * 
+     * **Strategy:**
+     * 1. By default, uses pre-generated sudoku templates from res/sudokus/ directory
+     * 2. Applies transformations (rotations, mirrors, etc.) to existing templates up to 10 times
+     * 3. Only generates NEW sudokus after 10 transformations or when explicitly requested
+     * 
+     * This approach ensures fast performance and avoids generation issues, since all 
+     * templates have been pre-validated.
      *
      * @param sudoku the used Sudoku
-     * @param useNewAlgorithm whether to use ImprovedGenerationAlgo for new generation
-     * @param forceGeneration force generation instead of transformation (used when explicitly requesting new algorithm)
+     * @param useNewAlgorithm whether to use ImprovedGenerationAlgo for new generation (experimental)
+     * @param forceGeneration force generation instead of transformation (only when explicitly requesting new algorithm)
      */
     fun usedSudoku(sudoku: Sudoku, useNewAlgorithm: Boolean = false, forceGeneration: Boolean = false) {
         if (sudoku.transformCount >= 10 || (forceGeneration && useNewAlgorithm)) {
@@ -85,6 +92,14 @@ open class SudokuManager(
 
     /**
      * Return a new [Sudoku] of the specified [type][SudokuTypes] and [Complexity]
+     * 
+     * **This is the PRIMARY method for getting sudokus.**
+     * Always loads from pre-generated templates in res/sudokus/ directory.
+     * These templates are:
+     * - Pre-validated for correct difficulty
+     * - Optimized for fast loading
+     * - Guaranteed to be solvable
+     * - Never require runtime generation
      *
      * @param t [type][SudokuTypes] of the [Sudoku]
      * @param c [Complexity] of the [Sudoku]
