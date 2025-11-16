@@ -38,6 +38,7 @@ class NewSudokuActivity : SudoqCompatActivity() {
     private val prefsName = "new_sudoku_prefs"
     private val keyLastType = "last_sudoku_type"
     private val keyLastComplexity = "last_complexity"
+    private val keyUseNewAlgorithm = "use_new_algorithm"
     
     private lateinit var gameSettings: GameSettings
 
@@ -77,8 +78,16 @@ class NewSudokuActivity : SudoqCompatActivity() {
                         state.value = state.value.copy(selectedComplexity = complexity)
                         persistComplexity(complexity)
                     },
+                    onAlgorithmToggle = { useNew ->
+                        state.value = state.value.copy(useNewAlgorithm = useNew)
+                        persistAlgorithmChoice(useNew)
+                    },
                     onStartGame = {
-                        startGame(state.value.selectedType, state.value.selectedComplexity)
+                        startGame(
+                            state.value.selectedType, 
+                            state.value.selectedComplexity,
+                            state.value.useNewAlgorithm
+                        )
                     },
                     onNavigateToSettings = {
                         startActivity(Intent(this, AppSettingsActivity::class.java))
@@ -115,10 +124,13 @@ class NewSudokuActivity : SudoqCompatActivity() {
             }
         }
         
+        val useNewAlgorithm = prefs.getBoolean(keyUseNewAlgorithm, false)
+        
         return NewSudokuState(
             selectedType = savedType,
             selectedComplexity = savedComplexity,
-            availableTypes = availableTypes
+            availableTypes = availableTypes,
+            useNewAlgorithm = useNewAlgorithm
         )
     }
     
@@ -136,7 +148,14 @@ class NewSudokuActivity : SudoqCompatActivity() {
             .apply()
     }
     
-    private fun startGame(type: SudokuTypes?, complexity: Complexity?) {
+    private fun persistAlgorithmChoice(useNew: Boolean) {
+        getSharedPreferences(prefsName, MODE_PRIVATE)
+            .edit()
+            .putBoolean(keyUseNewAlgorithm, useNew)
+            .apply()
+    }
+    
+    private fun startGame(type: SudokuTypes?, complexity: Complexity?, useNewAlgorithm: Boolean) {
         if (type == null || complexity == null) {
             Toast.makeText(
                 this,
@@ -167,7 +186,8 @@ class NewSudokuActivity : SudoqCompatActivity() {
             val gamesDir = File(pm.currentProfileDir, "games")
             val gamesListRepo: IGamesListRepo = GamesListRepo(gamesDir, gamesFile)
 
-            // Create game
+            // Create game with selected algorithm
+            Log.i(LOG_TAG, "Starting game creation - Type: $type, Complexity: $complexity, UseNewAlgorithm: $useNewAlgorithm")
             val gm = GameManager(pm, gameRepo, gamesListRepo, sudokuTypeRepo)
             val sudokuRepoProvider = SudokuRepoProvider(sudokuDir, sudokuTypeRepo)
             val game = gm.newGame(
@@ -175,7 +195,9 @@ class NewSudokuActivity : SudoqCompatActivity() {
                 complexity,
                 gameSettings,
                 sudokuDir,
-                sudokuRepoProvider
+                sudokuRepoProvider,
+                useNewAlgorithm,
+                logger = { tag, message -> Log.i(tag, message) }
             )
             
             check(!pm.noProfiles()) { 

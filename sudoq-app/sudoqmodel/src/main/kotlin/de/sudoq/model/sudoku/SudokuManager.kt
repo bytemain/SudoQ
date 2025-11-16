@@ -19,10 +19,13 @@ import de.sudoq.model.sudoku.sudokuTypes.SudokuTypes
 
 /** Responsible for maintaining existing Sudokus.
  * Implemented as Singleton. */
-open class SudokuManager(val sudokuTypeRepo: IRepo<SudokuType>,
-                         private val sudokuRepoProvider: ISudokuRepoProvider) : GeneratorCallback {
+open class SudokuManager(
+    val sudokuTypeRepo: IRepo<SudokuType>,
+    private val sudokuRepoProvider: ISudokuRepoProvider,
+    private val logger: ((String, String) -> Unit)? = null
+) : GeneratorCallback {
 
-    private val generator = Generator(sudokuTypeRepo)
+    private val generator = Generator(sudokuTypeRepo, logger)
 
     /** holds the old sudoku while the new sudoku is being generated. */
     private var used: Sudoku? = null
@@ -52,16 +55,32 @@ open class SudokuManager(val sudokuTypeRepo: IRepo<SudokuType>,
      * If possible it will be transformed, otherwise a new one is generated.
      *
      * @param sudoku the used Sudoku
+     * @param useNewAlgorithm whether to use ImprovedGenerationAlgo for new generation
+     * @param forceGeneration force generation instead of transformation (used when explicitly requesting new algorithm)
      */
-    fun usedSudoku(sudoku: Sudoku) {
-        if (sudoku.transformCount >= 10) {
+    fun usedSudoku(sudoku: Sudoku, useNewAlgorithm: Boolean = false, forceGeneration: Boolean = false) {
+        if (sudoku.transformCount >= 10 || (forceGeneration && useNewAlgorithm)) {
             used = sudoku
-            generator.generate(sudoku.sudokuType!!.enumType, sudoku.complexity, this)
+            logger?.invoke("SudokuManager", "Generating new sudoku - Type: ${sudoku.sudokuType?.enumType}, Complexity: ${sudoku.complexity}, UseNewAlgo: $useNewAlgorithm")
+            generator.generate(sudoku.sudokuType!!.enumType, sudoku.complexity, this, useNewAlgorithm)
         } else {
+            logger?.invoke("SudokuManager", "Transforming existing sudoku - Type: ${sudoku.sudokuType?.enumType}, TransformCount: ${sudoku.transformCount}")
             Transformer.transform(sudoku)
             val sudokuRepo = sudokuRepoProvider.getRepo(sudoku)
             sudokuRepo.update(sudoku)
         }
+    }
+
+    /**
+     * Generate a completely new Sudoku using the specified algorithm.
+     * This bypasses the template system and generates from scratch.
+     *
+     * @param type The type of Sudoku to generate
+     * @param complexity The complexity level
+     * @param useNewAlgorithm Whether to use ImprovedGenerationAlgo
+     */
+    fun generateNewSudoku(type: SudokuTypes, complexity: Complexity, useNewAlgorithm: Boolean) {
+        generator.generate(type, complexity, this, useNewAlgorithm)
     }
 
     /**

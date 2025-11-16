@@ -28,7 +28,10 @@ import java.util.*
  *
  * @see Solver
  */
-class Generator(private val sudokuTypeRepo: IRepo<SudokuType>) {
+class Generator(
+    private val sudokuTypeRepo: IRepo<SudokuType>,
+    private val logger: ((String, String) -> Unit)? = null
+) {
 
     private var random: Random
 
@@ -51,20 +54,32 @@ class Generator(private val sudokuTypeRepo: IRepo<SudokuType>) {
      * @param callbackObject
      * Das Objekt, dessen Callback-Methode aufgerufen werden soll,
      * sobald der Generator fertig ist
+     * @param useNewAlgorithm
+     * Whether to use ImprovedGenerationAlgo (true) or traditional GenerationAlgo (false)
      * @return true, falls ein leeres Sudoku erzeugt und der Warteschlange
      * hinzugefügt werden konnte, false andernfalls
      */
     fun generate(
         type: SudokuTypes?,
         complexity: Complexity?,
-        callbackObject: GeneratorCallback?
+        callbackObject: GeneratorCallback?,
+        useNewAlgorithm: Boolean = false
     ): Boolean {
         if (type == null || complexity == null || callbackObject == null) return false
 
         // Create sudoku
         val sudoku = SudokuBuilder(type, sudokuTypeRepo).createSudoku()
         sudoku.complexity = complexity
-        val t = Thread(GenerationAlgo(sudoku, callbackObject, random))
+        
+        // Choose algorithm based on useNewAlgorithm parameter
+        val algorithm = if (useNewAlgorithm) {
+            logger?.invoke(TAG, "Using ImprovedGenerationAlgo for $type with complexity $complexity")
+            ImprovedGenerationAlgo(sudoku, callbackObject, random, logger)
+        } else {
+            logger?.invoke(TAG, "Using traditional GenerationAlgo for $type with complexity $complexity")
+            GenerationAlgo(sudoku, callbackObject, random)
+        }
+        val t = Thread(algorithm)
         t.start()
 
         // Initiate new random object
@@ -86,6 +101,8 @@ class Generator(private val sudokuTypeRepo: IRepo<SudokuType>) {
     }
 
     companion object {
+        private const val TAG = "Generator"
+        
         /**
          * returns all positions of non-null Cells of sudoku
          * @param sudoku a sudoku object

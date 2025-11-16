@@ -6,6 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,7 +25,8 @@ data class NewSudokuState(
     val selectedType: SudokuTypes? = null,
     val selectedComplexity: Complexity? = null,
     val availableTypes: List<SudokuTypes> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val useNewAlgorithm: Boolean = false
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +35,7 @@ fun NewSudokuScreen(
     state: NewSudokuState,
     onTypeSelected: (SudokuTypes) -> Unit,
     onComplexitySelected: (Complexity) -> Unit,
+    onAlgorithmToggle: (Boolean) -> Unit,
     onStartGame: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onBackClick: () -> Unit
@@ -96,7 +99,9 @@ fun NewSudokuScreen(
                 ) {
                     ComplexitySection(
                         selectedComplexity = state.selectedComplexity,
-                        onComplexitySelected = onComplexitySelected
+                        useNewAlgorithm = state.useNewAlgorithm,
+                        onComplexitySelected = onComplexitySelected,
+                        onAlgorithmToggle = onAlgorithmToggle
                     )
                     
                     Spacer(modifier = Modifier.weight(1f))
@@ -142,7 +147,9 @@ fun NewSudokuScreen(
                 // Complexity Selection
                 ComplexitySection(
                     selectedComplexity = state.selectedComplexity,
-                    onComplexitySelected = onComplexitySelected
+                    useNewAlgorithm = state.useNewAlgorithm,
+                    onComplexitySelected = onComplexitySelected,
+                    onAlgorithmToggle = onAlgorithmToggle
                 )
                 
                 Spacer(modifier = Modifier.weight(1f))
@@ -250,16 +257,46 @@ fun SudokuTypeDropdown(
 @Composable
 fun ComplexitySection(
     selectedComplexity: Complexity?,
-    onComplexitySelected: (Complexity) -> Unit
+    useNewAlgorithm: Boolean,
+    onComplexitySelected: (Complexity) -> Unit,
+    onAlgorithmToggle: (Boolean) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = stringResource(R.string.sf_sudokupreferences_complexity),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
+        // Title with algorithm toggle
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.sf_sudokupreferences_complexity),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            
+            // Algorithm toggle chip
+            FilterChip(
+                selected = useNewAlgorithm,
+                onClick = { onAlgorithmToggle(!useNewAlgorithm) },
+                label = { 
+                    Text(
+                        text = if (useNewAlgorithm) "NEW" else "OLD",
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                },
+                leadingIcon = if (useNewAlgorithm) {
+                    {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                } else null
+            )
+        }
         
         ComplexitySelector(
             selectedComplexity = selectedComplexity,

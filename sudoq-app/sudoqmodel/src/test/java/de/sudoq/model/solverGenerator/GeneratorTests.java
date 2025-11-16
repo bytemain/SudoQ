@@ -33,29 +33,30 @@ import de.sudoq.model.sudoku.sudokuTypes.TypeBuilder;
 public class GeneratorTests implements GeneratorCallback {
 
 	private Generator generator;
-	private static File sudokuDir  = new File(Utility.RES + File.separator + "tmp_suds");
+	private static File sudokuDir = new File(Utility.RES + File.separator + "tmp_suds");
 
 	@BeforeClass
 	public static void init() throws IOException {
 		Utility.copySudokus();
-		//Profile.Companion.getInstance();
+		// Profile.Companion.getInstance();
 	}
 
 	@AfterClass
 	public static void clean() throws IOException, SecurityException, NoSuchFieldException, IllegalArgumentException,
 			IllegalAccessException {
-        java.lang.reflect.Field f = FileManager.class.getDeclaredField("profiles");
-        f.setAccessible(true);
-        f.set(null, null);
-        java.lang.reflect.Field s = FileManager.class.getDeclaredField("sudokus");
-        s.setAccessible(true);
-        s.set(null, null);
-        java.lang.reflect.Field p = ProfileSingleton.class.getDeclaredField("instance");
-        p.setAccessible(true);
-        p.set(null, null);
-        Utility.deleteDir(Utility.profiles);
-        Utility.deleteDir(Utility.sudokus);
-    }
+		java.lang.reflect.Field f = FileManager.class.getDeclaredField("profiles");
+		f.setAccessible(true);
+		f.set(null, null);
+		java.lang.reflect.Field s = FileManager.class.getDeclaredField("sudokus");
+		s.setAccessible(true);
+		s.set(null, null);
+		java.lang.reflect.Field p = ProfileSingleton.class.getDeclaredField("instance");
+		p.setAccessible(true);
+		p.set(null, null);
+		Utility.deleteDir(Utility.profiles);
+		Utility.deleteDir(Utility.sudokus);
+	}
+
 	@Before
 	public void beforeTest() {
 		TypeBuilder.get99();
@@ -86,7 +87,7 @@ public class GeneratorTests implements GeneratorCallback {
 
 			}
 		};
-		generator = new Generator(dummySoItCompiles/*sudokuDir*/);
+		generator = new Generator(dummySoItCompiles, null/* logger */);
 	}
 
 	@Override
@@ -106,7 +107,7 @@ public class GeneratorTests implements GeneratorCallback {
 		Random rnd = new Random(0);
 		generator.setRandom(rnd);
 		Transformer.setRandom(rnd);
-		generator.generate(SudokuTypes.standard4x4, Complexity.infernal, this);
+		generator.generate(SudokuTypes.standard4x4, Complexity.infernal, this, false);
 		synchronized (this) {
 			try {
 				wait();
@@ -117,13 +118,11 @@ public class GeneratorTests implements GeneratorCallback {
 		System.out.println("4 done");
 	}
 
+	// @Test(timeout = 10 * 60 * 1000)
+	public void testGenerationSamurai() {
+		// TODO fix this
 
-
-	//@Test(timeout = 10 * 60 * 1000)
-	public void testGenerationSamurai(){
-		//TODO fix this
-
-		//159145199318451
+		// 159145199318451
 		Random rnd = new Random(159145199318451l);
 		generator.setRandom(rnd);
 		Transformer.setRandom(rnd);
@@ -140,21 +139,16 @@ public class GeneratorTests implements GeneratorCallback {
 
 	}
 
+	private static long getSeed(Random r) {
 
-
-	private static long getSeed(Random r){
-
-		try
-		{
+		try {
 			Field field = Random.class.getDeclaredField("seed");
 			field.setAccessible(true);
-			AtomicLong scrambledSeed = (AtomicLong) field.get(r);   //this needs to be XOR'd with 0x5DEECE66DL
+			AtomicLong scrambledSeed = (AtomicLong) field.get(r); // this needs to be XOR'd with 0x5DEECE66DL
 			return scrambledSeed.get() ^ 0x5DEECE66DL;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			throw new IllegalArgumentException("smth went wrong");
-			//handle exception
+			// handle exception
 		}
 	}
 }

@@ -35,6 +35,8 @@ class GameManager(private var profile: ProfileManager,
      * @param type The type of the [Sudoku]
      * @param complexity The complexity of the Sudoku
      * @param assistsances The available assistances for the game
+     * @param useNewAlgorithm Whether to use ImprovedGenerationAlgo for puzzle generation
+     * @param logger Optional logger function for logging generation progress
      * @return The new [Game]
      *
      */
@@ -43,11 +45,25 @@ class GameManager(private var profile: ProfileManager,
         complexity: Complexity,
         assistances: GameSettings,
         sudokuDir: File,
-        sudokuRepoProvider: ISudokuRepoProvider
+        sudokuRepoProvider: ISudokuRepoProvider,
+        useNewAlgorithm: Boolean = false,
+        logger: ((String, String) -> Unit)? = null
     ): Game {
-        val sm = SudokuManager(sudokuTypeRepo, sudokuRepoProvider)
-        val sudoku = sm.getNewSudoku(type, complexity)
-        sm.usedSudoku(sudoku) //TODO warum instanziierung, wenn laut doc singleton?
+        val sm = SudokuManager(sudokuTypeRepo, sudokuRepoProvider, logger)
+        
+        val sudoku = if (useNewAlgorithm) {
+            // When using new algorithm, generate directly instead of loading from template
+            logger?.invoke("GameManager", "Generating new sudoku with algorithm for $type - $complexity")
+            sm.generateNewSudoku(type, complexity, useNewAlgorithm)
+            // Wait for generation to complete and get the sudoku from callback
+            // Note: This is handled asynchronously through the GeneratorCallback
+            sm.getNewSudoku(type, complexity) // Temporary: still need a sudoku object
+        } else {
+            sm.getNewSudoku(type, complexity)
+        }
+        
+        // Pass forceGeneration=true when using new algorithm to ensure generation happens
+        sm.usedSudoku(sudoku, useNewAlgorithm, forceGeneration = useNewAlgorithm) //TODO warum instanziierung, wenn laut doc singleton?
 
         val newGameID = gameRepo.create().id //due to interface we cannot pass sudoku to the new game
         val game = Game(newGameID, sudoku)

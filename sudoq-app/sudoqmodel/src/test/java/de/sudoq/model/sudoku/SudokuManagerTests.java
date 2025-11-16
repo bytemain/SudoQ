@@ -17,19 +17,25 @@ import de.sudoq.model.sudoku.complexity.Complexity;
 import de.sudoq.model.sudoku.sudokuTypes.SudokuTypes;
 
 public class SudokuManagerTests extends TestWithInitCleanforSingletons {
-	private static File sudokuDir  = new File(Utility.RES + File.separator + "tmp_suds");
+	private static File sudokuDir = new File(Utility.RES + File.separator + "tmp_suds");
 
-	//this is a dummy so it compiles todo use xmls from resources
+	// this is a dummy so it compiles todo use xmls from resources
 	private IRepo<SudokuType> sudokuTypeRepo = new IRepo<SudokuType>() {
 		@NotNull
 		@Override
-		public List<Integer> ids() { throw new NotImplementedException(); }
+		public List<Integer> ids() {
+			throw new NotImplementedException();
+		}
 
 		@Override
-		public void delete(int id) { throw new NotImplementedException(); }
+		public void delete(int id) {
+			throw new NotImplementedException();
+		}
 
 		@Override
-		public SudokuType update(SudokuType sudokuBE) { throw new NotImplementedException(); }
+		public SudokuType update(SudokuType sudokuBE) {
+			throw new NotImplementedException();
+		}
 
 		@Override
 		public SudokuType read(int id) {
@@ -37,22 +43,27 @@ public class SudokuManagerTests extends TestWithInitCleanforSingletons {
 		}
 
 		@Override
-		public SudokuType create() { throw new NotImplementedException(); }
+		public SudokuType create() {
+			throw new NotImplementedException();
+		}
 
 	};
 
 	@Test(timeout = 120) // threw an exception and ran forever in the past -> timeout
 	public void test() {
-		//assertEquals(21, FileManager.getSudokuCountOf(SudokuTypes.standard9x9, Complexity.infernal));
-		/*IRepo<Sudoku> sudokuRepo = new SudokuRepo(sudokuDir,
-				SudokuTypes.standard9x9,
-				Complexity.infernal, sudokuTypeRepo);*/
-		Sudoku s = new SudokuManager(sudokuTypeRepo,  null)
-				.getNewSudoku(SudokuTypes.standard9x9, Complexity.infernal);
+		// assertEquals(21, FileManager.getSudokuCountOf(SudokuTypes.standard9x9,
+		// Complexity.infernal));
+		/*
+		 * IRepo<Sudoku> sudokuRepo = new SudokuRepo(sudokuDir,
+		 * SudokuTypes.standard9x9,
+		 * Complexity.infernal, sudokuTypeRepo);
+		 */
+		Sudoku s = new SudokuManager(sudokuTypeRepo, null, null)
+				.getNewSudoku(SudokuTypes.standard9x9, Complexity.difficult);
 		for (int i = 0; i < 10; i++) {
 			s.increaseTransformCount();
 		}
-		SudokuManager sm = new SudokuManager(sudokuTypeRepo, null) {
+		SudokuManager sm = new SudokuManager(sudokuTypeRepo, null, null) {
 			public void generationFinished(Sudoku sudoku) {
 				synchronized (SudokuManagerTests.this) {
 					super.generationFinished(sudoku);
@@ -60,7 +71,7 @@ public class SudokuManagerTests extends TestWithInitCleanforSingletons {
 				}
 			}
 		};
-		sm.usedSudoku(s);
+		sm.usedSudoku(s, false);
 		synchronized (this) {
 			try {
 				wait();
@@ -68,7 +79,8 @@ public class SudokuManagerTests extends TestWithInitCleanforSingletons {
 				e.printStackTrace();
 			}
 		}
-		//assertEquals(21, FileManager.getSudokuCountOf(SudokuTypes.standard9x9, Complexity.infernal));
+		// assertEquals(21, FileManager.getSudokuCountOf(SudokuTypes.standard9x9,
+		// Complexity.infernal));
 	}
 
 }

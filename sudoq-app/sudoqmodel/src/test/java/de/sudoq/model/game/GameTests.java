@@ -39,17 +39,17 @@ public class GameTests {
 
 	private static Sudoku sudoku;
 
-	//this is a dummy so it compiles todo use xmls from resources
+	// this is a dummy so it compiles todo use xmls from resources
 	private static IRepo<SudokuType> sudokuTypeRepo;// = new SudokuTypeRepo();
 
 	@BeforeClass
 	public static void beforeClass() {
 		Utility.copySudokus();
 		File profileDir = new File("/tmp/sudoq/GameTests/profile");
-		//ProfileSingleton.Companion.getInstance(profileDir);
+		// ProfileSingleton.Companion.getInstance(profileDir);
 
-		TypeBuilder.get99(); //just to force initialization of filemanager
-		
+		TypeBuilder.get99(); // just to force initialization of filemanager
+
 		GeneratorCallback gc = new GeneratorCallback() {
 			@Override
 			public void generationFinished(Sudoku sudoku) {
@@ -61,8 +61,8 @@ public class GameTests {
 				GameTests.sudoku = sudoku;
 			}
 		};
-		
-		new Generator(sudokuTypeRepo).generate(SudokuTypes.standard9x9, Complexity.easy, gc);
+
+		new Generator(sudokuTypeRepo, null).generate(SudokuTypes.standard9x9, Complexity.easy, gc, false);
 	}
 
 	@Test
@@ -86,11 +86,11 @@ public class GameTests {
 
 		Position pos = Position.get(1, 1);
 		ActionTreeElement start = game.getCurrentState();
-        Cell f = game.getSudoku().getCell(pos);
-		game.addAndExecute(new SolveActionFactory().createAction(3, f));//setze 3
-		game.addAndExecute(new SolveActionFactory().createAction(4, f));//setze 4
+		Cell f = game.getSudoku().getCell(pos);
+		game.addAndExecute(new SolveActionFactory().createAction(3, f));// setze 3
+		game.addAndExecute(new SolveActionFactory().createAction(4, f));// setze 4
 		assertFalse(game.isMarked(game.getCurrentState()));
-		game.addAndExecute(new SolveActionFactory().createAction(5, f));//setze 5
+		game.addAndExecute(new SolveActionFactory().createAction(5, f));// setze 5
 		assertEquals(5, game.getSudoku().getCell(pos).getCurrentValue());
 		game.markCurrentState();
 		assertTrue(game.isMarked(game.getCurrentState()));
@@ -101,7 +101,7 @@ public class GameTests {
 
 		game.redo();
 		game.redo();
-		assertEquals(5, f.getCurrentValue());//schlägt fehl
+		assertEquals(5, f.getCurrentValue());// schlägt fehl
 		game.undo();
 		assertEquals(Cell.EMPTYVAL, f.getCurrentValue());
 		game.redo();
@@ -178,7 +178,6 @@ public class GameTests {
 
 	}
 
-
 	@Test(expected = NullPointerException.class)
 	public void testSetNullAssistances() {
 		Game game = new Game(2, new SudokuBuilder(SudokuTypes.standard9x9, sudokuTypeRepo).createSudoku());
@@ -208,7 +207,8 @@ public class GameTests {
 			private boolean errors = false;
 
 			public SudokuMock() {
-				super(SudokuTypeProvider.getSudokuType(SudokuTypes.standard9x9, sudokuTypeRepo), new PositionMap<Integer>(Position.get(9, 9)),
+				super(SudokuTypeProvider.getSudokuType(SudokuTypes.standard9x9, sudokuTypeRepo),
+						new PositionMap<Integer>(Position.get(9, 9)),
 						new PositionMap<Boolean>(Position.get(9, 9)));
 			}
 
@@ -286,18 +286,18 @@ public class GameTests {
 			Game game = new Game(0, sudoku);
 			game.addTime(60);
 			switch (c) {
-			case easy:
-				assertEquals(game.getScore(), 2430);
-				break;
-			case medium:
-				assertEquals(game.getScore(), 7290);
-				break;
-			case difficult:
-				assertEquals(game.getScore(), 21870);
-				break;
-			case infernal:
-				assertEquals(game.getScore(), 65610);
-				break;
+				case easy:
+					assertEquals(game.getScore(), 2430);
+					break;
+				case medium:
+					assertEquals(game.getScore(), 7290);
+					break;
+				case difficult:
+					assertEquals(game.getScore(), 21870);
+					break;
+				case infernal:
+					assertEquals(game.getScore(), 65610);
+					break;
 			}
 		}
 	}
@@ -305,9 +305,9 @@ public class GameTests {
 	@Test
 	public synchronized void testSolve() {
 		System.out.println("before while");
-		
+
 		int counter = 0;
-		while (GameTests.sudoku == null && counter<120) {
+		while (GameTests.sudoku == null && counter < 120) {
 			try {
 				wait(1000);
 				counter++;
@@ -315,10 +315,10 @@ public class GameTests {
 				e.printStackTrace();
 			}
 		}
-		if(GameTests.sudoku == null)
+		if (GameTests.sudoku == null)
 			throw new IllegalStateException("infinite loop!");
-		
-        System.out.println("we passed the while loop!");
+
+		System.out.println("we passed the while loop!");
 		Game game = new Game(1, sudoku);
 		ArrayList<Cell> unsolvedCells = new ArrayList<Cell>();
 		for (Cell f : sudoku) {
@@ -409,7 +409,8 @@ public class GameTests {
 
 		for (int i = 0; i < 9; i++) {
 			for (int j = 0; j < 9; j++) {
-				game.addAndExecute(new NoteActionFactory().createAction(1, game.getSudoku().getCell(Position.get(i, j))));
+				game.addAndExecute(
+						new NoteActionFactory().createAction(1, game.getSudoku().getCell(Position.get(i, j))));
 				assertTrue(game.getSudoku().getCell(Position.get(i, j)).isNoteSet(1));
 			}
 		}
