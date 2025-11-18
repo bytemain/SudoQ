@@ -400,9 +400,7 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                         onActionTreeBookmarkToggle = { targetElement ->
                             // Toggle bookmark on the selected element
                             if (targetElement.isMarked) {
-                                // Unmark is not implemented in ActionTreeElement, so we'll just mark it again
-                                // In future, could add an unmark() method
-                                targetElement.mark()
+                                targetElement.unmark()
                             } else {
                                 targetElement.mark()
                             }
@@ -410,7 +408,6 @@ class SudokuActivity : SudoqCompatActivity(), View.OnClickListener, ActionListen
                             gameState.value = gameState.value.copy(
                                 isActionTreeShown = isActionTreeShown
                             )
-
                         },
                         onUndoClick = {
                             sudokuController!!.onUndo()
