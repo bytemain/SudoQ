@@ -15,10 +15,10 @@ object GesturePreferences {
     private const val KEY_GESTURE_RIGHT = "gesture_right"
     
     // Default gesture actions
-    private const val DEFAULT_UP = "STRIKETHROUGH"
+    private const val DEFAULT_UP = "NORMAL"
     private const val DEFAULT_DOWN = "CANCEL"
     private const val DEFAULT_LEFT = "DELETE"
-    private const val DEFAULT_RIGHT = "NORMAL"
+    private const val DEFAULT_RIGHT = "STRIKETHROUGH"
     
     enum class GestureAction {
         NORMAL,         // Add normal note

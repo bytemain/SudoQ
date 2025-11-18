@@ -426,6 +426,39 @@ fun SudokuScreen(
         val gestureLeft = remember { GesturePreferences.loadGestureLeft(context) }
         val gestureRight = remember { GesturePreferences.loadGestureRight(context) }
         
+        // Get the action for current direction
+        val currentAction = when (preview.direction) {
+            SwipeDirection.UP -> gestureUp
+            SwipeDirection.DOWN -> gestureDown
+            SwipeDirection.LEFT -> gestureLeft
+            SwipeDirection.RIGHT -> gestureRight
+            SwipeDirection.NONE -> null
+        }
+        
+        // Determine colors based on action type, not direction
+        val (containerColor, contentColor) = when (currentAction) {
+            GesturePreferences.GestureAction.NORMAL, 
+            GesturePreferences.GestureAction.STRIKETHROUGH -> {
+                // Note and Strike: green colors (primary)
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f) to 
+                MaterialTheme.colorScheme.onPrimaryContainer
+            }
+            GesturePreferences.GestureAction.DELETE -> {
+                // Delete: red colors (error)
+                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.95f) to 
+                MaterialTheme.colorScheme.onErrorContainer
+            }
+            GesturePreferences.GestureAction.CANCEL -> {
+                // Cancel: gray colors (surfaceVariant)
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f) to 
+                MaterialTheme.colorScheme.onSurfaceVariant
+            }
+            null -> {
+                // None: default surface
+                MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
+            }
+        }
+        
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -437,13 +470,7 @@ fun SudokuScreen(
                 shape = RoundedCornerShape(12.dp),
                 shadowElevation = 16.dp,
                 tonalElevation = 12.dp,
-                color = when (preview.direction) {
-                    SwipeDirection.UP -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.95f)
-                    SwipeDirection.DOWN -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f)
-                    SwipeDirection.LEFT -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.95f)
-                    SwipeDirection.RIGHT -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
-                    SwipeDirection.NONE -> MaterialTheme.colorScheme.surface
-                }
+                color = containerColor
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -460,13 +487,7 @@ fun SudokuScreen(
                             SwipeDirection.NONE -> Icons.Default.Check
                         },
                         contentDescription = null,
-                        tint = when (preview.direction) {
-                            SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiaryContainer
-                            SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
-                            SwipeDirection.LEFT -> MaterialTheme.colorScheme.onErrorContainer
-                            SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimaryContainer
-                            SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
-                        },
+                        tint = contentColor,
                         modifier = Modifier.size(32.dp)
                     )
                     
@@ -476,13 +497,7 @@ fun SudokuScreen(
                         style = MaterialTheme.typography.headlineMedium,
                         fontSize = 36.sp,
                         fontWeight = FontWeight.Bold,
-                        color = when (preview.direction) {
-                            SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiaryContainer
-                            SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
-                            SwipeDirection.LEFT -> MaterialTheme.colorScheme.onErrorContainer
-                            SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimaryContainer
-                            SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
-                        }
+                        color = contentColor
                     )
                     
                     // Operation name
@@ -499,13 +514,7 @@ fun SudokuScreen(
                         fontWeight = FontWeight.Medium,
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                        color = when (preview.direction) {
-                            SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiaryContainer
-                            SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
-                            SwipeDirection.LEFT -> MaterialTheme.colorScheme.onErrorContainer
-                            SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimaryContainer
-                            SwipeDirection.NONE -> MaterialTheme.colorScheme.onSurface
-                        }
+                        color = contentColor
                     )
                 }
             }
@@ -778,6 +787,15 @@ fun ComposeKeyboard(
                                 var swipeDirection by remember { mutableStateOf(SwipeDirection.NONE) }
                                 var buttonGlobalCenter by remember { mutableStateOf(Offset.Zero) }
                                 val haptic = LocalHapticFeedback.current
+                                
+                                // Get current action based on swipe direction
+                                val currentAction = when (swipeDirection) {
+                                    SwipeDirection.UP -> gestureUp
+                                    SwipeDirection.DOWN -> gestureDown
+                                    SwipeDirection.LEFT -> gestureLeft
+                                    SwipeDirection.RIGHT -> gestureRight
+                                    SwipeDirection.NONE -> null
+                                }
 
                                 // Animate scale when swiping
                                 val scale by animateFloatAsState(
@@ -910,25 +928,47 @@ fun ComposeKeyboard(
                                                 )
                                             },
                                         colors = ButtonDefaults.filledTonalButtonColors(
-                                            containerColor = when (swipeDirection) {
-                                                SwipeDirection.UP -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.6f)
-                                                SwipeDirection.DOWN -> MaterialTheme.colorScheme.surfaceVariant
-                                                SwipeDirection.LEFT -> MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
-                                                SwipeDirection.RIGHT -> MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                                                SwipeDirection.NONE -> {
+                                            containerColor = when {
+                                                swipeDirection == SwipeDirection.NONE -> {
                                                     if (button.showCheckmark) MaterialTheme.colorScheme.tertiaryContainer
                                                     else MaterialTheme.colorScheme.secondaryContainer
                                                 }
+                                                // Use action-based colors when swiping
+                                                currentAction == GesturePreferences.GestureAction.NORMAL ||
+                                                currentAction == GesturePreferences.GestureAction.STRIKETHROUGH -> {
+                                                    // Note and Strike: green/primary color
+                                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                                                }
+                                                currentAction == GesturePreferences.GestureAction.DELETE -> {
+                                                    // Delete: red/error color
+                                                    MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
+                                                }
+                                                currentAction == GesturePreferences.GestureAction.CANCEL -> {
+                                                    // Cancel: gray/surfaceVariant color
+                                                    MaterialTheme.colorScheme.surfaceVariant
+                                                }
+                                                else -> MaterialTheme.colorScheme.secondaryContainer
                                             },
-                                            contentColor = when (swipeDirection) {
-                                                SwipeDirection.UP -> MaterialTheme.colorScheme.onTertiary
-                                                SwipeDirection.DOWN -> MaterialTheme.colorScheme.onSurfaceVariant
-                                                SwipeDirection.LEFT -> MaterialTheme.colorScheme.onError
-                                                SwipeDirection.RIGHT -> MaterialTheme.colorScheme.onPrimary
-                                                SwipeDirection.NONE -> {
+                                            contentColor = when {
+                                                swipeDirection == SwipeDirection.NONE -> {
                                                     if (button.showCheckmark) MaterialTheme.colorScheme.onTertiaryContainer
                                                     else MaterialTheme.colorScheme.onSecondaryContainer
                                                 }
+                                                // Use action-based colors when swiping
+                                                currentAction == GesturePreferences.GestureAction.NORMAL ||
+                                                currentAction == GesturePreferences.GestureAction.STRIKETHROUGH -> {
+                                                    // Note and Strike: on-primary color
+                                                    MaterialTheme.colorScheme.onPrimary
+                                                }
+                                                currentAction == GesturePreferences.GestureAction.DELETE -> {
+                                                    // Delete: on-error color
+                                                    MaterialTheme.colorScheme.onError
+                                                }
+                                                currentAction == GesturePreferences.GestureAction.CANCEL -> {
+                                                    // Cancel: on-surfaceVariant color
+                                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                                }
+                                                else -> MaterialTheme.colorScheme.onSecondaryContainer
                                             },
                                             disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                                             disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
