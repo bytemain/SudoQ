@@ -134,6 +134,11 @@ fun SudokuScreen(
     // Track active swipe preview at screen level
     var activeSwipePreview by remember { mutableStateOf<SwipePreviewState?>(null) }
 
+    // Handle back navigation for action tree
+    BackHandler(enabled = state.isActionTreeShown) {
+        onActionTreeToggle()
+    }
+
     Box {
     Scaffold(
         topBar = {
