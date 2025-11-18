@@ -1027,10 +1027,10 @@ private fun GestureSettingsSection() {
         // Reset to defaults button
         OutlinedButton(
             onClick = {
-                gestureUp = de.sudoq.controller.sudoku.GesturePreferences.GestureAction.STRIKETHROUGH
+                gestureUp = de.sudoq.controller.sudoku.GesturePreferences.GestureAction.NORMAL
                 gestureDown = de.sudoq.controller.sudoku.GesturePreferences.GestureAction.CANCEL
                 gestureLeft = de.sudoq.controller.sudoku.GesturePreferences.GestureAction.DELETE
-                gestureRight = de.sudoq.controller.sudoku.GesturePreferences.GestureAction.NORMAL
+                gestureRight = de.sudoq.controller.sudoku.GesturePreferences.GestureAction.STRIKETHROUGH
                 
                 de.sudoq.controller.sudoku.GesturePreferences.saveGestureUp(context, gestureUp)
                 de.sudoq.controller.sudoku.GesturePreferences.saveGestureDown(context, gestureDown)
