@@ -87,7 +87,10 @@ fun ActionTreeScreen(
                     }
                 }
             )
-        }
+        },
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) { paddingValues ->
         if (actionTree == null) {
             Box(
