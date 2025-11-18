@@ -39,6 +39,16 @@ class ActionTreeElementBETests {
     }
 
     @Test
+    fun `should retain unmark`() {
+        val ateChild = ActionTreeElement(44, action, null)
+        ateChild.mark()
+        ateChild.unmark()
+        var xmlTreeChild = ActionTreeElementMapper.toBE(ateChild).toXml()!!
+
+        xmlTreeChild.getAttributeValue(MARKED) `should be equal to` "false"
+    }
+
+    @Test
     fun `should retain mark correct`() {
         val ateChild = ActionTreeElement(44, action, null)
         ateChild.markCorrect()
