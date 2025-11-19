@@ -107,6 +107,14 @@ class ActionTreeElement(val id: Int, val action: Action, val parent: ActionTreeE
     }
 
     /**
+     * Unmarks this node (removes bookmark). Notifies listeners.
+     */
+    fun unmark() {
+        isMarked = false
+        notifyListeners(this)
+    }
+
+    /**
      * Marks this action as a mistake
      */
     fun markWrong() {

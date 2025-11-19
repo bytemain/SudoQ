@@ -211,19 +211,7 @@ fun SudokuScreen(
         },
         modifier = modifier
     ) { paddingValues ->
-        // Show ActionTree overlay when toggled
-        if (state.isActionTreeShown) {
-            val stateHandler = state.game.stateHandler
-            if (stateHandler != null) {
-                de.sudoq.view.actionTree.ActionTreeScreen(
-                    actionTree = stateHandler.actionTree.root,
-                    currentElement = stateHandler.currentState,
-                    onActionClick = onActionTreeNavigate,
-                    onToggleBookmark = onActionTreeBookmarkToggle,
-                    onClose = onActionTreeToggle
-                )
-            }
-        } else if (isLandscape) {
+        if (isLandscape) {
             // Landscape layout: Board on left, controls and keyboard on right
             Row(
                 modifier = Modifier
@@ -415,6 +403,20 @@ fun SudokuScreen(
                     )
                 }
             }
+        }
+    }
+    
+    // Show ActionTree as full-screen overlay when toggled
+    if (state.isActionTreeShown) {
+        val stateHandler = state.game.stateHandler
+        if (stateHandler != null) {
+            de.sudoq.view.actionTree.ActionTreeScreen(
+                actionTree = stateHandler.actionTree.root,
+                currentElement = stateHandler.currentState,
+                onActionClick = onActionTreeNavigate,
+                onToggleBookmark = onActionTreeBookmarkToggle,
+                onClose = onActionTreeToggle
+            )
         }
     }
     
