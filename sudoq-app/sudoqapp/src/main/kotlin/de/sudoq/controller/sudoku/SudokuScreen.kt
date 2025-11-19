@@ -1,14 +1,17 @@
 package de.sudoq.controller.sudoku
 
+import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,82 +20,67 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.viewinterop.AndroidView
-import android.content.res.Configuration
 import de.sudoq.R
 import de.sudoq.model.game.Game
-import de.sudoq.model.sudoku.complexity.Complexity
 import de.sudoq.model.sudoku.NoteStyle
+import de.sudoq.model.sudoku.complexity.Complexity
 import de.sudoq.view.SudokuLayout
-import android.view.Gravity
-import androidx.compose.material.icons.automirrored.filled.Redo
-import androidx.compose.material.icons.automirrored.filled.Undo
 import kotlin.math.abs
 
-/**
- * State for the Sudoku game screen
- */
+/** State for the Sudoku game screen */
 data class SudokuGameState(
-    val game: Game,
-    val complexity: Complexity? = null,
-    val isActionTreeShown: Boolean = false,
-    val isFinished: Boolean = false,
-    val elapsedTime: Long = 0,
-    val isPaused: Boolean = false,
-    val showMenu: Boolean = false,
-    val hintText: String? = null,
-    val hintHasExecute: Boolean = false,
-    val onHintContinue: (() -> Unit)? = null,
-    val onHintExecute: (() -> Unit)? = null,
-    val keyboardButtons: List<KeyboardButtonState> = emptyList(),
-    val isNoteMode: Boolean = false,
-    val canClearSelectedCell: Boolean = false
+        val game: Game,
+        val complexity: Complexity? = null,
+        val isActionTreeShown: Boolean = false,
+        val isFinished: Boolean = false,
+        val elapsedTime: Long = 0,
+        val isPaused: Boolean = false,
+        val showMenu: Boolean = false,
+        val hintText: String? = null,
+        val hintHasExecute: Boolean = false,
+        val onHintContinue: (() -> Unit)? = null,
+        val onHintExecute: (() -> Unit)? = null,
+        val keyboardButtons: List<KeyboardButtonState> = emptyList(),
+        val isNoteMode: Boolean = false,
+        val canClearSelectedCell: Boolean = false
 )
 
-/**
- * State for a keyboard button
- */
+/** State for a keyboard button */
 data class KeyboardButtonState(
-    val symbol: Int,
-    val displayText: String,
-    val isEnabled: Boolean = true,
-    val showCheckmark: Boolean = false
+        val symbol: Int,
+        val displayText: String,
+        val isEnabled: Boolean = true,
+        val showCheckmark: Boolean = false
 )
 
-/**
- * State for swipe preview overlay
- */
+/** State for swipe preview overlay */
 data class SwipePreviewState(
-    val buttonText: String,
-    val direction: SwipeDirection,
-    val dragOffset: Offset, // Offset relative to button start position
-    val buttonCenter: Offset // Button center in global coordinates
+        val buttonText: String,
+        val direction: SwipeDirection,
+        val dragOffset: Offset, // Offset relative to button start position
+        val buttonCenter: Offset // Button center in global coordinates
 )
 
 enum class SwipeDirection {
-    UP,      // Swipe up: Strikethrough note
-    DOWN,    // Swipe down: Cancel (do nothing)
-    LEFT,    // Swipe left: Delete note
-    RIGHT,   // Swipe right: Normal note
-    NONE     // No direction
+    UP, // Swipe up: Strikethrough note
+    DOWN, // Swipe down: Cancel (do nothing)
+    LEFT, // Swipe left: Delete note
+    RIGHT, // Swipe right: Normal note
+    NONE // No direction
 }
 
-/**
- * Get the string resource ID for a complexity level
- */
+/** Get the string resource ID for a complexity level */
 private fun getComplexityStringRes(complexity: Complexity?): Int {
     return when (complexity) {
         Complexity.easy -> R.string.complexity_easy
@@ -104,475 +92,469 @@ private fun getComplexityStringRes(complexity: Complexity?): Int {
     }
 }
 
-/**
- * Main Sudoku game screen with Material3 design
- */
+/** Main Sudoku game screen with Material3 design */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SudokuScreen(
-    state: SudokuGameState,
-    sudokuLayout: SudokuLayout,
-    onBackClick: () -> Unit,
-    onMenuClick: (SudokuMenuItem) -> Unit,
-    onActionTreeToggle: () -> Unit,
-    onActionTreeNavigate: (de.sudoq.model.actionTree.ActionTreeElement) -> Unit,
-    onActionTreeBookmarkToggle: ((de.sudoq.model.actionTree.ActionTreeElement) -> Unit)? = null,
-    onUndoClick: () -> Unit,
-    onRedoClick: () -> Unit,
-    onHintClick: () -> Unit,
-    onSolveClick: () -> Unit,
-    onNoteToggle: () -> Unit,
-    onClearClick: () -> Unit,
-    onKeyboardInput: (Int) -> Unit,
-    onKeyboardSwipe: (Int, NoteStyle?) -> Unit = { _, _ -> },
-    modifier: Modifier = Modifier
+        state: SudokuGameState,
+        sudokuLayout: SudokuLayout,
+        onBackClick: () -> Unit,
+        onMenuClick: (SudokuMenuItem) -> Unit,
+        onActionTreeToggle: () -> Unit,
+        onActionTreeNavigate: (de.sudoq.model.actionTree.ActionTreeElement) -> Unit,
+        onActionTreeBookmarkToggle: ((de.sudoq.model.actionTree.ActionTreeElement) -> Unit)? = null,
+        onUndoClick: () -> Unit,
+        onRedoClick: () -> Unit,
+        onHintClick: () -> Unit,
+        onSolveClick: () -> Unit,
+        onNoteToggle: () -> Unit,
+        onClearClick: () -> Unit,
+        onKeyboardInput: (Int) -> Unit,
+        onKeyboardSwipe: (Int, NoteStyle?) -> Unit = { _, _ -> },
+        modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    
+
     // Track active swipe preview at screen level
     var activeSwipePreview by remember { mutableStateOf<SwipePreviewState?>(null) }
 
     // Handle back navigation for action tree
-    BackHandler(enabled = state.isActionTreeShown) {
-        onActionTreeToggle()
-    }
+    BackHandler(enabled = state.isActionTreeShown) { onActionTreeToggle() }
 
     Box {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = stringResource(getComplexityStringRes(state.complexity)),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = formatTime(state.elapsedTime),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                },
-                actions = {
-                    // Action Tree toggle
-                    IconButton(onClick = onActionTreeToggle) {
-                        Icon(
-                            imageVector = if (state.isActionTreeShown) Icons.Default.Close else Icons.Default.Commit,
-                            contentDescription = "Action Tree"
-                        )
-                    }
-
-                    // More options menu
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = stringResource(R.string.sf_mainmenu_preferences)
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.sf_mainmenu_preferences)) },
-                            onClick = {
-                                showMenu = false
-                                onMenuClick(SudokuMenuItem.Settings)
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Default.Settings, contentDescription = null)
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.sf_sudoku_new_game)) },
-                            onClick = {
-                                showMenu = false
-                                onMenuClick(SudokuMenuItem.NewGame)
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Default.Add, contentDescription = null)
-                            }
-                        )
-                    }
-                }
-            )
-        },
-        modifier = modifier
-    ) { paddingValues ->
-        if (isLandscape) {
-            // Landscape layout: Board on left, controls and keyboard on right
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                // Sudoku Board - takes 60% of width
-                var boardWidth by remember { mutableStateOf(0) }
-                var boardHeight by remember { mutableStateOf(0) }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(0.6f)
-                        .onGloballyPositioned { coordinates ->
-                            val newWidth = coordinates.size.width
-                            val newHeight = coordinates.size.height
-                            if (newWidth > 0 && newHeight > 0 && (newWidth != boardWidth || newHeight != boardHeight)) {
-                                boardWidth = newWidth
-                                boardHeight = newHeight
-                                android.util.Log.d(
-                                    "SudokuScreen",
-                                    "Box sized (landscape): width=$boardWidth, height=$boardHeight"
-                                )
-                            }
-                        }
-                ) {
-                    if (boardWidth > 0 && boardHeight > 0) {
-                        AndroidView(
-                            factory = { context ->
-                                android.util.Log.d(
-                                    "SudokuScreen",
-                                    "AndroidView factory called (landscape)"
-                                )
-                                sudokuLayout.apply {
-                                    post {
-                                        android.util.Log.d(
-                                            "SudokuScreen",
-                                            "Calling optiZoom (landscape)"
-                                        )
-                                        optiZoom(boardWidth, boardHeight)
-                                    }
+        Scaffold(
+                topBar = {
+                    TopAppBar(
+                            title = {
+                                Column {
+                                    Text(
+                                            text =
+                                                    stringResource(
+                                                            getComplexityStringRes(state.complexity)
+                                                    ),
+                                            style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Text(
+                                            text = formatTime(state.elapsedTime),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                             },
-                            modifier = Modifier.fillMaxSize()
+                            navigationIcon = {
+                                IconButton(onClick = onBackClick) {
+                                    Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = stringResource(R.string.back)
+                                    )
+                                }
+                            },
+                            actions = {
+                                // Action Tree toggle
+                                IconButton(onClick = onActionTreeToggle) {
+                                    Icon(
+                                            imageVector =
+                                                    if (state.isActionTreeShown) Icons.Default.Close
+                                                    else Icons.Default.Commit,
+                                            contentDescription = "Action Tree"
+                                    )
+                                }
+
+                                // More options menu
+                                IconButton(onClick = { showMenu = true }) {
+                                    Icon(
+                                            imageVector = Icons.Default.MoreVert,
+                                            contentDescription =
+                                                    stringResource(R.string.sf_mainmenu_preferences)
+                                    )
+                                }
+
+                                DropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = { showMenu = false }
+                                ) {
+                                    DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                        stringResource(
+                                                                R.string.sf_mainmenu_preferences
+                                                        )
+                                                )
+                                            },
+                                            onClick = {
+                                                showMenu = false
+                                                onMenuClick(SudokuMenuItem.Settings)
+                                            },
+                                            leadingIcon = {
+                                                Icon(
+                                                        Icons.Default.Settings,
+                                                        contentDescription = null
+                                                )
+                                            }
+                                    )
+                                    DropdownMenuItem(
+                                            text = {
+                                                Text(stringResource(R.string.sf_sudoku_new_game))
+                                            },
+                                            onClick = {
+                                                showMenu = false
+                                                onMenuClick(SudokuMenuItem.NewGame)
+                                            },
+                                            leadingIcon = {
+                                                Icon(Icons.Default.Add, contentDescription = null)
+                                            }
+                                    )
+                                }
+                            }
+                    )
+                },
+                modifier = modifier
+        ) { paddingValues ->
+            if (isLandscape) {
+                // Landscape layout: Board on left, controls and keyboard on right
+                Row(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                    // Sudoku Board - takes 60% of width
+                    var boardWidth by remember { mutableStateOf(0) }
+                    var boardHeight by remember { mutableStateOf(0) }
+
+                    Box(
+                            modifier =
+                                    Modifier.fillMaxHeight().weight(0.6f).onGloballyPositioned {
+                                            coordinates ->
+                                        val newWidth = coordinates.size.width
+                                        val newHeight = coordinates.size.height
+                                        if (newWidth > 0 &&
+                                                        newHeight > 0 &&
+                                                        (newWidth != boardWidth ||
+                                                                newHeight != boardHeight)
+                                        ) {
+                                            boardWidth = newWidth
+                                            boardHeight = newHeight
+                                            android.util.Log.d(
+                                                    "SudokuScreen",
+                                                    "Box sized (landscape): width=$boardWidth, height=$boardHeight"
+                                            )
+                                        }
+                                    }
+                    ) {
+                        if (boardWidth > 0 && boardHeight > 0) {
+                            AndroidView(
+                                    factory = { context ->
+                                        android.util.Log.d(
+                                                "SudokuScreen",
+                                                "AndroidView factory called (landscape)"
+                                        )
+                                        sudokuLayout.apply {
+                                            post {
+                                                android.util.Log.d(
+                                                        "SudokuScreen",
+                                                        "Calling optiZoom (landscape)"
+                                                )
+                                                optiZoom(boardWidth, boardHeight)
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+
+                    // Right side: Controls and Keyboard
+                    Column(modifier = Modifier.fillMaxHeight().weight(0.4f).padding(start = 8.dp)) {
+                        // Control Panel
+                        SudokuControlPanel(
+                                isNoteMode = state.isNoteMode,
+                                canClearSelectedCell = state.canClearSelectedCell,
+                                onUndoClick = onUndoClick,
+                                onRedoClick = onRedoClick,
+                                onHintClick = onHintClick,
+                                onSolveClick = onSolveClick,
+                                onNoteToggle = onNoteToggle,
+                                onClearClick = onClearClick,
+                                modifier =
+                                        Modifier.fillMaxWidth()
+                                                .height(56.dp)
+                                                .padding(horizontal = 4.dp, vertical = 4.dp)
                         )
+
+                        // Virtual Keyboard or Hint Panel
+                        if (state.hintText != null) {
+                            HintPanel(
+                                    text = state.hintText,
+                                    showExecute = state.hintHasExecute,
+                                    onContinue = state.onHintContinue ?: {},
+                                    onExecute = state.onHintExecute ?: {},
+                                    modifier =
+                                            Modifier.fillMaxWidth()
+                                                    .weight(1f)
+                                                    .padding(horizontal = 4.dp, vertical = 4.dp)
+                            )
+                        } else {
+                            ComposeKeyboard(
+                                    buttons = state.keyboardButtons,
+                                    onButtonClick = onKeyboardInput,
+                                    onButtonSwipe = onKeyboardSwipe,
+                                    onSwipePreviewChange = { activeSwipePreview = it },
+                                    modifier =
+                                            Modifier.fillMaxWidth()
+                                                    .weight(1f)
+                                                    .padding(horizontal = 4.dp, vertical = 4.dp)
+                            )
+                        }
                     }
                 }
+            } else {
+                // Portrait layout: Board on top, controls and keyboard below
+                Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                    // Sudoku Board - takes most of the space
+                    var boardWidth by remember { mutableStateOf(0) }
+                    var boardHeight by remember { mutableStateOf(0) }
 
-                // Right side: Controls and Keyboard
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(0.4f)
-                        .padding(start = 8.dp)
-                ) {
+                    Box(
+                            modifier =
+                                    Modifier.fillMaxWidth().weight(1f).onGloballyPositioned {
+                                            coordinates ->
+                                        val newWidth = coordinates.size.width
+                                        val newHeight = coordinates.size.height
+                                        if (newWidth > 0 &&
+                                                        newHeight > 0 &&
+                                                        (newWidth != boardWidth ||
+                                                                newHeight != boardHeight)
+                                        ) {
+                                            boardWidth = newWidth
+                                            boardHeight = newHeight
+                                            android.util.Log.d(
+                                                    "SudokuScreen",
+                                                    "Box sized (portrait): width=$boardWidth, height=$boardHeight"
+                                            )
+                                        }
+                                    }
+                    ) {
+                        if (boardWidth > 0 && boardHeight > 0) {
+                            AndroidView(
+                                    factory = { context ->
+                                        android.util.Log.d(
+                                                "SudokuScreen",
+                                                "AndroidView factory called (portrait)"
+                                        )
+                                        sudokuLayout.apply {
+                                            post {
+                                                android.util.Log.d(
+                                                        "SudokuScreen",
+                                                        "Calling optiZoom (portrait)"
+                                                )
+                                                optiZoom(boardWidth, boardHeight)
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+
                     // Control Panel
                     SudokuControlPanel(
-                        isNoteMode = state.isNoteMode,
-                        canClearSelectedCell = state.canClearSelectedCell,
-                        onUndoClick = onUndoClick,
-                        onRedoClick = onRedoClick,
-                        onHintClick = onHintClick,
-                        onSolveClick = onSolveClick,
-                        onNoteToggle = onNoteToggle,
-                        onClearClick = onClearClick,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                            .padding(horizontal = 4.dp, vertical = 4.dp)
+                            isNoteMode = state.isNoteMode,
+                            canClearSelectedCell = state.canClearSelectedCell,
+                            onUndoClick = onUndoClick,
+                            onRedoClick = onRedoClick,
+                            onHintClick = onHintClick,
+                            onSolveClick = onSolveClick,
+                            onNoteToggle = onNoteToggle,
+                            onClearClick = onClearClick,
+                            modifier =
+                                    Modifier.fillMaxWidth()
+                                            .height(64.dp)
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
 
                     // Virtual Keyboard or Hint Panel
                     if (state.hintText != null) {
+                        // Show hint panel in keyboard area
                         HintPanel(
-                            text = state.hintText,
-                            showExecute = state.hintHasExecute,
-                            onContinue = state.onHintContinue ?: {},
-                            onExecute = state.onHintExecute ?: {},
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .padding(horizontal = 4.dp, vertical = 4.dp)
+                                text = state.hintText,
+                                showExecute = state.hintHasExecute,
+                                onContinue = state.onHintContinue ?: {},
+                                onExecute = state.onHintExecute ?: {},
+                                modifier =
+                                        Modifier.fillMaxWidth()
+                                                .height(180.dp)
+                                                .padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     } else {
+                        // Show virtual keyboard (Material Design Compose version)
                         ComposeKeyboard(
-                            buttons = state.keyboardButtons,
-                            onButtonClick = onKeyboardInput,
-                            onButtonSwipe = onKeyboardSwipe,
-                            onSwipePreviewChange = { activeSwipePreview = it },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .padding(horizontal = 4.dp, vertical = 4.dp)
+                                buttons = state.keyboardButtons,
+                                onButtonClick = onKeyboardInput,
+                                onButtonSwipe = onKeyboardSwipe,
+                                onSwipePreviewChange = { activeSwipePreview = it },
+                                modifier =
+                                        Modifier.fillMaxWidth()
+                                                .height(180.dp)
+                                                .padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
                 }
             }
-        } else {
-            // Portrait layout: Board on top, controls and keyboard below
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                // Sudoku Board - takes most of the space
-                var boardWidth by remember { mutableStateOf(0) }
-                var boardHeight by remember { mutableStateOf(0) }
+        }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .onGloballyPositioned { coordinates ->
-                            val newWidth = coordinates.size.width
-                            val newHeight = coordinates.size.height
-                            if (newWidth > 0 && newHeight > 0 && (newWidth != boardWidth || newHeight != boardHeight)) {
-                                boardWidth = newWidth
-                                boardHeight = newHeight
-                                android.util.Log.d(
-                                    "SudokuScreen",
-                                    "Box sized (portrait): width=$boardWidth, height=$boardHeight"
-                                )
-                            }
-                        }
-                ) {
-                    if (boardWidth > 0 && boardHeight > 0) {
-                        AndroidView(
-                            factory = { context ->
-                                android.util.Log.d(
-                                    "SudokuScreen",
-                                    "AndroidView factory called (portrait)"
-                                )
-                                sudokuLayout.apply {
-                                    post {
-                                        android.util.Log.d(
-                                            "SudokuScreen",
-                                            "Calling optiZoom (portrait)"
-                                        )
-                                        optiZoom(boardWidth, boardHeight)
-                                    }
-                                }
-                            },
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                }
-
-                // Control Panel
-                SudokuControlPanel(
-                    isNoteMode = state.isNoteMode,
-                    canClearSelectedCell = state.canClearSelectedCell,
-                    onUndoClick = onUndoClick,
-                    onRedoClick = onRedoClick,
-                    onHintClick = onHintClick,
-                    onSolveClick = onSolveClick,
-                    onNoteToggle = onNoteToggle,
-                    onClearClick = onClearClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+        // Show ActionTree as full-screen overlay when toggled
+        if (state.isActionTreeShown) {
+            val stateHandler = state.game.stateHandler
+            if (stateHandler != null) {
+                // Use new branch-aware ActionTreeScreen
+                de.sudoq.view.actionTree.ActionTreeScreenWithBranches(
+                        gameStateHandler = stateHandler,
+                        onClose = onActionTreeToggle
                 )
+            }
+        }
 
-                // Virtual Keyboard or Hint Panel
-                if (state.hintText != null) {
-                    // Show hint panel in keyboard area
-                    HintPanel(
-                        text = state.hintText,
-                        showExecute = state.hintHasExecute,
-                        onContinue = state.onHintContinue ?: {},
-                        onExecute = state.onHintExecute ?: {},
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                } else {
-                    // Show virtual keyboard (Material Design Compose version)
-                    ComposeKeyboard(
-                        buttons = state.keyboardButtons,
-                        onButtonClick = onKeyboardInput,
-                        onButtonSwipe = onKeyboardSwipe,
-                        onSwipePreviewChange = { activeSwipePreview = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
-            }
-        }
-    }
-    
-    // Show ActionTree as full-screen overlay when toggled
-    if (state.isActionTreeShown) {
-        val stateHandler = state.game.stateHandler
-        if (stateHandler != null) {
-            de.sudoq.view.actionTree.ActionTreeScreen(
-                actionTree = stateHandler.actionTree.root,
-                currentElement = stateHandler.currentState,
-                onActionClick = onActionTreeNavigate,
-                onToggleBookmark = onActionTreeBookmarkToggle,
-                onClose = onActionTreeToggle
-            )
-        }
-    }
-    
-    // Global gesture feedback overlay at screen top level
-    activeSwipePreview?.let { preview ->
-        val context = LocalContext.current
-        val gestureUp = remember { GesturePreferences.loadGestureUp(context) }
-        val gestureDown = remember { GesturePreferences.loadGestureDown(context) }
-        val gestureLeft = remember { GesturePreferences.loadGestureLeft(context) }
-        val gestureRight = remember { GesturePreferences.loadGestureRight(context) }
-        
-        // Get the action for current direction
-        val currentAction = when (preview.direction) {
-            SwipeDirection.UP -> gestureUp
-            SwipeDirection.DOWN -> gestureDown
-            SwipeDirection.LEFT -> gestureLeft
-            SwipeDirection.RIGHT -> gestureRight
-            SwipeDirection.NONE -> null
-        }
-        
-        // Determine colors based on action type, not direction
-        val (containerColor, contentColor) = when (currentAction) {
-            GesturePreferences.GestureAction.NORMAL, 
-            GesturePreferences.GestureAction.STRIKETHROUGH -> {
-                // Note and Strike: green colors (primary)
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f) to 
-                MaterialTheme.colorScheme.onPrimaryContainer
-            }
-            GesturePreferences.GestureAction.DELETE -> {
-                // Delete: red colors (error)
-                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.95f) to 
-                MaterialTheme.colorScheme.onErrorContainer
-            }
-            GesturePreferences.GestureAction.CANCEL -> {
-                // Cancel: gray colors (surfaceVariant)
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f) to 
-                MaterialTheme.colorScheme.onSurfaceVariant
-            }
-            null -> {
-                // None: default surface
-                MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
-            }
-        }
-        
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) { /* Intercept touch events */ },
-            contentAlignment = Alignment.Center
-        ) {
-            Surface(
-                modifier = Modifier.wrapContentSize(),
-                shape = RoundedCornerShape(12.dp),
-                shadowElevation = 16.dp,
-                tonalElevation = 12.dp,
-                color = containerColor
+        // Global gesture feedback overlay at screen top level
+        activeSwipePreview?.let { preview ->
+            val context = LocalContext.current
+            val gestureUp = remember { GesturePreferences.loadGestureUp(context) }
+            val gestureDown = remember { GesturePreferences.loadGestureDown(context) }
+            val gestureLeft = remember { GesturePreferences.loadGestureLeft(context) }
+            val gestureRight = remember { GesturePreferences.loadGestureRight(context) }
+
+            // Get the action for current direction
+            val currentAction =
+                    when (preview.direction) {
+                        SwipeDirection.UP -> gestureUp
+                        SwipeDirection.DOWN -> gestureDown
+                        SwipeDirection.LEFT -> gestureLeft
+                        SwipeDirection.RIGHT -> gestureRight
+                        SwipeDirection.NONE -> null
+                    }
+
+            // Determine colors based on action type, not direction
+            val (containerColor, contentColor) =
+                    when (currentAction) {
+                        GesturePreferences.GestureAction.NORMAL,
+                        GesturePreferences.GestureAction.STRIKETHROUGH -> {
+                            // Note and Strike: green colors (primary)
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f) to
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                        }
+                        GesturePreferences.GestureAction.DELETE -> {
+                            // Delete: red colors (error)
+                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.95f) to
+                                    MaterialTheme.colorScheme.onErrorContainer
+                        }
+                        GesturePreferences.GestureAction.CANCEL -> {
+                            // Cancel: gray colors (surfaceVariant)
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f) to
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                        null -> {
+                            // None: default surface
+                            MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
+                        }
+                    }
+
+            Box(
+                    modifier =
+                            Modifier.fillMaxSize().pointerInput(Unit) { /* Intercept touch events */
+                            },
+                    contentAlignment = Alignment.Center
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                Surface(
+                        modifier = Modifier.wrapContentSize(),
+                        shape = RoundedCornerShape(12.dp),
+                        shadowElevation = 16.dp,
+                        tonalElevation = 12.dp,
+                        color = containerColor
                 ) {
-                    // Direction icon
-                    Icon(
-                        imageVector = when (preview.direction) {
-                            SwipeDirection.UP -> Icons.Default.KeyboardArrowUp
-                            SwipeDirection.DOWN -> Icons.Default.KeyboardArrowDown
-                            SwipeDirection.LEFT -> Icons.Default.KeyboardArrowLeft
-                            SwipeDirection.RIGHT -> Icons.Default.KeyboardArrowRight
-                            SwipeDirection.NONE -> Icons.Default.Check
-                        },
-                        contentDescription = null,
-                        tint = contentColor,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    
-                    // Current number
-                    Text(
-                        text = preview.buttonText,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontSize = 36.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = contentColor
-                    )
-                    
-                    // Operation name
-                    Text(
-                        text = when (preview.direction) {
-                            SwipeDirection.UP -> gestureUp.getDisplayName()
-                            SwipeDirection.DOWN -> gestureDown.getDisplayName()
-                            SwipeDirection.LEFT -> gestureLeft.getDisplayName()
-                            SwipeDirection.RIGHT -> gestureRight.getDisplayName()
-                            SwipeDirection.NONE -> ""
-                        },
-                        style = MaterialTheme.typography.titleMedium,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                        color = contentColor
-                    )
+                    Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Direction icon
+                        Icon(
+                                imageVector =
+                                        when (preview.direction) {
+                                            SwipeDirection.UP -> Icons.Default.KeyboardArrowUp
+                                            SwipeDirection.DOWN -> Icons.Default.KeyboardArrowDown
+                                            SwipeDirection.LEFT -> Icons.Default.KeyboardArrowLeft
+                                            SwipeDirection.RIGHT -> Icons.Default.KeyboardArrowRight
+                                            SwipeDirection.NONE -> Icons.Default.Check
+                                        },
+                                contentDescription = null,
+                                tint = contentColor,
+                                modifier = Modifier.size(32.dp)
+                        )
+
+                        // Current number
+                        Text(
+                                text = preview.buttonText,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontSize = 36.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = contentColor
+                        )
+
+                        // Operation name
+                        Text(
+                                text =
+                                        when (preview.direction) {
+                                            SwipeDirection.UP -> gestureUp.getDisplayName()
+                                            SwipeDirection.DOWN -> gestureDown.getDisplayName()
+                                            SwipeDirection.LEFT -> gestureLeft.getDisplayName()
+                                            SwipeDirection.RIGHT -> gestureRight.getDisplayName()
+                                            SwipeDirection.NONE -> ""
+                                        },
+                                style = MaterialTheme.typography.titleMedium,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                color = contentColor
+                        )
+                    }
                 }
             }
         }
-    }
     }
 }
 
-/**
- * Control panel with game action buttons
- */
+/** Control panel with game action buttons */
 @Composable
 fun SudokuControlPanel(
-    isNoteMode: Boolean,
-    canClearSelectedCell: Boolean,
-    onUndoClick: () -> Unit,
-    onRedoClick: () -> Unit,
-    onHintClick: () -> Unit,
-    onSolveClick: () -> Unit,
-    onNoteToggle: () -> Unit,
-    onClearClick: () -> Unit,
-    modifier: Modifier = Modifier
+        isNoteMode: Boolean,
+        canClearSelectedCell: Boolean,
+        onUndoClick: () -> Unit,
+        onRedoClick: () -> Unit,
+        onHintClick: () -> Unit,
+        onSolveClick: () -> Unit,
+        onNoteToggle: () -> Unit,
+        onClearClick: () -> Unit,
+        modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier,
-        tonalElevation = 2.dp,
-        shape = MaterialTheme.shapes.medium
-    ) {
+    Surface(modifier = modifier, tonalElevation = 2.dp, shape = MaterialTheme.shapes.medium) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
         ) {
             // Undo button
-            IconButton(
-                onClick = onUndoClick,
-                modifier = Modifier.size(48.dp)
-            ) {
+            IconButton(onClick = onUndoClick, modifier = Modifier.size(48.dp)) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Undo,
-                    contentDescription = stringResource(R.string.sf_sudoku_button_undo),
-                    modifier = Modifier.size(24.dp)
+                        imageVector = Icons.AutoMirrored.Filled.Undo,
+                        contentDescription = stringResource(R.string.sf_sudoku_button_undo),
+                        modifier = Modifier.size(24.dp)
                 )
             }
 
             // Redo button
-            IconButton(
-                onClick = onRedoClick,
-                modifier = Modifier.size(48.dp)
-            ) {
+            IconButton(onClick = onRedoClick, modifier = Modifier.size(48.dp)) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Redo,
-                    contentDescription = stringResource(R.string.sf_sudoku_button_redo),
-                    modifier = Modifier.size(24.dp)
+                        imageVector = Icons.AutoMirrored.Filled.Redo,
+                        contentDescription = stringResource(R.string.sf_sudoku_button_redo),
+                        modifier = Modifier.size(24.dp)
                 )
             }
 
@@ -580,107 +562,102 @@ fun SudokuControlPanel(
             if (canClearSelectedCell) {
                 // Clear button - shown when a filled cell is selected
                 FilledTonalIconButton(
-                    onClick = onClearClick,
-                    modifier = Modifier.size(48.dp),
-                    colors = IconButtonDefaults.filledTonalIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer
-                    )
+                        onClick = onClearClick,
+                        modifier = Modifier.size(48.dp),
+                        colors =
+                                IconButtonDefaults.filledTonalIconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                )
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = stringResource(R.string.sf_sudoku_button_clear),
-                        modifier = Modifier.size(24.dp)
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = stringResource(R.string.sf_sudoku_button_clear),
+                            modifier = Modifier.size(24.dp)
                     )
                 }
             } else {
                 // Note toggle button - shows different icons based on mode
                 FilledTonalIconButton(
-                    onClick = onNoteToggle,
-                    modifier = Modifier.size(48.dp),
-                    colors = IconButtonDefaults.filledTonalIconButtonColors(
-                        containerColor = if (isNoteMode) {
-                            MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.surfaceVariant
-                        },
-                        contentColor = if (isNoteMode) {
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
+                        onClick = onNoteToggle,
+                        modifier = Modifier.size(48.dp),
+                        colors =
+                                IconButtonDefaults.filledTonalIconButtonColors(
+                                        containerColor =
+                                                if (isNoteMode) {
+                                                    MaterialTheme.colorScheme.primaryContainer
+                                                } else {
+                                                    MaterialTheme.colorScheme.surfaceVariant
+                                                },
+                                        contentColor =
+                                                if (isNoteMode) {
+                                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                                } else {
+                                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                                }
+                                )
                 ) {
                     Icon(
-                        imageVector = if (isNoteMode) Icons.Default.EditNote else Icons.Default.Create,
-                        contentDescription = stringResource(R.string.sf_sudoku_button_note),
-                        modifier = Modifier.size(24.dp)
+                            imageVector =
+                                    if (isNoteMode) Icons.Default.EditNote
+                                    else Icons.Default.Create,
+                            contentDescription = stringResource(R.string.sf_sudoku_button_note),
+                            modifier = Modifier.size(24.dp)
                     )
                 }
             }
 
             // Hint button
-            IconButton(
-                onClick = onHintClick,
-                modifier = Modifier.size(48.dp)
-            ) {
+            IconButton(onClick = onHintClick, modifier = Modifier.size(48.dp)) {
                 Icon(
-                    imageVector = Icons.Default.Lightbulb,
-                    contentDescription = stringResource(R.string.sf_sudoku_button_hint),
-                    modifier = Modifier.size(24.dp)
+                        imageVector = Icons.Default.Lightbulb,
+                        contentDescription = stringResource(R.string.sf_sudoku_button_hint),
+                        modifier = Modifier.size(24.dp)
                 )
             }
 
             // Fill candidates button
-            IconButton(
-                onClick = onSolveClick,
-                modifier = Modifier.size(48.dp)
-            ) {
+            IconButton(onClick = onSolveClick, modifier = Modifier.size(48.dp)) {
                 Icon(
-                    imageVector = Icons.Default.GridOn,
-                    contentDescription = stringResource(R.string.sf_sudoku_button_fill_candidates),
-                    modifier = Modifier.size(24.dp)
+                        imageVector = Icons.Default.GridOn,
+                        contentDescription =
+                                stringResource(R.string.sf_sudoku_button_fill_candidates),
+                        modifier = Modifier.size(24.dp)
                 )
             }
         }
     }
 }
 
-/**
- * Hint panel that appears in the keyboard area
- */
+/** Hint panel that appears in the keyboard area */
 @Composable
 fun HintPanel(
-    text: String,
-    showExecute: Boolean,
-    onContinue: () -> Unit,
-    onExecute: () -> Unit,
-    modifier: Modifier = Modifier
+        text: String,
+        showExecute: Boolean,
+        onContinue: () -> Unit,
+        onExecute: () -> Unit,
+        modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = modifier,
-        tonalElevation = 2.dp,
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceVariant
+            modifier = modifier,
+            tonalElevation = 2.dp,
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxSize().padding(12.dp),
+                verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Scrollable text area
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    modifier =
+                            Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
             ) {
                 Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth()
+                        text = text,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.fillMaxWidth()
                 )
             }
 
@@ -688,20 +665,15 @@ fun HintPanel(
 
             // Buttons row
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Button(
-                    onClick = onContinue,
-                    modifier = if (showExecute) Modifier.weight(1f) else Modifier.fillMaxWidth()
-                ) {
-                    Text(text = stringResource(id = R.string.hint_panel_continue))
-                }
+                        onClick = onContinue,
+                        modifier = if (showExecute) Modifier.weight(1f) else Modifier.fillMaxWidth()
+                ) { Text(text = stringResource(id = R.string.hint_panel_continue)) }
                 if (showExecute) {
-                    Button(
-                        onClick = onExecute,
-                        modifier = Modifier.weight(1f)
-                    ) {
+                    Button(onClick = onExecute, modifier = Modifier.weight(1f)) {
                         Text(text = stringResource(id = R.string.hint_panel_execute))
                     }
                 }
@@ -710,17 +682,13 @@ fun HintPanel(
     }
 }
 
-/**
- * Menu items for the Sudoku game
- */
+/** Menu items for the Sudoku game */
 enum class SudokuMenuItem {
     Settings,
     NewGame
 }
 
-/**
- * Format elapsed time in HH:MM:SS format
- */
+/** Format elapsed time in HH:MM:SS format */
 private fun formatTime(milliseconds: Long): String {
     val seconds = (milliseconds / 1000) % 60
     val minutes = (milliseconds / (1000 * 60)) % 60
@@ -733,16 +701,14 @@ private fun formatTime(milliseconds: Long): String {
     }
 }
 
-/**
- * Material Design Compose keyboard for Sudoku input
- */
+/** Material Design Compose keyboard for Sudoku input */
 @Composable
 fun ComposeKeyboard(
-    buttons: List<KeyboardButtonState>,
-    onButtonClick: (Int) -> Unit,
-    onButtonSwipe: (Int, de.sudoq.model.sudoku.NoteStyle?) -> Unit = { _, _ -> },
-    onSwipePreviewChange: (SwipePreviewState?) -> Unit = {},
-    modifier: Modifier = Modifier
+        buttons: List<KeyboardButtonState>,
+        onButtonClick: (Int) -> Unit,
+        onButtonSwipe: (Int, de.sudoq.model.sudoku.NoteStyle?) -> Unit = { _, _ -> },
+        onSwipePreviewChange: (SwipePreviewState?) -> Unit = {},
+        modifier: Modifier = Modifier
 ) {
     if (buttons.isEmpty()) return
 
@@ -759,23 +725,19 @@ fun ComposeKeyboard(
 
     Box(modifier = modifier) {
         Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 1.dp
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 1.dp
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxSize().padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Create rows
                 for (row in 0 until gridSize) {
                     Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier = Modifier.weight(1f).fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         // Create columns
                         for (col in 0 until gridSize) {
@@ -786,208 +748,426 @@ fun ComposeKeyboard(
                                 // Track gesture state for swipe detection
                                 var dragStart by remember { mutableStateOf<Offset?>(null) }
                                 var currentDragOffset by remember { mutableStateOf(Offset.Zero) }
-                                var swipeDirection by remember { mutableStateOf(SwipeDirection.NONE) }
+                                var swipeDirection by remember {
+                                    mutableStateOf(SwipeDirection.NONE)
+                                }
                                 var buttonGlobalCenter by remember { mutableStateOf(Offset.Zero) }
                                 val haptic = LocalHapticFeedback.current
-                                
+
                                 // Get current action based on swipe direction
-                                val currentAction = when (swipeDirection) {
-                                    SwipeDirection.UP -> gestureUp
-                                    SwipeDirection.DOWN -> gestureDown
-                                    SwipeDirection.LEFT -> gestureLeft
-                                    SwipeDirection.RIGHT -> gestureRight
-                                    SwipeDirection.NONE -> null
-                                }
+                                val currentAction =
+                                        when (swipeDirection) {
+                                            SwipeDirection.UP -> gestureUp
+                                            SwipeDirection.DOWN -> gestureDown
+                                            SwipeDirection.LEFT -> gestureLeft
+                                            SwipeDirection.RIGHT -> gestureRight
+                                            SwipeDirection.NONE -> null
+                                        }
 
                                 // Animate scale when swiping
-                                val scale by animateFloatAsState(
-                                    targetValue = if (swipeDirection != SwipeDirection.NONE) 0.90f else 1f,
-                                    label = "buttonScale"
-                                )
+                                val scale by
+                                        animateFloatAsState(
+                                                targetValue =
+                                                        if (swipeDirection != SwipeDirection.NONE)
+                                                                0.90f
+                                                        else 1f,
+                                                label = "buttonScale"
+                                        )
 
                                 // Animate alpha for stronger feedback
-                                val buttonAlpha by animateFloatAsState(
-                                    targetValue = when {
-                                        !button.isEnabled -> 0.3f
-                                        swipeDirection != SwipeDirection.NONE -> 0.7f
-                                        else -> 1f
-                                    },
-                                    label = "buttonAlpha"
-                                )
+                                val buttonAlpha by
+                                        animateFloatAsState(
+                                                targetValue =
+                                                        when {
+                                                            !button.isEnabled -> 0.3f
+                                                            swipeDirection != SwipeDirection.NONE ->
+                                                                    0.7f
+                                                            else -> 1f
+                                                        },
+                                                label = "buttonAlpha"
+                                        )
 
                                 Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxHeight()
-                                        .onGloballyPositioned { coordinates ->
-                                            // Calculate button center in screen coordinates (using size instead of boundsInWindow)
-                                            val size = coordinates.size
-                                            buttonGlobalCenter = Offset(
-                                                size.width / 2f,
-                                                size.height / 2f
-                                            )
-                                        },
-                                    contentAlignment = Alignment.Center
+                                        modifier =
+                                                Modifier.weight(1f)
+                                                        .fillMaxHeight()
+                                                        .onGloballyPositioned { coordinates ->
+                                                            // Calculate button center in screen
+                                                            // coordinates (using size instead of
+                                                            // boundsInWindow)
+                                                            val size = coordinates.size
+                                                            buttonGlobalCenter =
+                                                                    Offset(
+                                                                            size.width / 2f,
+                                                                            size.height / 2f
+                                                                    )
+                                                        },
+                                        contentAlignment = Alignment.Center
                                 ) {
                                     FilledTonalButton(
-                                        onClick = {
-                                            if (button.isEnabled) {
-                                                onButtonClick(button.symbol)
-                                            }
-                                        },
-                                        enabled = button.isEnabled,
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .scale(scale)
-                                            .alpha(buttonAlpha)
-                                            .pointerInput(button.symbol, button.isEnabled) {
-                                                if (!button.isEnabled) return@pointerInput
+                                            onClick = {
+                                                if (button.isEnabled) {
+                                                    onButtonClick(button.symbol)
+                                                }
+                                            },
+                                            enabled = button.isEnabled,
+                                            modifier =
+                                                    Modifier.fillMaxSize()
+                                                            .scale(scale)
+                                                            .alpha(buttonAlpha)
+                                                            .pointerInput(
+                                                                    button.symbol,
+                                                                    button.isEnabled
+                                                            ) {
+                                                                if (!button.isEnabled)
+                                                                        return@pointerInput
 
-                                                detectDragGestures(
-                                                    onDragStart = { offset ->
-                                                        dragStart = offset
-                                                        currentDragOffset = Offset.Zero
-                                                        swipeDirection = SwipeDirection.NONE
-                                                        onSwipePreviewChange(null)
-                                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                    },
-                                                    onDragEnd = {
-                                                        // Execute operation based on final direction and user preferences
-                                                        val action = when (swipeDirection) {
-                                                            SwipeDirection.UP -> gestureUp
-                                                            SwipeDirection.DOWN -> gestureDown
-                                                            SwipeDirection.LEFT -> gestureLeft
-                                                            SwipeDirection.RIGHT -> gestureRight
-                                                            SwipeDirection.NONE -> null
-                                                        }
-                                                        
-                                                        if (action != null && action != GesturePreferences.GestureAction.CANCEL) {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                            onButtonSwipe(button.symbol, action.toNoteStyle())
-                                                        } else if (action == GesturePreferences.GestureAction.CANCEL) {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                        }
-                                                        
-                                                        // Reset state
-                                                        swipeDirection = SwipeDirection.NONE
-                                                        dragStart = null
-                                                        currentDragOffset = Offset.Zero
-                                                        onSwipePreviewChange(null)
-                                                    },
-                                                    onDragCancel = {
-                                                        swipeDirection = SwipeDirection.NONE
-                                                        dragStart = null
-                                                        currentDragOffset = Offset.Zero
-                                                        onSwipePreviewChange(null)
-                                                    },
-                                                    onDrag = { change, dragAmount ->
-                                                        val start = dragStart
-                                                        if (start != null) {
-                                                            // Calculate cumulative offset
-                                                            val currentPos = change.position
-                                                            val deltaX = currentPos.x - start.x
-                                                            val deltaY = currentPos.y - start.y
-                                                            currentDragOffset = Offset(deltaX, deltaY)
+                                                                detectDragGestures(
+                                                                        onDragStart = { offset ->
+                                                                            dragStart = offset
+                                                                            currentDragOffset =
+                                                                                    Offset.Zero
+                                                                            swipeDirection =
+                                                                                    SwipeDirection
+                                                                                            .NONE
+                                                                            onSwipePreviewChange(
+                                                                                    null
+                                                                            )
+                                                                            haptic.performHapticFeedback(
+                                                                                    HapticFeedbackType
+                                                                                            .TextHandleMove
+                                                                            )
+                                                                        },
+                                                                        onDragEnd = {
+                                                                            // Execute operation
+                                                                            // based on final
+                                                                            // direction and user
+                                                                            // preferences
+                                                                            val action =
+                                                                                    when (swipeDirection
+                                                                                    ) {
+                                                                                        SwipeDirection
+                                                                                                .UP ->
+                                                                                                gestureUp
+                                                                                        SwipeDirection
+                                                                                                .DOWN ->
+                                                                                                gestureDown
+                                                                                        SwipeDirection
+                                                                                                .LEFT ->
+                                                                                                gestureLeft
+                                                                                        SwipeDirection
+                                                                                                .RIGHT ->
+                                                                                                gestureRight
+                                                                                        SwipeDirection
+                                                                                                .NONE ->
+                                                                                                null
+                                                                                    }
 
-                                                            // Direction recognition threshold
-                                                            val threshold = 30f
-                                                            
-                                                            // Determine primary direction (four directions)
-                                                            val newDirection = when {
-                                                                abs(deltaX) < threshold && abs(deltaY) < threshold -> SwipeDirection.NONE
-                                                                abs(deltaY) > abs(deltaX) -> {
-                                                                    if (deltaY < 0) SwipeDirection.UP else SwipeDirection.DOWN
-                                                                }
-                                                                else -> {
-                                                                    if (deltaX < 0) SwipeDirection.LEFT else SwipeDirection.RIGHT
-                                                                }
-                                                            }
-                                                            
-                                                            // Trigger haptic feedback when direction changes
-                                                            if (newDirection != swipeDirection && newDirection != SwipeDirection.NONE) {
-                                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                            }
-                                                            
-                                                            swipeDirection = newDirection
+                                                                            if (action != null &&
+                                                                                            action !=
+                                                                                                    GesturePreferences
+                                                                                                            .GestureAction
+                                                                                                            .CANCEL
+                                                                            ) {
+                                                                                haptic.performHapticFeedback(
+                                                                                        HapticFeedbackType
+                                                                                                .LongPress
+                                                                                )
+                                                                                onButtonSwipe(
+                                                                                        button.symbol,
+                                                                                        action.toNoteStyle()
+                                                                                )
+                                                                            } else if (action ==
+                                                                                            GesturePreferences
+                                                                                                    .GestureAction
+                                                                                                    .CANCEL
+                                                                            ) {
+                                                                                haptic.performHapticFeedback(
+                                                                                        HapticFeedbackType
+                                                                                                .TextHandleMove
+                                                                                )
+                                                                            }
 
-                                                            // Update global preview state via callback
-                                                            if (swipeDirection != SwipeDirection.NONE) {
-                                                                onSwipePreviewChange(
-                                                                    SwipePreviewState(
-                                                                        buttonText = button.displayText,
-                                                                        direction = swipeDirection,
-                                                                        dragOffset = currentDragOffset,
-                                                                        buttonCenter = buttonGlobalCenter
-                                                                    )
+                                                                            // Reset state
+                                                                            swipeDirection =
+                                                                                    SwipeDirection
+                                                                                            .NONE
+                                                                            dragStart = null
+                                                                            currentDragOffset =
+                                                                                    Offset.Zero
+                                                                            onSwipePreviewChange(
+                                                                                    null
+                                                                            )
+                                                                        },
+                                                                        onDragCancel = {
+                                                                            swipeDirection =
+                                                                                    SwipeDirection
+                                                                                            .NONE
+                                                                            dragStart = null
+                                                                            currentDragOffset =
+                                                                                    Offset.Zero
+                                                                            onSwipePreviewChange(
+                                                                                    null
+                                                                            )
+                                                                        },
+                                                                        onDrag = {
+                                                                                change,
+                                                                                dragAmount ->
+                                                                            val start = dragStart
+                                                                            if (start != null) {
+                                                                                // Calculate
+                                                                                // cumulative offset
+                                                                                val currentPos =
+                                                                                        change.position
+                                                                                val deltaX =
+                                                                                        currentPos
+                                                                                                .x -
+                                                                                                start.x
+                                                                                val deltaY =
+                                                                                        currentPos
+                                                                                                .y -
+                                                                                                start.y
+                                                                                currentDragOffset =
+                                                                                        Offset(
+                                                                                                deltaX,
+                                                                                                deltaY
+                                                                                        )
+
+                                                                                // Direction
+                                                                                // recognition
+                                                                                // threshold
+                                                                                val threshold = 30f
+
+                                                                                // Determine primary
+                                                                                // direction (four
+                                                                                // directions)
+                                                                                val newDirection =
+                                                                                        when {
+                                                                                            abs(
+                                                                                                    deltaX
+                                                                                            ) <
+                                                                                                    threshold &&
+                                                                                                    abs(
+                                                                                                            deltaY
+                                                                                                    ) <
+                                                                                                            threshold ->
+                                                                                                    SwipeDirection
+                                                                                                            .NONE
+                                                                                            abs(
+                                                                                                    deltaY
+                                                                                            ) >
+                                                                                                    abs(
+                                                                                                            deltaX
+                                                                                                    ) -> {
+                                                                                                if (deltaY <
+                                                                                                                0
+                                                                                                )
+                                                                                                        SwipeDirection
+                                                                                                                .UP
+                                                                                                else
+                                                                                                        SwipeDirection
+                                                                                                                .DOWN
+                                                                                            }
+                                                                                            else -> {
+                                                                                                if (deltaX <
+                                                                                                                0
+                                                                                                )
+                                                                                                        SwipeDirection
+                                                                                                                .LEFT
+                                                                                                else
+                                                                                                        SwipeDirection
+                                                                                                                .RIGHT
+                                                                                            }
+                                                                                        }
+
+                                                                                // Trigger haptic
+                                                                                // feedback when
+                                                                                // direction changes
+                                                                                if (newDirection !=
+                                                                                                swipeDirection &&
+                                                                                                newDirection !=
+                                                                                                        SwipeDirection
+                                                                                                                .NONE
+                                                                                ) {
+                                                                                    haptic.performHapticFeedback(
+                                                                                            HapticFeedbackType
+                                                                                                    .TextHandleMove
+                                                                                    )
+                                                                                }
+
+                                                                                swipeDirection =
+                                                                                        newDirection
+
+                                                                                // Update global
+                                                                                // preview state via
+                                                                                // callback
+                                                                                if (swipeDirection !=
+                                                                                                SwipeDirection
+                                                                                                        .NONE
+                                                                                ) {
+                                                                                    onSwipePreviewChange(
+                                                                                            SwipePreviewState(
+                                                                                                    buttonText =
+                                                                                                            button.displayText,
+                                                                                                    direction =
+                                                                                                            swipeDirection,
+                                                                                                    dragOffset =
+                                                                                                            currentDragOffset,
+                                                                                                    buttonCenter =
+                                                                                                            buttonGlobalCenter
+                                                                                            )
+                                                                                    )
+                                                                                } else {
+                                                                                    onSwipePreviewChange(
+                                                                                            null
+                                                                                    )
+                                                                                }
+
+                                                                                change.consume()
+                                                                            }
+                                                                        }
                                                                 )
-                                                            } else {
-                                                                onSwipePreviewChange(null)
-                                                            }
-
-                                                            change.consume()
-                                                        }
-                                                    }
-                                                )
-                                            },
-                                        colors = ButtonDefaults.filledTonalButtonColors(
-                                            containerColor = when {
-                                                swipeDirection == SwipeDirection.NONE -> {
-                                                    if (button.showCheckmark) MaterialTheme.colorScheme.tertiaryContainer
-                                                    else MaterialTheme.colorScheme.secondaryContainer
-                                                }
-                                                // Use action-based colors when swiping
-                                                currentAction == GesturePreferences.GestureAction.NORMAL ||
-                                                currentAction == GesturePreferences.GestureAction.STRIKETHROUGH -> {
-                                                    // Note and Strike: green/primary color
-                                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                                                }
-                                                currentAction == GesturePreferences.GestureAction.DELETE -> {
-                                                    // Delete: red/error color
-                                                    MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
-                                                }
-                                                currentAction == GesturePreferences.GestureAction.CANCEL -> {
-                                                    // Cancel: gray/surfaceVariant color
-                                                    MaterialTheme.colorScheme.surfaceVariant
-                                                }
-                                                else -> MaterialTheme.colorScheme.secondaryContainer
-                                            },
-                                            contentColor = when {
-                                                swipeDirection == SwipeDirection.NONE -> {
-                                                    if (button.showCheckmark) MaterialTheme.colorScheme.onTertiaryContainer
-                                                    else MaterialTheme.colorScheme.onSecondaryContainer
-                                                }
-                                                // Use action-based colors when swiping
-                                                currentAction == GesturePreferences.GestureAction.NORMAL ||
-                                                currentAction == GesturePreferences.GestureAction.STRIKETHROUGH -> {
-                                                    // Note and Strike: on-primary color
-                                                    MaterialTheme.colorScheme.onPrimary
-                                                }
-                                                currentAction == GesturePreferences.GestureAction.DELETE -> {
-                                                    // Delete: on-error color
-                                                    MaterialTheme.colorScheme.onError
-                                                }
-                                                currentAction == GesturePreferences.GestureAction.CANCEL -> {
-                                                    // Cancel: on-surfaceVariant color
-                                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                                }
-                                                else -> MaterialTheme.colorScheme.onSecondaryContainer
-                                            },
-                                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                        ),
-                                        shape = MaterialTheme.shapes.medium
+                                                            },
+                                            colors =
+                                                    ButtonDefaults.filledTonalButtonColors(
+                                                            containerColor =
+                                                                    when {
+                                                                        swipeDirection ==
+                                                                                SwipeDirection
+                                                                                        .NONE -> {
+                                                                            if (button.showCheckmark
+                                                                            )
+                                                                                    MaterialTheme
+                                                                                            .colorScheme
+                                                                                            .tertiaryContainer
+                                                                            else
+                                                                                    MaterialTheme
+                                                                                            .colorScheme
+                                                                                            .secondaryContainer
+                                                                        }
+                                                                        // Use action-based colors
+                                                                        // when swiping
+                                                                        currentAction ==
+                                                                                GesturePreferences
+                                                                                        .GestureAction
+                                                                                        .NORMAL ||
+                                                                                currentAction ==
+                                                                                        GesturePreferences
+                                                                                                .GestureAction
+                                                                                                .STRIKETHROUGH -> {
+                                                                            // Note and Strike:
+                                                                            // green/primary color
+                                                                            MaterialTheme
+                                                                                    .colorScheme
+                                                                                    .primary.copy(
+                                                                                    alpha = 0.6f
+                                                                            )
+                                                                        }
+                                                                        currentAction ==
+                                                                                GesturePreferences
+                                                                                        .GestureAction
+                                                                                        .DELETE -> {
+                                                                            // Delete: red/error
+                                                                            // color
+                                                                            MaterialTheme
+                                                                                    .colorScheme
+                                                                                    .error.copy(
+                                                                                    alpha = 0.6f
+                                                                            )
+                                                                        }
+                                                                        currentAction ==
+                                                                                GesturePreferences
+                                                                                        .GestureAction
+                                                                                        .CANCEL -> {
+                                                                            // Cancel:
+                                                                            // gray/surfaceVariant
+                                                                            // color
+                                                                            MaterialTheme
+                                                                                    .colorScheme
+                                                                                    .surfaceVariant
+                                                                        }
+                                                                        else ->
+                                                                                MaterialTheme
+                                                                                        .colorScheme
+                                                                                        .secondaryContainer
+                                                                    },
+                                                            contentColor =
+                                                                    when {
+                                                                        swipeDirection ==
+                                                                                SwipeDirection
+                                                                                        .NONE -> {
+                                                                            if (button.showCheckmark
+                                                                            )
+                                                                                    MaterialTheme
+                                                                                            .colorScheme
+                                                                                            .onTertiaryContainer
+                                                                            else
+                                                                                    MaterialTheme
+                                                                                            .colorScheme
+                                                                                            .onSecondaryContainer
+                                                                        }
+                                                                        // Use action-based colors
+                                                                        // when swiping
+                                                                        currentAction ==
+                                                                                GesturePreferences
+                                                                                        .GestureAction
+                                                                                        .NORMAL ||
+                                                                                currentAction ==
+                                                                                        GesturePreferences
+                                                                                                .GestureAction
+                                                                                                .STRIKETHROUGH -> {
+                                                                            // Note and Strike:
+                                                                            // on-primary color
+                                                                            MaterialTheme
+                                                                                    .colorScheme
+                                                                                    .onPrimary
+                                                                        }
+                                                                        currentAction ==
+                                                                                GesturePreferences
+                                                                                        .GestureAction
+                                                                                        .DELETE -> {
+                                                                            // Delete: on-error
+                                                                            // color
+                                                                            MaterialTheme
+                                                                                    .colorScheme
+                                                                                    .onError
+                                                                        }
+                                                                        currentAction ==
+                                                                                GesturePreferences
+                                                                                        .GestureAction
+                                                                                        .CANCEL -> {
+                                                                            // Cancel:
+                                                                            // on-surfaceVariant
+                                                                            // color
+                                                                            MaterialTheme
+                                                                                    .colorScheme
+                                                                                    .onSurfaceVariant
+                                                                        }
+                                                                        else ->
+                                                                                MaterialTheme
+                                                                                        .colorScheme
+                                                                                        .onSecondaryContainer
+                                                                    },
+                                                            disabledContainerColor =
+                                                                    MaterialTheme.colorScheme
+                                                                            .surfaceVariant,
+                                                            disabledContentColor =
+                                                                    MaterialTheme.colorScheme
+                                                                            .onSurfaceVariant
+                                                    ),
+                                            shape = MaterialTheme.shapes.medium
                                     ) {
                                         if (button.showCheckmark) {
                                             Icon(
-                                                imageVector = Icons.Default.Check,
-                                                contentDescription = "Completed",
-                                                modifier = Modifier.size(24.dp)
+                                                    imageVector = Icons.Default.Check,
+                                                    contentDescription = "Completed",
+                                                    modifier = Modifier.size(24.dp)
                                             )
                                         } else {
                                             Text(
-                                                text = button.displayText,
-                                                style = MaterialTheme.typography.titleLarge,
-                                                fontSize = 24.sp
+                                                    text = button.displayText,
+                                                    style = MaterialTheme.typography.titleLarge,
+                                                    fontSize = 24.sp
                                             )
                                         }
                                     }
