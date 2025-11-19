@@ -17,5 +17,5 @@ dependencyResolutionManagement {
 rootProject.name = "SudoQ"
 
 include(":sudoqmodel")
-// include(":Playground")  // Excluded: outdated utility module with compilation errors
+include(":Playground")  // Utility module for sudoku generation tools
 include(":sudoqapp")

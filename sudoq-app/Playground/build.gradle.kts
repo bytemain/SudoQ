@@ -16,4 +16,14 @@ dependencies {
     implementation(project(":sudoqmodel"))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation(libs.kotlin.stdlib)
+    
+    // Test dependencies for sudoku generation tools
+    testImplementation(libs.junit)
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
 }

@@ -1,18 +1,19 @@
-package de.sudoq.model.solverGenerator
+package de.sudoq.tools
 
+import de.sudoq.model.solverGenerator.GenerationAlgo
+import de.sudoq.model.solverGenerator.GeneratorCallback
 import de.sudoq.model.solverGenerator.solver.ComplexityRelation
 import de.sudoq.model.solverGenerator.solver.Solver
 import de.sudoq.model.sudoku.Sudoku
 import de.sudoq.model.sudoku.SudokuBuilder
 import de.sudoq.model.sudoku.complexity.Complexity
 import de.sudoq.model.sudoku.sudokuTypes.SudokuTypes
-import de.sudoq.model.sudoku.sudokuTypes.TestSudokuTypeRepo
-import org.junit.Test
 import java.util.*
+import org.junit.Test
 
 /**
- * Tool for generating high-difficulty Sudoku puzzles
- * Run this to test generation and analyze difficulty
+ * Tool for generating high-difficulty Sudoku puzzles Run this to test generation and analyze
+ * difficulty
  */
 class SudokuGeneratorTool : GeneratorCallback {
 
@@ -27,48 +28,51 @@ class SudokuGeneratorTool : GeneratorCallback {
         }
     }
 
-    override fun generationFinished(sudoku: Sudoku, sl: List<de.sudoq.model.solverGenerator.solution.Solution>) {
+    override fun generationFinished(
+            sudoku: Sudoku,
+            sl: List<de.sudoq.model.solverGenerator.solution.Solution>
+    ) {
         generationFinished(sudoku)
     }
 
     /**
-     * Test generation of extremely difficult 9x9 Sudoku puzzles
-     * and analyze their actual difficulty
+     * Test generation of extremely difficult 9x9 Sudoku puzzles and analyze their actual difficulty
      */
     @Test
     fun testGenerateExtremelyHard9x9() {
         println("=== Testing Extremely Hard 9x9 Generation ===\n")
-        
-        val targetDifficulties = mapOf(
-            Complexity.difficult to ComplexityRelation.CONSTRAINT_SATURATION,
-            Complexity.infernal to ComplexityRelation.CONSTRAINT_SATURATION
-        )
-        
+
+        val targetDifficulties =
+                mapOf(
+                        Complexity.difficult to ComplexityRelation.CONSTRAINT_SATURATION,
+                        Complexity.infernal to ComplexityRelation.CONSTRAINT_SATURATION
+                )
+
         for ((targetComplexity, minExpectedDifficulty) in targetDifficulties) {
             println("\n=== Target Complexity: $targetComplexity ===")
             var successCount = 0
             var attempts = 0
             val targetCount = 3
             val maxAttempts = 10
-            
+
             val difficultyDistribution = mutableMapOf<ComplexityRelation, Int>()
-            
+
             while (successCount < targetCount && attempts < maxAttempts) {
                 attempts++
                 val seed = System.currentTimeMillis() + attempts * 1000L
-                
+
                 try {
                     println("\n[Attempt $attempts] Generating with seed $seed...")
                     val sudoku = generate9x9(targetComplexity, seed)
-                    
+
                     val actualDifficulty = validateAndGetDifficulty(sudoku)
-                    difficultyDistribution[actualDifficulty] = 
-                        difficultyDistribution.getOrDefault(actualDifficulty, 0) + 1
-                    
+                    difficultyDistribution[actualDifficulty] =
+                            difficultyDistribution.getOrDefault(actualDifficulty, 0) + 1
+
                     val filledCells = countFilledCells(sudoku)
                     println("  Difficulty: $actualDifficulty")
                     println("  Filled cells: $filledCells/81")
-                    
+
                     if (actualDifficulty.ordinal >= minExpectedDifficulty.ordinal) {
                         successCount++
                         println("  ✓ SUCCESS! (${successCount}/$targetCount)")
@@ -80,7 +84,7 @@ class SudokuGeneratorTool : GeneratorCallback {
                     println("  ✗ Generation failed: ${e.message}")
                 }
             }
-            
+
             println("\n=== Summary for $targetComplexity ===")
             println("Success rate: $successCount/$attempts")
             println("Difficulty distribution:")
@@ -90,25 +94,23 @@ class SudokuGeneratorTool : GeneratorCallback {
         }
     }
 
-    /**
-     * Test generation of hard 16x16 puzzles
-     */
+    /** Test generation of hard 16x16 puzzles */
     @Test
     fun testGenerateHard16x16() {
         println("=== Testing Hard 16x16 Generation ===\n")
-        
+
         val attempts = 3
         val results = mutableListOf<Pair<ComplexityRelation, Int>>()
-        
+
         repeat(attempts) { i ->
             val seed = System.currentTimeMillis() + i * 2000L
             println("\n[Attempt ${i+1}/$attempts] Seed: $seed")
-            
+
             try {
                 val sudoku = generate16x16(Complexity.infernal, seed)
                 val difficulty = validateAndGetDifficulty(sudoku)
                 val filledCells = countFilledCells(sudoku)
-                
+
                 results.add(difficulty to filledCells)
                 println("  Difficulty: $difficulty")
                 println("  Filled cells: $filledCells/256")
@@ -116,7 +118,7 @@ class SudokuGeneratorTool : GeneratorCallback {
                 println("  ✗ Failed: ${e.message}")
             }
         }
-        
+
         println("\n=== Summary ===")
         val byDifficulty = results.groupBy { it.first }
         byDifficulty.forEach { (diff, list) ->
@@ -125,27 +127,26 @@ class SudokuGeneratorTool : GeneratorCallback {
         }
     }
 
-    /**
-     * Benchmark generation speed for different types
-     */
+    /** Benchmark generation speed for different types */
     @Test
     fun benchmarkGenerationSpeed() {
         println("=== Generation Speed Benchmark ===\n")
-        
-        val testCases = listOf(
-            Triple(SudokuTypes.standard4x4, Complexity.easy, 5),
-            Triple(SudokuTypes.standard9x9, Complexity.easy, 3),
-            Triple(SudokuTypes.standard9x9, Complexity.difficult, 2)
-        )
-        
+
+        val testCases =
+                listOf(
+                        Triple(SudokuTypes.standard4x4, Complexity.easy, 5),
+                        Triple(SudokuTypes.standard9x9, Complexity.easy, 3),
+                        Triple(SudokuTypes.standard9x9, Complexity.difficult, 2)
+                )
+
         for ((type, complexity, count) in testCases) {
             println("\n=== $type - $complexity ===")
             val times = mutableListOf<Long>()
-            
+
             repeat(count) { i ->
                 val seed = System.currentTimeMillis() + i * 500L
                 val startTime = System.currentTimeMillis()
-                
+
                 try {
                     generateSudoku(type, complexity, seed, timeoutMs = 60000)
                     val elapsed = System.currentTimeMillis() - startTime
@@ -155,7 +156,7 @@ class SudokuGeneratorTool : GeneratorCallback {
                     println("  Run ${i+1}: FAILED (${e.message})")
                 }
             }
-            
+
             if (times.isNotEmpty()) {
                 println("  Average: ${"%.0f".format(times.average())}ms")
                 println("  Min: ${times.minOrNull()}ms, Max: ${times.maxOrNull()}ms")
@@ -172,10 +173,10 @@ class SudokuGeneratorTool : GeneratorCallback {
     }
 
     private fun generateSudoku(
-        type: SudokuTypes,
-        complexity: Complexity,
-        seed: Long,
-        timeoutMs: Long = 60000
+            type: SudokuTypes,
+            complexity: Complexity,
+            seed: Long,
+            timeoutMs: Long = 60000
     ): Sudoku {
         generatedSudoku = null
         val random = Random(seed)
@@ -183,15 +184,14 @@ class SudokuGeneratorTool : GeneratorCallback {
         sudoku.complexity = complexity
 
         val algo = GenerationAlgo(sudoku, this, random)
-        
-        val thread = Thread(algo).apply { 
-            isDaemon = true
-            start()
-        }
 
-        synchronized(lock) {
-            lock.wait(timeoutMs)
-        }
+        val thread =
+                Thread(algo).apply {
+                    isDaemon = true
+                    start()
+                }
+
+        synchronized(lock) { lock.wait(timeoutMs) }
 
         if (generatedSudoku == null) {
             thread.interrupt()
@@ -207,9 +207,7 @@ class SudokuGeneratorTool : GeneratorCallback {
     }
 
     private fun countFilledCells(sudoku: Sudoku): Int {
-        return sudoku.cells?.values?.count { cell ->
-            !cell.isNotSolved
-        } ?: 0
+        return sudoku.cells?.values?.count { cell -> !cell.isNotSolved } ?: 0
     }
 
     private fun printSudoku(sudoku: Sudoku) {
