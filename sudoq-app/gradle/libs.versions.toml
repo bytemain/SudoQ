@@ -3,7 +3,7 @@
 kotlin = "2.2.21"
 
 # Android
-agp = "8.13.0"
+agp = "8.13.2"
 compileSdk = "30"
 minSdk = "14"
 targetSdk = "33"
